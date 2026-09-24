@@ -4,6 +4,10 @@
 
 ## Documentation
 
+### Project Planning
+
+- [CMAQ Project Master Plan](docs/planning/00_CMAQ_Project_Master_Plan.md)
+
 ### Linux
 
 - [Rocky Linux Installation Guide](docs/linux/Rocky_Linux_Installation_Guide.md)
@@ -12,6 +16,7 @@
 
 ```text
 docs/
+  planning/
   linux/
 scripts/
 config/
