@@ -68,6 +68,8 @@ dvd.iso
 
 GUI 환경과 개발도구 설치를 고려하는 워크스테이션에서는 DVD ISO가 편리하다.
 
+특히 **네트워크가 없는 환경에서 설치할 경우 DVD ISO 사용을 권장**한다. DVD ISO에는 `BaseOS`, `AppStream` 등의 설치 패키지가 포함되어 있어 로컬 미디어만으로 설치할 수 있다.
+
 ---
 
 ## 4. 설치 USB 준비
@@ -113,30 +115,82 @@ https://rufus.ie/
 
 ---
 
-## 6. ISOHybrid 이미지 선택
+## 6. ISOHybrid 이미지 기록 방식
 
-Rocky Linux ISO를 Rufus로 기록하는 과정에서 다음과 같은 메시지가 표시될 수 있다.
+Rocky Linux DVD ISO를 Rufus로 기록하는 과정에서 다음과 같은 메시지가 표시될 수 있다.
 
 ```text
 ISOHybrid 이미지가 감지되었습니다.
 ```
 
-선택 항목:
+Rufus에서는 다음 두 가지 방식 중 하나를 선택할 수 있다.
 
 ```text
-○ ISO 이미지 모드로 쓰기 (권장)
+○ ISO 이미지 모드로 쓰기
 ○ DD 이미지 모드로 쓰기
 ```
 
-일반적인 설치에서는 다음을 선택한다.
+### 6.1 Rocky Linux에서는 DD 이미지 모드 권장
+
+Rocky Linux 설치 USB를 만들 때는 다음 항목을 선택한다.
 
 ```text
-ISO 이미지 모드로 쓰기 (권장)
+● DD 이미지 모드로 쓰기
 ```
 
-이후 `OK`를 눌러 USB 작성을 진행한다.
+Rocky Linux의 ISO 이미지는 ISOHybrid 구조이므로 DD 방식으로 기록하면 원본 ISO의 디스크 구조를 그대로 USB에 복제할 수 있다.
 
-특정 하드웨어에서 정상적으로 부팅되지 않는 경우에는 DD 이미지 모드를 대안으로 사용할 수 있다.
+특히 **네트워크가 없는 시스템에서 오프라인 설치를 수행할 경우 DD 이미지 모드를 사용하는 것이 중요하다.**
+
+### 6.2 ISO 이미지 모드 사용 시 발생할 수 있는 문제
+
+DVD ISO를 사용했더라도 Rufus의 **ISO 이미지 모드**로 USB를 만든 경우 다음과 같은 현상이 발생할 수 있다.
+
+- USB 자체는 정상적으로 부팅됨
+- USB 내부에 `BaseOS`, `AppStream` 폴더가 존재함
+- 그러나 Rocky Linux 설치 프로그램의 **Installation Source(설치 원천)** 에서 로컬 미디어를 정상적으로 인식하지 못함
+- 설치 원천으로 `Closest mirror`만 표시될 수 있음
+- 네트워크가 없는 환경에서는 설치를 계속 진행할 수 없음
+
+이 경우 USB를 **DD 이미지 모드로 다시 작성**하면 설치 프로그램이 로컬 설치 미디어를 정상적으로 인식할 수 있다.
+
+### 6.3 정상적인 오프라인 설치 미디어 확인
+
+DVD ISO가 정상적으로 사용된 경우 원본 미디어에는 일반적으로 다음과 같은 디렉터리가 포함된다.
+
+```text
+AppStream/
+BaseOS/
+EFI/
+images/
+isolinux/
+```
+
+다만 위 디렉터리가 보인다고 해서 Rufus의 ISO 이미지 모드가 항상 정상적인 오프라인 설치 미디어로 인식되는 것은 아니다.
+
+오프라인 설치에서는 다음 조합을 권장한다.
+
+```text
+Rocky Linux DVD ISO
+        ↓
+Rufus
+        ↓
+DD 이미지 모드
+        ↓
+UEFI USB 부팅
+        ↓
+Local Media / Auto-detected installation media
+        ↓
+오프라인 설치
+```
+
+### 6.4 DD 모드 작성 후 Windows에서의 USB 표시
+
+DD 이미지 모드로 USB를 만들면 Windows에서 해당 USB를 다시 연결했을 때 일반 데이터 USB처럼 표시되지 않거나, 일부 파티션만 보이거나, 포맷이 필요하다는 메시지가 표시될 수 있다.
+
+이는 DD 방식으로 Linux 설치 미디어 구조가 그대로 기록된 결과일 수 있으며, 설치 USB 자체가 잘못 만들어졌다는 의미는 아니다.
+
+Windows가 포맷을 요구하는 경우 설치 전에 포맷하지 않는다.
 
 ---
 
@@ -181,9 +235,44 @@ Test this media & Install Rocky Linux
 
 ---
 
-## 9. 설치 언어 및 기본 설정
+## 9. 설치 원천(Installation Source) 확인
 
-### 9.1 시간대
+DVD ISO를 DD 이미지 모드로 정상적으로 작성한 경우 설치 프로그램은 USB를 로컬 설치 미디어로 자동 인식해야 한다.
+
+정상적인 예:
+
+```text
+Local Media
+Auto-detected installation media
+```
+
+네트워크가 없는 시스템에서는 설치 원천이 로컬 미디어로 인식되는지 반드시 확인한다.
+
+### 9.1 Closest mirror만 표시되는 경우
+
+다음과 같은 경우 설치 원천이 `Closest mirror`만 표시될 수 있다.
+
+- Boot ISO를 사용한 경우
+- 네트워크 설치용 이미지를 사용한 경우
+- DVD ISO를 Rufus의 ISO 이미지 모드로 기록하여 로컬 repository 인식에 문제가 발생한 경우
+- 설치 USB가 비정상적으로 작성된 경우
+
+이 경우 가장 먼저 다음을 확인한다.
+
+```text
+1. ISO 파일이 dvd.iso인지 확인
+2. USB를 Rufus에서 DD 이미지 모드로 다시 작성
+3. 다시 UEFI 방식으로 부팅
+4. Installation Source에서 Local Media 인식 여부 확인
+```
+
+오프라인 환경에서는 `Closest mirror`를 사용할 수 없으므로 반드시 로컬 미디어가 인식되어야 한다.
+
+---
+
+## 10. 설치 언어 및 기본 설정
+
+### 10.1 시간대
 
 대한민국에서 사용하는 경우:
 
@@ -191,7 +280,7 @@ Test this media & Install Rocky Linux
 Asia/Seoul
 ```
 
-### 9.2 키보드
+### 10.2 키보드
 
 ```text
 English (US)
@@ -202,7 +291,7 @@ Korean
 
 ---
 
-## 10. 설치 대상 디스크
+## 11. 설치 대상 디스크
 
 Rocky Linux를 설치할 SSD, NVMe 또는 HDD를 정확하게 확인한다.
 
@@ -217,7 +306,7 @@ Rocky Linux를 설치할 SSD, NVMe 또는 HDD를 정확하게 확인한다.
 
 ---
 
-## 11. 파티션 설정
+## 12. 파티션 설정
 
 일반적인 신규 설치에서는 **Automatic Partitioning**을 사용할 수 있다.
 
@@ -236,7 +325,7 @@ Linux system 영역
 
 ---
 
-## 12. 소프트웨어 설치 유형
+## 13. 소프트웨어 설치 유형
 
 예:
 
@@ -251,15 +340,17 @@ Minimal Install
 
 ---
 
-## 13. 네트워크 설정
+## 14. 네트워크 설정
 
-가능하면 설치 단계에서 네트워크 인터페이스를 활성화한다.
+네트워크를 사용할 수 있는 경우 설치 단계에서 네트워크 인터페이스를 활성화한다.
 
 설치 후 인터넷 연결은 운영체제 업데이트, 개발도구 설치, Git 사용, 외부 라이브러리 다운로드 등에 필요하다.
 
+네트워크가 없는 환경에서도 DVD ISO와 정상적인 로컬 설치 미디어를 사용하면 Rocky Linux 기본 설치는 가능하다.
+
 ---
 
-## 14. 사용자 계정 및 관리자 권한
+## 15. 사용자 계정 및 관리자 권한
 
 일반 사용자 계정을 생성하고 필요 시 관리자 권한을 부여한다.
 
@@ -272,7 +363,7 @@ sudo dnf install package_name
 
 ---
 
-## 15. 설치 완료 및 재부팅
+## 16. 설치 완료 및 재부팅
 
 필수 설정이 완료되면 설치를 시작한다.
 
@@ -280,7 +371,7 @@ sudo dnf install package_name
 
 ---
 
-## 16. 설치 완료 후 기본 시스템 확인
+## 17. 설치 완료 후 기본 시스템 확인
 
 ### 운영체제 버전
 
@@ -329,7 +420,9 @@ hostnamectl
 
 ---
 
-## 17. 설치 후 운영체제 업데이트
+## 18. 설치 후 운영체제 업데이트
+
+네트워크 사용이 가능한 환경에서는 다음 명령으로 운영체제를 업데이트한다.
 
 ```bash
 sudo dnf update
@@ -349,24 +442,27 @@ sudo reboot
 
 ---
 
-## 18. 기본 점검 항목
+## 19. 기본 점검 항목
 
 ```text
 [ ] Rocky Linux 정상 부팅
 [ ] UEFI 부팅 여부 확인
-[ ] 네트워크 연결 확인
+[ ] DVD ISO 사용 여부 확인
+[ ] Rufus DD 이미지 모드 사용
+[ ] Installation Source에서 Local Media 인식
 [ ] 사용자 계정 로그인 확인
 [ ] sudo 사용 가능 여부 확인
 [ ] 저장장치 인식 확인
 [ ] RAM 용량 확인
 [ ] CPU core/thread 확인
 [ ] 시간대 확인
-[ ] 시스템 업데이트 수행
+[ ] 네트워크 연결 여부 확인
+[ ] 네트워크 사용 가능 시 시스템 업데이트 수행
 ```
 
 ---
 
-## 19. 설치 기록 권장 항목
+## 20. 설치 기록 권장 항목
 
 상업용 시스템, 연구용 시스템 또는 장기간 유지해야 하는 모델링 시스템에서는 다음 항목을 기록한다.
 
@@ -381,6 +477,9 @@ Disk 구성
 파일시스템
 Hostname
 Network 설정
+설치 ISO 종류
+USB 작성 도구
+USB 작성 방식(DD/ISO)
 설치일자
 업데이트 이력
 ```
@@ -389,7 +488,7 @@ Network 설정
 
 ---
 
-## 20. 참고 사이트
+## 21. 참고 사이트
 
 - Rocky Linux: https://rockylinux.org/
 - Rocky Linux Documentation: https://docs.rockylinux.org/
