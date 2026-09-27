@@ -350,7 +350,268 @@ Minimal Install
 
 ---
 
-## 15. 사용자 계정 및 관리자 권한
+## 15. USB 무선랜 어댑터를 이용한 네트워크 연결
+
+유선 네트워크가 없는 시스템에서는 USB 무선랜 어댑터를 이용해 인터넷에 연결할 수 있다.
+
+본 환경에서는 **ipTIME N150UA**를 연결하여 확인하였으며, 장치 내부 칩셋은 다음과 같이 인식되었다.
+
+```text
+Ralink Technology, Corp. MT7601U Wireless Adapter
+```
+
+### 15.1 USB 장치 인식 확인
+
+USB 무선랜을 연결한 뒤 다음 명령으로 장치가 보이는지 확인한다.
+
+```bash
+lsusb
+```
+
+MT7601U가 정상 인식된 예:
+
+```text
+Ralink Technology, Corp. MT7601U Wireless Adapter
+```
+
+`lsusb`에 장치가 보이면 USB 장치 자체는 운영체제에서 인식된 상태이다.
+
+---
+
+### 15.2 네트워크 인터페이스 확인
+
+다음 명령을 실행한다.
+
+```bash
+nmcli device
+```
+
+Wi-Fi 장치가 정상적으로 생성된 경우 `TYPE`이 `wifi`인 항목이 표시된다.
+
+예:
+
+```text
+DEVICE        TYPE      STATE
+wlan0         wifi      disconnected
+enp3s0        ethernet  disconnected
+lo            loopback  unmanaged
+```
+
+인터페이스 이름은 시스템에 따라 `wlan0`, `wlp...` 등으로 다르게 표시될 수 있다.
+
+추가 확인:
+
+```bash
+ip link
+```
+
+---
+
+### 15.3 MT7601U driver 확인
+
+MT7601U 칩셋의 kernel module이 로드되었는지 확인한다.
+
+```bash
+lsmod | grep mt7601u
+```
+
+필요하면 kernel message도 확인한다.
+
+```bash
+dmesg | grep -i -E "mt7601|firmware|wlan|wifi"
+```
+
+다음과 같은 firmware 오류가 있는 경우 추가 firmware package가 필요할 수 있다.
+
+```text
+firmware: failed to load ...
+```
+
+---
+
+### 15.4 Wi-Fi 활성화
+
+Wi-Fi radio가 꺼져 있는 경우 다음 명령으로 활성화한다.
+
+```bash
+nmcli radio wifi on
+```
+
+주변 Wi-Fi 검색:
+
+```bash
+nmcli device wifi list
+```
+
+---
+
+### 15.5 숨김 SSID 연결
+
+SSID가 숨겨져 있는 경우 네트워크 이름과 비밀번호를 직접 지정할 수 있다.
+
+```bash
+nmcli device wifi connect "SSID_NAME" password 'WIFI_PASSWORD' hidden yes
+```
+
+Wi-Fi 장치가 여러 개인 경우 interface를 지정한다.
+
+```bash
+nmcli device wifi connect "SSID_NAME" password 'WIFI_PASSWORD' hidden yes ifname wlan0
+```
+
+> 비밀번호에 `!` 문자가 포함된 경우 Bash history expansion 때문에 `event not found` 오류가 발생할 수 있다. 이 경우 비밀번호를 큰따옴표가 아니라 **작은따옴표(' ')** 로 감싼다.
+
+예:
+
+```bash
+nmcli device wifi connect "SSID_NAME" password 'password!@' hidden yes
+```
+
+실제 운영 비밀번호는 문서나 Git 저장소에 기록하지 않는다.
+
+---
+
+### 15.6 2.4 GHz / 5 GHz 주의
+
+본 환경에서 확인된 **MT7601U는 2.4 GHz 계열 무선랜**으로 사용하였다.
+
+따라서 5 GHz 전용 SSID에는 연결할 수 없을 수 있다.
+
+지원 주파수 확인:
+
+```bash
+iw list
+```
+
+2.4 GHz 주파수 예:
+
+```text
+2412 MHz
+2437 MHz
+2462 MHz
+```
+
+5 GHz 주파수 예:
+
+```text
+5180 MHz
+5200 MHz
+5220 MHz
+```
+
+주변 공유기가 5 GHz 전용으로 구성되어 있다면 2.4 GHz SSID를 별도로 사용하거나, 2.4 GHz를 지원하는 다른 액세스 포인트를 이용해야 한다.
+
+---
+
+### 15.7 iPhone 개인용 핫스팟 연결
+
+유선망이나 2.4 GHz 공유기를 사용할 수 없는 경우 iPhone 개인용 핫스팟을 사용할 수 있다.
+
+iPhone에서 다음 항목을 설정한다.
+
+```text
+설정
+→ 개인용 핫스팟
+→ 다른 사람의 연결 허용
+→ 호환성 최대화 활성화
+```
+
+`호환성 최대화`를 활성화하면 구형 2.4 GHz Wi-Fi 장치와의 연결 호환성이 좋아질 수 있다.
+
+Rocky Linux에서 주변 AP를 다시 검색한다.
+
+```bash
+nmcli radio wifi off
+nmcli radio wifi on
+nmcli device wifi rescan
+nmcli device wifi list
+```
+
+iPhone hotspot SSID가 보이면 연결한다.
+
+```bash
+nmcli device wifi connect "IPHONE_SSID" password 'HOTSPOT_PASSWORD'
+```
+
+본 환경에서는 **ipTIME N150UA (MT7601U) + iPhone 개인용 핫스팟의 호환성 최대화 설정으로 인터넷 연결이 정상적으로 동작함을 확인하였다.**
+
+---
+
+### 15.8 연결 상태 확인
+
+```bash
+nmcli device
+```
+
+Wi-Fi 장치의 상태가 다음과 같이 표시되면 정상이다.
+
+```text
+connected
+```
+
+현재 연결 profile 확인:
+
+```bash
+nmcli connection show
+```
+
+IP 주소 확인:
+
+```bash
+ip addr
+```
+
+Routing table 확인:
+
+```bash
+ip route
+```
+
+---
+
+### 15.9 인터넷 연결 테스트
+
+외부 IP 연결 확인:
+
+```bash
+ping -c 4 8.8.8.8
+```
+
+DNS 확인:
+
+```bash
+ping -c 4 google.com
+```
+
+두 테스트가 모두 정상이라면 인터넷 연결과 DNS resolution이 정상적으로 동작하는 상태이다.
+
+---
+
+### 15.10 USB 무선랜 점검 순서
+
+```text
+USB 연결
+   ↓
+lsusb
+   ↓
+nmcli device
+   ↓
+lsmod / dmesg
+   ↓
+nmcli radio wifi on
+   ↓
+nmcli device wifi list
+   ↓
+SSID 연결
+   ↓
+ip addr / ip route
+   ↓
+ping test
+```
+
+---
+
+## 16. 사용자 계정 및 관리자 권한
 
 일반 사용자 계정을 생성하고 필요 시 관리자 권한을 부여한다.
 
@@ -363,7 +624,7 @@ sudo dnf install package_name
 
 ---
 
-## 16. 설치 완료 및 재부팅
+## 17. 설치 완료 및 재부팅
 
 필수 설정이 완료되면 설치를 시작한다.
 
@@ -371,7 +632,7 @@ sudo dnf install package_name
 
 ---
 
-## 17. 설치 완료 후 기본 시스템 확인
+## 18. 설치 완료 후 기본 시스템 확인
 
 ### 운영체제 버전
 
@@ -420,7 +681,7 @@ hostnamectl
 
 ---
 
-## 18. 설치 후 운영체제 업데이트
+## 19. 설치 후 운영체제 업데이트
 
 네트워크 사용이 가능한 환경에서는 다음 명령으로 운영체제를 업데이트한다.
 
@@ -442,7 +703,7 @@ sudo reboot
 
 ---
 
-## 19. 기본 점검 항목
+## 20. 기본 점검 항목
 
 ```text
 [ ] Rocky Linux 정상 부팅
@@ -457,12 +718,15 @@ sudo reboot
 [ ] CPU core/thread 확인
 [ ] 시간대 확인
 [ ] 네트워크 연결 여부 확인
+[ ] USB 무선랜 사용 시 lsusb에서 장치 인식 확인
+[ ] USB 무선랜 사용 시 nmcli device에서 wifi 인터페이스 확인
+[ ] 무선 연결 사용 시 IP/DNS 통신 테스트
 [ ] 네트워크 사용 가능 시 시스템 업데이트 수행
 ```
 
 ---
 
-## 20. 설치 기록 권장 항목
+## 21. 설치 기록 권장 항목
 
 상업용 시스템, 연구용 시스템 또는 장기간 유지해야 하는 모델링 시스템에서는 다음 항목을 기록한다.
 
@@ -488,7 +752,7 @@ USB 작성 방식(DD/ISO)
 
 ---
 
-## 21. 참고 사이트
+## 22. 참고 사이트
 
 - Rocky Linux: https://rockylinux.org/
 - Rocky Linux Documentation: https://docs.rockylinux.org/
