@@ -291,22 +291,7 @@ Korean
 
 ---
 
-## 11. 설치 대상 디스크
-
-Rocky Linux를 설치할 SSD, NVMe 또는 HDD를 정확하게 확인한다.
-
-특히 다음과 같은 경우에는 디스크 선택에 주의한다.
-
-- 기존 Windows가 설치되어 있는 경우
-- 중요 데이터가 저장되어 있는 경우
-- 여러 개의 SSD/HDD가 연결되어 있는 경우
-- 외장 저장장치가 연결되어 있는 경우
-
-운영체제 설치 과정에서 선택한 디스크의 기존 파티션 또는 데이터가 삭제될 수 있다.
-
----
-
-## 12. 파티션 설정
+## 11. 파티션 설정
 
 일반적인 신규 설치에서는 **Automatic Partitioning**을 사용할 수 있다.
 
@@ -325,7 +310,7 @@ Linux system 영역
 
 ---
 
-## 13. 소프트웨어 설치 유형
+## 12. 소프트웨어 설치 유형
 
 예:
 
@@ -340,7 +325,7 @@ Minimal Install
 
 ---
 
-## 14. 네트워크 설정
+## 13. 네트워크 설정
 
 네트워크를 사용할 수 있는 경우 설치 단계에서 네트워크 인터페이스를 활성화한다.
 
@@ -350,7 +335,7 @@ Minimal Install
 
 ---
 
-## 15. USB 무선랜 어댑터를 이용한 네트워크 연결
+## 13. USB 무선랜 어댑터를 이용한 네트워크 연결
 
 유선 네트워크가 없는 시스템에서는 USB 무선랜 어댑터를 이용해 인터넷에 연결할 수 있다.
 
@@ -360,7 +345,7 @@ Minimal Install
 Ralink Technology, Corp. MT7601U Wireless Adapter
 ```
 
-### 15.1 USB 장치 인식 확인
+### 14.1 USB 장치 인식 확인
 
 USB 무선랜을 연결한 뒤 다음 명령으로 장치가 보이는지 확인한다.
 
@@ -378,7 +363,7 @@ Ralink Technology, Corp. MT7601U Wireless Adapter
 
 ---
 
-### 15.2 네트워크 인터페이스 확인
+### 14.2 네트워크 인터페이스 확인
 
 다음 명령을 실행한다.
 
@@ -407,7 +392,7 @@ ip link
 
 ---
 
-### 15.3 MT7601U driver 확인
+### 14.3 MT7601U driver 확인
 
 MT7601U 칩셋의 kernel module이 로드되었는지 확인한다.
 
@@ -429,7 +414,7 @@ firmware: failed to load ...
 
 ---
 
-### 15.4 Wi-Fi 활성화
+### 14.4 Wi-Fi 활성화
 
 Wi-Fi radio가 꺼져 있는 경우 다음 명령으로 활성화한다.
 
@@ -445,7 +430,7 @@ nmcli device wifi list
 
 ---
 
-### 15.5 숨김 SSID 연결
+### 14.5 숨김 SSID 연결
 
 SSID가 숨겨져 있는 경우 네트워크 이름과 비밀번호를 직접 지정할 수 있다.
 
@@ -471,7 +456,7 @@ nmcli device wifi connect "SSID_NAME" password 'password!@' hidden yes
 
 ---
 
-### 15.6 2.4 GHz / 5 GHz 주의
+### 14.6 2.4 GHz / 5 GHz 주의
 
 본 환경에서 확인된 **MT7601U는 2.4 GHz 계열 무선랜**으로 사용하였다.
 
@@ -503,7 +488,7 @@ iw list
 
 ---
 
-### 15.7 iPhone 개인용 핫스팟 연결
+### 14.7 iPhone 개인용 핫스팟 연결
 
 유선망이나 2.4 GHz 공유기를 사용할 수 없는 경우 iPhone 개인용 핫스팟을 사용할 수 있다.
 
@@ -537,7 +522,7 @@ nmcli device wifi connect "IPHONE_SSID" password 'HOTSPOT_PASSWORD'
 
 ---
 
-### 15.8 연결 상태 확인
+### 14.8 연결 상태 확인
 
 ```bash
 nmcli device
@@ -569,49 +554,7 @@ ip route
 
 ---
 
-### 15.9 인터넷 연결 테스트
-
-외부 IP 연결 확인:
-
-```bash
-ping -c 4 8.8.8.8
-```
-
-DNS 확인:
-
-```bash
-ping -c 4 google.com
-```
-
-두 테스트가 모두 정상이라면 인터넷 연결과 DNS resolution이 정상적으로 동작하는 상태이다.
-
----
-
-### 15.10 USB 무선랜 점검 순서
-
-```text
-USB 연결
-   ↓
-lsusb
-   ↓
-nmcli device
-   ↓
-lsmod / dmesg
-   ↓
-nmcli radio wifi on
-   ↓
-nmcli device wifi list
-   ↓
-SSID 연결
-   ↓
-ip addr / ip route
-   ↓
-ping test
-```
-
----
-
-## 16. 사용자 계정 및 관리자 권한
+## 15. 사용자 계정 및 관리자 권한
 
 일반 사용자 계정을 생성하고 필요 시 관리자 권한을 부여한다.
 
@@ -624,7 +567,7 @@ sudo dnf install package_name
 
 ---
 
-## 17. 설치 완료 및 재부팅
+## 16. 설치 완료 및 재부팅
 
 필수 설정이 완료되면 설치를 시작한다.
 
@@ -632,7 +575,7 @@ sudo dnf install package_name
 
 ---
 
-## 18. 설치 완료 후 기본 시스템 확인
+## 17. 설치 완료 후 기본 시스템 확인
 
 ### 운영체제 버전
 
@@ -681,52 +624,7 @@ hostnamectl
 
 ---
 
-## 19. 설치 후 운영체제 업데이트
-
-네트워크 사용이 가능한 환경에서는 다음 명령으로 운영체제를 업데이트한다.
-
-```bash
-sudo dnf update
-```
-
-또는
-
-```bash
-sudo dnf upgrade
-```
-
-Kernel 또는 주요 시스템 패키지가 변경된 경우:
-
-```bash
-sudo reboot
-```
-
----
-
-## 20. 기본 점검 항목
-
-```text
-[ ] Rocky Linux 정상 부팅
-[ ] UEFI 부팅 여부 확인
-[ ] DVD ISO 사용 여부 확인
-[ ] Rufus DD 이미지 모드 사용
-[ ] Installation Source에서 Local Media 인식
-[ ] 사용자 계정 로그인 확인
-[ ] sudo 사용 가능 여부 확인
-[ ] 저장장치 인식 확인
-[ ] RAM 용량 확인
-[ ] CPU core/thread 확인
-[ ] 시간대 확인
-[ ] 네트워크 연결 여부 확인
-[ ] USB 무선랜 사용 시 lsusb에서 장치 인식 확인
-[ ] USB 무선랜 사용 시 nmcli device에서 wifi 인터페이스 확인
-[ ] 무선 연결 사용 시 IP/DNS 통신 테스트
-[ ] 네트워크 사용 가능 시 시스템 업데이트 수행
-```
-
----
-
-## 21. 설치 기록 권장 항목
+## 18. 설치 기록 권장 항목
 
 상업용 시스템, 연구용 시스템 또는 장기간 유지해야 하는 모델링 시스템에서는 다음 항목을 기록한다.
 
@@ -752,7 +650,7 @@ USB 작성 방식(DD/ISO)
 
 ---
 
-## 22. 참고 사이트
+## 19. 참고 사이트
 
 - Rocky Linux: https://rockylinux.org/
 - Rocky Linux Documentation: https://docs.rockylinux.org/
