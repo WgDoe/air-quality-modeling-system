@@ -2,7 +2,7 @@
 
 ## 1. 문서 목적
 
-본 문서는 Rocky Linux 9 계열 환경에서 대기질 모델링 시스템 구축에 필요한 기본 GNU Compiler와 OpenMPI를 설치하고, Windows와 Linux 간 파일 전송 환경을 구성한 뒤 실제 C/C++/Fortran 및 MPI 동작 여부를 확인하는 절차를 정리한다.
+본 문서는 Rocky Linux 9 계열 환경에서 대기질 모델링 시스템 구축에 필요한 기본 GNU Compiler와 OpenMPI를 설치하고, Windows와 Linux 간 파일 전송 환경을 구성하고 GNU Compiler와 OpenMPI의 설치 및 MPI 병렬 실행 여부를 확인하는 절차를 정리한다.
 
 주요 대상은 다음과 같다.
 
@@ -27,7 +27,6 @@
 - 설치 작업은 root 권한으로 수행할 수 있다.
 - 실제 모델 및 라이브러리 컴파일·실행은 일반 사용자 계정에서 수행한다.
 - C, C++, Fortran compiler는 같은 GCC family를 사용한다.
-- OpenMPI가 실제로 동일한 GNU Fortran compiler를 사용하는지 확인한다.
 - 설치 후에는 버전 확인뿐 아니라 실제 compile 및 parallel run test를 수행한다.
 
 권장 계정 구분:
@@ -284,48 +283,9 @@ cat compiler_version.txt
 
 ---
 
-# 7. GFortran 기본 컴파일 테스트
+# 7. OpenMPI 설치
 
-OpenMPI 설치 전에 Fortran compiler가 단독으로 정상 작동하는지 확인할 수 있다.
-
-## 7.1 테스트 소스 작성
-
-```fortran
-program test_fortran
-  implicit none
-  print *, "Fortran compiler OK"
-end program test_fortran
-```
-
-파일명:
-
-```text
-test_fortran.f90
-```
-
-## 7.2 컴파일
-
-```bash
-gfortran test_fortran.f90 -o test_fortran
-```
-
-## 7.3 실행
-
-```bash
-./test_fortran
-```
-
-정상 예:
-
-```text
- Fortran compiler OK
-```
-
----
-
-# 8. OpenMPI 설치
-
-## 8.1 설치
+## 7.1 설치
 
 root 계정에서:
 
@@ -348,7 +308,7 @@ sudo dnf install openmpi openmpi-devel
 
 ---
 
-# 9. OpenMPI 환경 활성화
+# 8. OpenMPI 환경 활성화
 
 Rocky Linux 패키지로 설치한 OpenMPI는 Environment Modules를 이용하여 경로를 활성화할 수 있다.
 
@@ -377,7 +337,7 @@ which mpirun
 
 ---
 
-# 10. OpenMPI 버전 확인
+# 9. OpenMPI 버전 확인
 
 ```bash
 mpirun --version
@@ -401,37 +361,11 @@ OpenMPI   4.1.1
 
 ---
 
-# 11. OpenMPI가 사용하는 Fortran Compiler 확인
-
-`mpifort`는 독립적인 Fortran compiler가 아니라 실제 compiler와 MPI 라이브러리를 연결해주는 wrapper이다.
-
-실제 사용되는 compiler를 확인한다.
-
-```bash
-mpifort --showme:command
-```
-
-확인 결과:
-
-```text
-gfortran
-```
-
-즉, OpenMPI의 Fortran wrapper가 시스템에 설치한 GNU Fortran을 정상적으로 사용하고 있다.
-
-추가 정보 확인:
-
-```bash
-mpifort --showme
-```
-
----
-
-# 12. MPI 병렬 실행 테스트
+# 10. MPI 병렬 실행 테스트
 
 OpenMPI는 설치 여부만 확인하지 않고 실제 병렬 실행까지 확인해야 한다.
 
-## 12.1 테스트 프로그램 작성
+## 10.1 테스트 프로그램 작성
 
 파일명 예:
 
@@ -464,7 +398,7 @@ end program hello_mpi
 
 ---
 
-## 12.2 컴파일
+## 10.2 컴파일
 
 ```bash
 mpifort mpi_test.f90 -o hello_mpi
@@ -493,7 +427,7 @@ hello_mpi
 
 ---
 
-## 12.3 4개 MPI process로 실행
+## 10.3 4개 MPI process로 실행
 
 ```bash
 mpirun -np 4 ./hello_mpi
@@ -514,164 +448,7 @@ MPI 병렬 프로그램에서는 각 process의 출력 순서가 항상 0, 1, 2,
 
 ---
 
-# 13. MPI 테스트 결과 파일 저장
-
-MPI 결과를 텍스트 파일로 저장하려면 shell redirection을 사용한다.
-
-```bash
-mpirun -np 4 ./hello_mpi > mpitest_result.txt
-```
-
-확인:
-
-```bash
-cat mpitest_result.txt
-```
-
-표준 오류까지 함께 저장하려면:
-
-```bash
-mpirun -np 4 ./hello_mpi > mpitest_result.txt 2>&1
-```
-
----
-
-# 14. 대표적인 테스트 오류와 해결
-
-## 14.1 실행파일을 찾을 수 없는 경우
-
-오류 예:
-
-```text
-mpirun was unable to launch the specified application as it could not access
-or execute an executable:
-
-Executable: ./mpi_test
-```
-
-원인:
-
-소스 파일 `mpi_test.f90`만 존재하고 실행파일을 아직 컴파일하지 않은 상태에서 `mpirun`을 실행한 경우이다.
-
-해결:
-
-먼저 컴파일한다.
-
-```bash
-mpifort mpi_test.f90 -o hello_mpi
-```
-
-이후 실행:
-
-```bash
-mpirun -np 4 ./hello_mpi
-```
-
----
-
-## 14.2 프로그램 이름 충돌
-
-오류 예:
-
-```text
-'mpi_test' of module 'mpi' ... is also the name of the current program unit
-```
-
-또는:
-
-```text
-Name 'mpi_test' ... is an ambiguous reference
-```
-
-해결:
-
-Fortran program unit의 이름을 다음과 같이 변경한다.
-
-잘못된 예:
-
-```fortran
-program mpi_test
-  use mpi
-```
-
-권장 예:
-
-```fortran
-program hello_mpi
-  use mpi
-```
-
-마지막도 동일하게 변경한다.
-
-```fortran
-end program hello_mpi
-```
-
----
-
-## 14.3 module 명령을 찾을 수 없는 경우
-
-먼저 modules 환경을 불러온다.
-
-```bash
-source /etc/profile.d/modules.sh
-```
-
-그 후:
-
-```bash
-module load mpi/openmpi-x86_64
-```
-
----
-
-## 14.4 mpirun 명령을 찾을 수 없는 경우
-
-OpenMPI module이 로드되었는지 확인한다.
-
-```bash
-module list
-```
-
-필요하면:
-
-```bash
-module load mpi/openmpi-x86_64
-```
-
-그 후:
-
-```bash
-which mpirun
-```
-
----
-
-# 15. 설치 완료 확인 체크리스트
-
-다음 항목을 모두 확인하면 GNU Compiler 및 OpenMPI 기본 환경 구축이 완료된 것으로 판단할 수 있다.
-
-```text
-[ ] gcc --version 정상
-[ ] g++ --version 정상
-[ ] gfortran --version 정상
-[ ] make --version 정상
-[ ] gcc/g++/gfortran 버전 family 일치
-[ ] OpenMPI 설치 완료
-[ ] module load mpi/openmpi-x86_64 성공
-[ ] which mpicc 정상
-[ ] which mpifort 정상
-[ ] which mpirun 정상
-[ ] mpirun --version 정상
-[ ] mpifort --showme:command 결과가 gfortran
-[ ] Fortran 단독 compile/run 성공
-[ ] MPI Fortran compile 성공
-[ ] mpirun -np 4 병렬 실행 성공
-```
-
----
-
-# 16. 현재 검증된 환경
+# 11. 현재 검증된 환경
 
 본 설치에서 확인된 구성:
 
@@ -683,7 +460,6 @@ g++            : 11.5.0
 gfortran       : 11.5.0
 GNU Make       : 4.3
 OpenMPI        : 4.1.1
-MPI Fortran    : mpifort → gfortran
 MPI Test       : 4 process 병렬 실행 성공
 File Transfer  : SFTP 사용 가능
 ```
