@@ -432,25 +432,47 @@ nmcli device wifi list
 
 ### 14.5 숨김 SSID 연결
 
-SSID가 숨겨져 있는 경우 네트워크 이름과 비밀번호를 직접 지정할 수 있다.
+SSID가 숨겨져 있어 일반적인 Wi-Fi 검색 목록에 표시되지 않는 경우에는 NetworkManager 연결 프로파일을 먼저 생성하는 방법이 안정적이다.
+
+먼저 Wi-Fi 장치 이름을 확인한다.
 
 ```bash
-nmcli device wifi connect "SSID_NAME" password 'WIFI_PASSWORD' hidden yes
+nmcli device
 ```
 
-Wi-Fi 장치가 여러 개인 경우 interface를 지정한다.
+예를 들어 Wi-Fi interface가 `wlan0`이라면 다음과 같이 연결 프로파일을 생성한다.
 
 ```bash
-nmcli device wifi connect "SSID_NAME" password 'WIFI_PASSWORD' hidden yes ifname wlan0
+nmcli connection add type wifi ifname wlan0 con-name AirNew2G ssid "AirNew.2G"
 ```
 
-> 비밀번호에 `!` 문자가 포함된 경우 Bash history expansion 때문에 `event not found` 오류가 발생할 수 있다. 이 경우 비밀번호를 큰따옴표가 아니라 **작은따옴표(' ')** 로 감싼다.
-
-예:
+숨김 SSID임을 지정한다.
 
 ```bash
-nmcli device wifi connect "SSID_NAME" password 'password!@' hidden yes
+nmcli connection modify AirNew2G 802-11-wireless.hidden yes
 ```
+
+WPA2-PSK 보안을 사용하는 경우 보안 방식을 설정한다.
+
+```bash
+nmcli connection modify AirNew2G wifi-sec.key-mgmt wpa-psk
+```
+
+비밀번호는 실제 값을 문서에 기록하지 않고 다음과 같이 입력한다.
+
+```bash
+nmcli connection modify AirNew2G wifi-sec.psk 'WIFI_PASSWORD'
+```
+
+위 설정까지 완료하면 GNOME의 Wi-Fi 설정 화면에서 해당 숨김 네트워크가 인식될 수 있으며, 화면에서 비밀번호를 입력하여 연결할 수도 있다.
+
+명령줄에서 직접 연결하려면 다음을 실행한다.
+
+```bash
+nmcli connection up AirNew2G
+```
+
+> 비밀번호에 `!` 문자가 포함된 경우 Bash history expansion 때문에 `event not found` 오류가 발생할 수 있으므로 비밀번호는 **작은따옴표(' ')** 로 감싼다.
 
 실제 운영 비밀번호는 문서나 Git 저장소에 기록하지 않는다.
 
