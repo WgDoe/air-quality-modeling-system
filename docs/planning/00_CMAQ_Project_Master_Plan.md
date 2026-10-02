@@ -697,7 +697,6 @@ REAS 원자료
 - Soil NO
 
 중복 입력을 방지하기 위해 CMAQ inline emission과 외부 SMOKE emission을 동시에 사용할 때 설정을 명확히 확인한다.
-
 ---
 
 # 14. CMAQ 구축 요구사항
@@ -998,3 +997,340 @@ ncdump -h filename.nc
 ## Phase 0. 기존 시스템 조사
 
 - 기존 운영 Linux 시스템 정보 수집
+- 디렉터리 구조 확인
+- 모델 버전 확인
+- run script 확보
+- 배출자료 처리흐름 파악
+- 기존 자료 중 재사용 가능한 항목 확인
+
+## Phase 1. Linux workstation 구축
+
+- OS 설치
+- 사용자/디스크 구조 구성
+- 개발도구 설치
+- shell 환경 설정
+- SSH/원격접속 설정
+- 저장공간 구성
+
+## Phase 2. Compiler 및 공통 library
+
+- GNU compiler
+- OpenMPI
+- zlib
+- HDF5
+- netCDF-C
+- netCDF-Fortran
+- I/O API
+
+## Phase 3. WRF/WPS
+
+- 버전: WRF 4.5.1 / WPS 4.5 (§3.5)
+- netCDF 통합 링크 경로, libpng, JasPer 준비
+- WRF compile
+- WPS compile
+- official test
+- 기상자료 download
+- 동아시아 domain test
+
+## Phase 4. MCIP
+
+- compile
+- WRF output 변환
+- CMAQ grid 검증
+
+## Phase 5. SMOKE
+
+- install
+- example case
+- CAPSS test
+- REAS test
+- natural emissions test
+
+## Phase 6. CMAQ
+
+- 버전: CMAQ 5.5 (`CMAQv5.5.0.3_11Jul2025`)
+- compile
+- official benchmark
+- 실제 domain base run
+
+## Phase 7. ISAM
+
+- benchmark
+- 국가별 tagging
+- 배출부문별 tagging
+- real case
+
+## Phase 8. 자동화 및 후처리
+
+- case manager
+- batch scripts
+- logging
+- R/Python postprocessing
+- 관측자료 검증
+
+---
+
+# 23. 프로젝트 산출물
+
+아래 목록은 계획 당시 산출물명이다. 현재 작성된 설치 가이드는 번호 없는 설명형 파일명을 사용하며, 향후 문서명은 작성 시 확정한다.
+
+| 계획 당시 산출물명 | 현재 저장소 문서 |
+|---|---|
+| `01_Linux_Workstation_Setup.md` | [Rocky Linux 설치 가이드](../linux/Rocky_Linux_Installation_Guide.md) |
+| `02_GNU_Compiler_MPI_Setup.md` | [GNU Compiler 및 OpenMPI 설치 가이드](../compiler/GNU_Compiler_OpenMPI_Installation_Guide.md) |
+| `03_NetCDF_HDF5_IOAPI_Setup.md` | [공통 라이브러리 구축 기록](../libraries/Common_Libraries_Installation_Guide.md) |
+
+계획 당시 전체 산출물 목록:
+
+```text
+00_CMAQ_Project_Master_Plan.md
+
+01_Linux_Workstation_Setup.md
+02_GNU_Compiler_MPI_Setup.md
+03_NetCDF_HDF5_IOAPI_Setup.md
+
+04_WRF_WPS_Install.md
+05_WRF_Case_Run.md
+
+06_MCIP_Install_Run.md
+
+07_SMOKE_Install.md
+08_CAPSS_Processing.md
+09_REAS_Processing.md
+10_Biogenic_Emissions.md
+
+11_CMAQ_Install_Benchmark.md
+12_CMAQ_Real_Case.md
+13_CMAQ_ISAM.md
+14_CMAQ_DDM.md
+
+15_IC_BC_Processing.md
+16_PostProcessing_Evaluation.md
+
+17_Case_Automation.md
+18_Troubleshooting_Log.md
+19_System_Version_Record.md
+20_Existing_System_Analysis.md
+```
+
+---
+
+# 24. 공식 참고 페이지
+
+## CMAQ
+
+EPA CMAQ:
+https://www.epa.gov/cmaq
+
+CMAQ Documentation:
+https://www.epa.gov/cmaq/cmaq-documentation
+
+USEPA CMAQ GitHub:
+https://github.com/USEPA/CMAQ
+
+CMAS CMAQ:
+https://www.cmascenter.org/cmaq/
+
+CMAQ Linux environment:
+https://github.com/USEPA/CMAQ/blob/main/DOCS/Users_Guide/Tutorials/CMAQ_UG_tutorial_configure_linux_environment.md
+
+CMAQ compute environment:
+https://github.com/USEPA/CMAQ/blob/main/DOCS/Users_Guide/CMAQ_UG_ch03_preparing_compute_environment.md
+
+CMAQ model inputs:
+https://github.com/USEPA/CMAQ/blob/main/DOCS/Users_Guide/CMAQ_UG_ch04_model_inputs.md
+
+CMAQ simulation:
+https://github.com/USEPA/CMAQ/blob/main/DOCS/Users_Guide/CMAQ_UG_ch05_running_a_simulation.md
+
+CMAQ configuration:
+https://github.com/USEPA/CMAQ/blob/main/DOCS/Users_Guide/CMAQ_UG_ch06_model_configuration_options.md
+
+CMAQ benchmark:
+https://github.com/USEPA/CMAQ/blob/main/DOCS/Users_Guide/Tutorials/CMAQ_UG_tutorial_benchmark.md
+
+CMAQ ISAM:
+https://github.com/USEPA/CMAQ/blob/main/DOCS/Users_Guide/Tutorials/CMAQ_UG_tutorial_ISAM.md
+
+WRF-CMAQ (호환 WRF 버전):
+https://github.com/USEPA/CMAQ/blob/main/DOCS/Users_Guide/CMAQ_UG_ch13_WRF-CMAQ.md
+
+CMAQ releases / tags:
+https://github.com/USEPA/CMAQ/releases
+
+CMAQ benchmark data (v5.5):
+https://cmaq-release-benchmark-data-for-easy-download.s3.amazonaws.com/index.html#v5_5/
+
+---
+
+## WRF / WPS
+
+WRF Users Page:
+https://www2.mmm.ucar.edu/wrf/users/
+
+WRF User Guide:
+https://www2.mmm.ucar.edu/wrf/users/wrf_users_guide/build/html/
+
+WRF compilation:
+https://www2.mmm.ucar.edu/wrf/users/wrf_users_guide/build/html/compiling.html
+
+WRF online compilation tutorial:
+https://www2.mmm.ucar.edu/wrf/OnLineTutorial/compilation_tutorial.php
+
+WRF GitHub:
+https://github.com/wrf-model/WRF
+
+WPS GitHub:
+https://github.com/wrf-model/WPS
+
+---
+
+## SMOKE
+
+SMOKE official:
+https://www.cmascenter.org/smoke/
+
+SMOKE documentation:
+https://www.cmascenter.org/smoke/documentation/5.3/html/
+
+SMOKE Concepts:
+https://www.cmascenter.org/smoke/documentation/5.3/html/ch02.html
+
+CMAS Training:
+https://www.cmascenter.org/training/classes.cfm
+
+CMAS Forum:
+https://forum.cmascenter.org/
+
+---
+
+## CMAS / I/O API
+
+CMAS Center:
+https://www.cmascenter.org/
+
+I/O API:
+https://cmascenter.org/ioapi/
+
+I/O API GitHub:
+https://github.com/cjcoats/ioapi-3.2
+
+---
+
+## netCDF
+
+netCDF-C:
+https://docs.unidata.ucar.edu/netcdf-c/current/
+
+netCDF-Fortran:
+https://docs.unidata.ucar.edu/netcdf-fortran/current/
+
+---
+
+## OpenMPI
+
+OpenMPI Documentation:
+https://docs.open-mpi.org/en/main/
+
+OpenMPI Installation:
+https://docs.open-mpi.org/en/main/installing-open-mpi/quickstart.html
+
+---
+
+## GNU Compiler
+
+GCC:
+https://gcc.gnu.org/
+
+GNU Fortran:
+https://gcc.gnu.org/fortran/
+
+GNU Fortran manual:
+https://gcc.gnu.org/onlinedocs/gfortran/
+
+---
+
+## Intel oneAPI
+
+Intel Fortran:
+https://www.intel.com/content/www/us/en/developer/tools/oneapi/fortran-compiler.html
+
+Intel oneAPI:
+https://www.intel.com/content/www/us/en/developer/tools/oneapi/oneapi-toolkit.html
+
+---
+
+## REAS
+
+NIES REAS:
+https://www.nies.go.jp/REAS/
+
+REAS는 버전별 자료기간, species, grid, format이 다를 수 있으므로 실제 사용자료를 확인한 뒤 별도 문서에서 처리방법을 기록한다.
+
+---
+
+# 25. 향후 추가 조사 대상
+
+다음 항목은 기존 운영 시스템 확인 후 확정한다.
+
+- 기존 운영 시스템의 실제 Linux 배포판 및 compiler family(신규 구축 환경은 Rocky Linux 9.8, GNU 11.5.0으로 확인됨)
+- WRF version (신규 구축은 4.5.1로 확정, §3.5. 기존 시스템 버전은 비교용으로 확인)
+- CMAQ version (신규 구축은 5.5로 확정, §3.5. 기존 시스템 버전은 비교용으로 확인)
+- SMOKE version
+- chemical mechanism
+- aerosol module
+- meteorological input
+- FNL/GFS/ERA5 사용 여부
+- CAPSS 기준연도
+- REAS version
+- MEGAN/BEIS 사용 여부
+- 화재배출 처리 여부
+- 선박 배출원
+- sea salt 처리
+- windblown dust 처리
+- IC/BC 생성방법
+- CMAQ nesting 여부
+- ISAM tag 체계
+- 후처리 도구
+- 자동화 방식
+- 저장공간 및 backup 체계
+
+---
+
+# 26. 성공 기준
+
+본 프로젝트는 다음 조건을 만족할 때 기본 구축이 완료된 것으로 본다.
+
+1. Linux 시스템에서 WRF/WPS를 정상 compile 및 실행할 수 있다.
+2. WRF 결과를 MCIP로 정상 변환할 수 있다.
+3. SMOKE example case를 실행할 수 있다.
+4. CMAQ official benchmark를 reference 수준으로 재현할 수 있다.
+5. 실제 동아시아/부산 domain의 WRF-CMAQ base case를 실행할 수 있다.
+6. CAPSS 국내 배출량을 CMAQ input으로 사용할 수 있다.
+7. REAS 국외 배출량을 CMAQ input으로 사용할 수 있다.
+8. 식생배출을 정상 반영할 수 있다.
+9. ISAM을 이용해 지역/배출원 기여도를 계산할 수 있다.
+10. 관측자료와 모델 결과를 비교할 수 있다.
+11. case별 반복 실행이 가능한 구조를 갖춘다.
+12. 전체 설치·실행·오류·수정 이력이 문서화되어 있다.
+
+---
+
+# 27. 프로젝트 운영 원칙
+
+이 문서는 프로젝트의 최상위 기준 문서로 사용한다.
+
+세부 설치 및 분석이 진행되면 다음 사항을 지속적으로 업데이트한다.
+
+- 확정된 버전(§3.5)
+- 실제 사용 명령어
+- 실제 directory path
+- 실제 compiler option
+- 기존 시스템에서 확인된 설정
+- 변경한 설정
+- benchmark 결과
+- 오류와 해결방법
+- 실제 case run 결과
+
+기존 운영 시스템의 스크립트와 자료는 가능한 한 그대로 분석하되,
+단순 복사보다는 각 단계의 역할과 의존성을 이해하여 신규 시스템에 재현 가능한 형태로 정리한다.
