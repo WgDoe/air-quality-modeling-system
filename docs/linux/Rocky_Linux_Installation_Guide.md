@@ -335,7 +335,7 @@ Minimal Install
 
 ---
 
-## 13. USB 무선랜 어댑터를 이용한 네트워크 연결
+## 14. USB 무선랜 어댑터를 이용한 네트워크 연결
 
 유선 네트워크가 없는 시스템에서는 USB 무선랜 어댑터를 이용해 인터넷에 연결할 수 있다.
 
@@ -671,6 +671,8 @@ USB 작성 방식(DD/ISO)
 이 기록은 동일 시스템 재구축, 장애 복구, 버전 비교, 고객 시스템 납품 및 유지보수에 활용할 수 있다.
 
 ---
+
+설치 후 GNU Compiler와 OpenMPI 구성은 [GNU Compiler 및 OpenMPI 설치 가이드](../compiler/GNU_Compiler_OpenMPI_Installation_Guide.md)를 참고한다.
 
 ## 19. 참고 사이트
 

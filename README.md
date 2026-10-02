@@ -16,6 +16,22 @@
 
 - [GNU Compiler & OpenMPI Installation Guide](docs/compiler/GNU_Compiler_OpenMPI_Installation_Guide.md)
 
+### Libraries
+
+- [Common Libraries Installation (HDF5 / netCDF-C / netCDF-Fortran)](docs/libraries/01_common_libraries_installation.md)
+
+### Master Plan과 현재 문서의 대응
+
+Master Plan §22의 구축 단계는 그대로 적용한다. §23의 산출물명은 계획 당시 명칭이며, 현재 저장소에서는 아래 경로를 사용한다.
+
+| 구축 단계 | 계획 당시 산출물명 | 현재 문서 |
+|---|---|---|
+| Phase 1. Linux workstation 구축 | `01_Linux_Workstation_Setup.md` | [Rocky Linux 설치](docs/linux/Rocky_Linux_Installation_Guide.md) |
+| Phase 2. Compiler 및 공통 library | `02_GNU_Compiler_MPI_Setup.md` | [GNU Compiler / OpenMPI](docs/compiler/GNU_Compiler_OpenMPI_Installation_Guide.md) |
+| Phase 2. Compiler 및 공통 library | `03_NetCDF_HDF5_IOAPI_Setup.md` | [공통 라이브러리](docs/libraries/01_common_libraries_installation.md) |
+
+Rocky Linux 문서는 Phase 1의 OS 설치와 기본 확인을, Compiler/MPI 문서는 Phase 1의 SFTP 설정 및 Phase 2의 compiler/MPI 구축을 다룬다. 공통 라이브러리 문서는 I/O API 설치 이전까지를 다루며, Phase 2 전체의 완료를 뜻하지 않는다.
+
 ## Repository structure
 
 ```text
@@ -23,6 +39,7 @@ docs/
   planning/
   linux/
   compiler/
+  libraries/
 scripts/
 config/
 examples/

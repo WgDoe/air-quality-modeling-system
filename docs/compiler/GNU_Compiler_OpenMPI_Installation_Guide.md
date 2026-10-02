@@ -1,6 +1,6 @@
 # GNU Compiler 및 OpenMPI 설치 가이드
 
-## 1. 문서 목적
+# 1. 문서 목적
 
 본 문서는 Rocky Linux 9 계열 환경에서 대기질 모델링 시스템 구축에 필요한 기본 GNU Compiler와 OpenMPI를 설치하고, Windows와 Linux 간 파일 전송 환경을 구성하고 GNU Compiler와 OpenMPI의 설치 및 MPI 병렬 실행 여부를 확인하는 절차를 정리한다.
 
@@ -19,7 +19,9 @@
 
 ---
 
-## 2. 설치 원칙
+운영체제 설치는 [Rocky Linux 설치 가이드](../linux/Rocky_Linux_Installation_Guide.md)를 먼저 참고한다.
+
+# 2. 설치 원칙
 
 본 환경에서는 다음 원칙을 적용한다.
 
@@ -177,6 +179,8 @@ sudo dnf install gcc gcc-c++ gcc-gfortran make
 
 # 5. GNU Compiler 설치 확인
 
+아래 GCC 11.5.0, GNU Make 4.3 및 OpenMPI 4.1.1은 기존 환경에서 확인한 버전 기록이다. `dnf install`은 해당 버전을 고정하지 않으므로 설치 시점과 활성 저장소에 따라 버전이 달라질 수 있다. 재구축 시 실제 버전을 기록하고 compiler family와 MPI wrapper의 기반 compiler를 확인한다.
+
 설치 후 일반 사용자 계정에서 다음 명령을 실행한다.
 
 ## 5.1 GCC
@@ -325,7 +329,11 @@ module load mpi/openmpi-x86_64
 which mpicc
 which mpifort
 which mpirun
+mpicc --showme:command
+mpifort --showme:command
 ```
+
+`--showme:command`로 C wrapper가 `gcc`, Fortran wrapper가 `gfortran`을 사용하는지 확인한다. 이는 [OpenMPI 공식 wrapper 문서](https://docs.open-mpi.org/en/v5.0.0/man-openmpi/man1/ompi-wrapper-compiler.1.html)의 확인 방법이다. 모델을 컴파일하거나 실행하는 새 shell에서도 동일한 MPI module을 활성화한다.
 
 확인된 경로 예:
 
