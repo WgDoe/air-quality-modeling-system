@@ -1,6 +1,7 @@
 # CMAQ 통합 대기질 모델링 시스템 구축 기본계획 및 요구사항
 
 작성일: 2026-09-23  
+수정일: 2026-10-03 (CMAQ 5.5 기준 모델 버전 확정, §3.5)  
 문서 성격: 프로젝트 기본계획 / 요구사항 정의 / 공식 참고자료 인덱스  
 적용 대상: Linux Desktop 기반 CMAQ 독립 운영환경 구축
 
@@ -194,6 +195,74 @@ Library test
 초기 구축은 **GNU gcc/g++/gfortran + OpenMPI**를 기준선으로 한다.
 
 Intel oneAPI(ifx)는 안정화 이후 성능 비교 또는 기존 시스템 호환 목적일 때 검토한다.
+
+## 3.5 모델 버전 결정 기준 (CMAQ 우선)
+
+### 3.5.1 원칙
+
+모델 버전은 개별 프로그램의 최신 버전이 아니라 **최종 목적 모델인 CMAQ의 버전을 먼저 확정**하고, 나머지 구성요소를 CMAQ와의 호환성에 맞춰 결정한다.
+
+```text
+CMAQ 버전 확정
+  ↓
+CMAQ에 포함된 MCIP 버전 결정
+  ↓
+MCIP/CMAQ가 처리 가능한 WRF/WPS 버전 결정
+  ↓
+공통 라이브러리 호환성 확인
+```
+
+근거:
+
+- MCIP는 CMAQ 저장소(`PREP/mcip`)에 포함되어 CMAQ와 함께 배포되므로, 처리 가능한 WRF 출력 형식은 CMAQ 버전에 종속된다.
+- 과거 CMAQ v5.3 이전(MCIP v5.0 이전)은 WRF 3.9부터 도입된 hybrid 연직좌표를 처리하지 못한 사례가 있다.
+- Pleim-Xiu LSM, ACM2 PBL 등 CMAQ와 짝을 이루는 WRF 물리옵션이 버전에 따라 달라진다.
+- 결합형 WRF-CMAQ는 지원하는 WRF 버전 범위가 명시되어 있다(CMAQ 5.5 기준 WRF 4.4~4.5.1).
+
+### 3.5.2 확정 버전 (2026-10-03)
+
+| 구성요소 | 확정 버전 | 비고 |
+|---|---|---|
+| CMAQ | 5.5 (태그 `CMAQv5.5.0.3_11Jul2025`) | 기준 모델. 현재 공개된 5.5 계열 최신 bugfix 태그이며 GitHub Releases에서는 pre-release로 표시됨. 문서·benchmark 자료는 v5.5 기준 |
+| MCIP | CMAQ 5.5.0.3 포함 버전 | `PREP/mcip` |
+| ICON/BCON 등 전처리 | CMAQ 5.5.0.3 포함 버전 | `PREP/` |
+| WRF | 4.5.1 (태그 `v4.5.1`) | WRF-CMAQv5.5 결합 호환범위(4.4~4.5.1)의 상한 |
+| WPS | 4.5 (태그 `v4.5`) | WPS는 4.5.1 태그가 없으며 WRF 4.5.x와 짝을 이루는 버전 |
+| I/O API | 3.2-20200828 | CMAQ v5.5 공식 문서에서 tested/stable version으로 제시되는 버전. 설치 완료 |
+| netCDF-C / netCDF-Fortran | 4.9.3 / 4.6.2 | 설치 완료. CMAQ 5.5는 C/Fortran 경로를 별도 변수로 지정 가능 |
+| HDF5 | 1.14.6 | 설치 완료 |
+| Compiler / MPI | GNU 11.5.0 / OpenMPI | 설치 완료 |
+| SMOKE | 미정 | Phase 5 착수 시 CMAQ 5.5 호환 버전으로 결정 |
+
+WRF 4.5.1을 선택한 이유:
+
+- 분리 실행(WRF → MCIP → CMAQ)에서 CMAQ 5.5 MCIP로 처리 가능하다.
+- EPA가 WRF-CMAQv5.5를 시험한 범위 안에 있어 향후 결합 실행(에어로졸-기상 피드백 등)으로 확장할 때 WRF를 재설치할 필요가 없다.
+- WRF 4.6 이상은 분리 실행에는 사용할 수 있으나 결합형 WRF-CMAQv5.5 지원 범위를 벗어난다.
+
+### 3.5.3 CMAQ 5.5 설치 시 연계 사항
+
+- CMAQ 5.5의 `config_cmaq.csh`는 `NETCDF_LIB_DIR`/`NETCDF_INCL_DIR`(netCDF-C)와 `NETCDFF_LIB_DIR`/`NETCDFF_INCL_DIR`(netCDF-Fortran)를 따로 지정하므로, 현재처럼 C와 Fortran을 별도 디렉터리에 설치한 구조를 그대로 사용한다.
+- I/O API 경로는 다음과 같이 지정한다.
+
+```text
+IOAPI_INCL_DIR = /home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/ioapi/fixed_src
+IOAPI_LIB_DIR  = /home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/Linux2_x86_64gfort10
+```
+
+- 재현성을 위해 CMAQ는 `main` 브랜치가 아니라 확정 태그로 내려받는다.
+
+```bash
+git clone -b CMAQv5.5.0.3_11Jul2025 https://github.com/USEPA/CMAQ.git CMAQ_REPO
+```
+
+### 3.5.4 재검토 조건
+
+다음의 경우 버전 기준을 재검토하고 이 절을 갱신한다.
+
+- 기존 운영 시스템 조사(Phase 0)에서 결과 연속성 확보가 필요한 CMAQ/WRF 버전이 확인된 경우
+- CMAQ 차기 주요 버전이 공개되어 benchmark 자료와 문서가 갱신된 경우
+- CMAQ 5.5 계열에 연구 결과에 영향을 주는 버그수정 태그가 추가된 경우
 
 ---
 
@@ -438,6 +507,14 @@ wrfout_d02_*
 
 기존 운영 시스템 namelist를 확보하면 우선 비교분석한다.
 
+## 8.6 버전 및 빌드 준비사항
+
+- 버전: WRF 4.5.1, WPS 4.5 (§3.5 CMAQ 5.5 기준)
+- WRF는 `NETCDF` 환경변수 하나로 netCDF-C와 netCDF-Fortran을 함께 찾으므로, 별도 설치된 두 라이브러리를 하나의 경로로 묶는 링크 디렉터리를 구성한다(기존 설치는 변경하지 않음).
+- WPS ungrib의 GRIB2 처리를 위해 libpng, JasPer를 준비한다.
+- 빌드 스크립트용 `tcsh`(csh), `perl`, `m4` 설치 여부를 확인한다.
+- CMAQ 연계를 고려하여 PX LSM, ACM2 PBL 등 CMAQ 권장 물리옵션 조합을 우선 검토한다.
+
 ---
 
 # 9. MCIP 구축 요구사항
@@ -465,8 +542,8 @@ wrfout
 - land-use mapping
 - time zone
 - 시작/종료시간
-- MCIP 버전
-- CMAQ 버전 compatibility
+- MCIP 버전: CMAQ 5.5.0.3 포함 버전(`PREP/mcip`) 사용
+- CMAQ 버전 compatibility: CMAQ 5.5와 동일 태그에서 빌드하여 일치시킴
 
 ---
 
@@ -631,7 +708,7 @@ REAS 원자료
 
 ## 14.2 주요 설정항목
 
-- CMAQ version
+- CMAQ version: 5.5 (`CMAQv5.5.0.3_11Jul2025`, §3.5)
 - chemical mechanism
 - aerosol module
 - photolysis
@@ -647,6 +724,17 @@ REAS 원자료
 ## 14.3 초기 검증
 
 공식 benchmark 수행 후 reference result와 비교한다.
+
+CMAQ 5.5 공식 benchmark:
+
+- 사례: 2018년 7월 1~2일, 2일 모의
+- 영역: 미국 북동부 12 km(12NE3), 100 × 105 격자, 35층
+- 화학기작: `cb6r5_ae7_aq`, 건성침적 `m3dry`
+- 입력자료: `CMAQv5.4_2018_12NE3_Benchmark_2Day_Input.tar.gz`
+- 비교용 출력: `output_CCTM_v55_gcc_Bench_2018_12NE3_cb6r5_ae7_aq_m3dry.tar.gz`
+- 출처: CMAS Center Data Warehouse(AWS S3, `v5_5/`)
+
+benchmark 입력에는 MCIP 기상자료, 배출량, IC/BC가 포함되어 있으므로 WRF/SMOKE 구축 이전에도 수행할 수 있다.
 
 ---
 
@@ -894,7 +982,7 @@ ncdump -h filename.nc
 
 # 22. 단계별 구축 계획
 
-## 현재 진행상황 (2026-10-02)
+## 현재 진행상황 (2026-10-03)
 
 실제 설치 명령과 확인 결과는 [공통 라이브러리 구축 기록](../libraries/Common_Libraries_Installation_Guide.md)을 기준으로 한다.
 
@@ -902,332 +990,11 @@ ncdump -h filename.nc
 - **I/O API 3.2-20200828 완료**: `Linux2_x86_64gfort10`, `nocpl`, OpenMP 미사용 구성으로 라이브러리·모듈·M3TOOLS 빌드와 링크·실행 테스트 완료. 환경변수 등록 및 경로 확인 완료.
 - I/O API 라이브러리·모듈·실행파일: `/home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/Linux2_x86_64gfort10`.
 - I/O API include: `/home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/ioapi/fixed_src`.
-- **다음 단계: Phase 3 WRF/WPS**. 버전과 상세 빌드 설정은 후속 단계에서 확인한다. 현재 기록은 WRF/WPS 또는 CMAQ 실행 완료를 의미하지 않는다.
+- **모델 버전 확정 (2026-10-03)**: CMAQ 5.5(`CMAQv5.5.0.3_11Jul2025`)를 기준으로 MCIP(CMAQ 포함), WRF 4.5.1, WPS 4.5로 결정. 상세 기준은 §3.5.
+- **다음 단계: Phase 3 WRF/WPS (WRF 4.5.1 / WPS 4.5)**. 상세 빌드 설정은 후속 문서에서 기록한다. 현재 기록은 WRF/WPS 또는 CMAQ 실행 완료를 의미하지 않는다.
 
 아래 Phase 목록은 전체 구축 계획이며, 이후 단계의 완료 기록이 아니다.
 
 ## Phase 0. 기존 시스템 조사
 
 - 기존 운영 Linux 시스템 정보 수집
-- 디렉터리 구조 확인
-- 모델 버전 확인
-- run script 확보
-- 배출자료 처리흐름 파악
-- 기존 자료 중 재사용 가능한 항목 확인
-
-## Phase 1. Linux workstation 구축
-
-- OS 설치
-- 사용자/디스크 구조 구성
-- 개발도구 설치
-- shell 환경 설정
-- SSH/원격접속 설정
-- 저장공간 구성
-
-## Phase 2. Compiler 및 공통 library
-
-- GNU compiler
-- OpenMPI
-- zlib
-- HDF5
-- netCDF-C
-- netCDF-Fortran
-- I/O API
-
-## Phase 3. WRF/WPS
-
-- WRF compile
-- WPS compile
-- official test
-- 기상자료 download
-- 동아시아 domain test
-
-## Phase 4. MCIP
-
-- compile
-- WRF output 변환
-- CMAQ grid 검증
-
-## Phase 5. SMOKE
-
-- install
-- example case
-- CAPSS test
-- REAS test
-- natural emissions test
-
-## Phase 6. CMAQ
-
-- compile
-- official benchmark
-- 실제 domain base run
-
-## Phase 7. ISAM
-
-- benchmark
-- 국가별 tagging
-- 배출부문별 tagging
-- real case
-
-## Phase 8. 자동화 및 후처리
-
-- case manager
-- batch scripts
-- logging
-- R/Python postprocessing
-- 관측자료 검증
-
----
-
-# 23. 프로젝트 산출물
-
-아래 목록은 계획 당시 산출물명이다. 현재 작성된 설치 가이드는 번호 없는 설명형 파일명을 사용하며, 향후 문서명은 작성 시 확정한다.
-
-| 계획 당시 산출물명 | 현재 저장소 문서 |
-|---|---|
-| `01_Linux_Workstation_Setup.md` | [Rocky Linux 설치 가이드](../linux/Rocky_Linux_Installation_Guide.md) |
-| `02_GNU_Compiler_MPI_Setup.md` | [GNU Compiler 및 OpenMPI 설치 가이드](../compiler/GNU_Compiler_OpenMPI_Installation_Guide.md) |
-| `03_NetCDF_HDF5_IOAPI_Setup.md` | [공통 라이브러리 구축 기록](../libraries/Common_Libraries_Installation_Guide.md) |
-
-계획 당시 전체 산출물 목록:
-
-```text
-00_CMAQ_Project_Master_Plan.md
-
-01_Linux_Workstation_Setup.md
-02_GNU_Compiler_MPI_Setup.md
-03_NetCDF_HDF5_IOAPI_Setup.md
-
-04_WRF_WPS_Install.md
-05_WRF_Case_Run.md
-
-06_MCIP_Install_Run.md
-
-07_SMOKE_Install.md
-08_CAPSS_Processing.md
-09_REAS_Processing.md
-10_Biogenic_Emissions.md
-
-11_CMAQ_Install_Benchmark.md
-12_CMAQ_Real_Case.md
-13_CMAQ_ISAM.md
-14_CMAQ_DDM.md
-
-15_IC_BC_Processing.md
-16_PostProcessing_Evaluation.md
-
-17_Case_Automation.md
-18_Troubleshooting_Log.md
-19_System_Version_Record.md
-20_Existing_System_Analysis.md
-```
-
----
-
-# 24. 공식 참고 페이지
-
-## CMAQ
-
-EPA CMAQ:
-https://www.epa.gov/cmaq
-
-CMAQ Documentation:
-https://www.epa.gov/cmaq/cmaq-documentation
-
-USEPA CMAQ GitHub:
-https://github.com/USEPA/CMAQ
-
-CMAS CMAQ:
-https://www.cmascenter.org/cmaq/
-
-CMAQ Linux environment:
-https://github.com/USEPA/CMAQ/blob/main/DOCS/Users_Guide/Tutorials/CMAQ_UG_tutorial_configure_linux_environment.md
-
-CMAQ compute environment:
-https://github.com/USEPA/CMAQ/blob/main/DOCS/Users_Guide/CMAQ_UG_ch03_preparing_compute_environment.md
-
-CMAQ model inputs:
-https://github.com/USEPA/CMAQ/blob/main/DOCS/Users_Guide/CMAQ_UG_ch04_model_inputs.md
-
-CMAQ simulation:
-https://github.com/USEPA/CMAQ/blob/main/DOCS/Users_Guide/CMAQ_UG_ch05_running_a_simulation.md
-
-CMAQ configuration:
-https://github.com/USEPA/CMAQ/blob/main/DOCS/Users_Guide/CMAQ_UG_ch06_model_configuration_options.md
-
-CMAQ benchmark:
-https://github.com/USEPA/CMAQ/blob/main/DOCS/Users_Guide/Tutorials/CMAQ_UG_tutorial_benchmark.md
-
-CMAQ ISAM:
-https://github.com/USEPA/CMAQ/blob/main/DOCS/Users_Guide/Tutorials/CMAQ_UG_tutorial_ISAM.md
-
----
-
-## WRF / WPS
-
-WRF Users Page:
-https://www2.mmm.ucar.edu/wrf/users/
-
-WRF User Guide:
-https://www2.mmm.ucar.edu/wrf/users/wrf_users_guide/build/html/
-
-WRF compilation:
-https://www2.mmm.ucar.edu/wrf/users/wrf_users_guide/build/html/compiling.html
-
-WRF online compilation tutorial:
-https://www2.mmm.ucar.edu/wrf/OnLineTutorial/compilation_tutorial.php
-
-WRF GitHub:
-https://github.com/wrf-model/WRF
-
----
-
-## SMOKE
-
-SMOKE official:
-https://www.cmascenter.org/smoke/
-
-SMOKE documentation:
-https://www.cmascenter.org/smoke/documentation/5.3/html/
-
-SMOKE Concepts:
-https://www.cmascenter.org/smoke/documentation/5.3/html/ch02.html
-
-CMAS Training:
-https://www.cmascenter.org/training/classes.cfm
-
-CMAS Forum:
-https://forum.cmascenter.org/
-
----
-
-## CMAS / I/O API
-
-CMAS Center:
-https://www.cmascenter.org/
-
-I/O API:
-https://cmascenter.org/ioapi/
-
-I/O API GitHub:
-https://github.com/cjcoats/ioapi-3.2
-
----
-
-## netCDF
-
-netCDF-C:
-https://docs.unidata.ucar.edu/netcdf-c/current/
-
-netCDF-Fortran:
-https://docs.unidata.ucar.edu/netcdf-fortran/current/
-
----
-
-## OpenMPI
-
-OpenMPI Documentation:
-https://docs.open-mpi.org/en/main/
-
-OpenMPI Installation:
-https://docs.open-mpi.org/en/main/installing-open-mpi/quickstart.html
-
----
-
-## GNU Compiler
-
-GCC:
-https://gcc.gnu.org/
-
-GNU Fortran:
-https://gcc.gnu.org/fortran/
-
-GNU Fortran manual:
-https://gcc.gnu.org/onlinedocs/gfortran/
-
----
-
-## Intel oneAPI
-
-Intel Fortran:
-https://www.intel.com/content/www/us/en/developer/tools/oneapi/fortran-compiler.html
-
-Intel oneAPI:
-https://www.intel.com/content/www/us/en/developer/tools/oneapi/oneapi-toolkit.html
-
----
-
-## REAS
-
-NIES REAS:
-https://www.nies.go.jp/REAS/
-
-REAS는 버전별 자료기간, species, grid, format이 다를 수 있으므로 실제 사용자료를 확인한 뒤 별도 문서에서 처리방법을 기록한다.
-
----
-
-# 25. 향후 추가 조사 대상
-
-다음 항목은 기존 운영 시스템 확인 후 확정한다.
-
-- 기존 운영 시스템의 실제 Linux 배포판 및 compiler family(신규 구축 환경은 Rocky Linux 9.8, GNU 11.5.0으로 확인됨)
-- WRF version
-- CMAQ version
-- SMOKE version
-- chemical mechanism
-- aerosol module
-- meteorological input
-- FNL/GFS/ERA5 사용 여부
-- CAPSS 기준연도
-- REAS version
-- MEGAN/BEIS 사용 여부
-- 화재배출 처리 여부
-- 선박 배출원
-- sea salt 처리
-- windblown dust 처리
-- IC/BC 생성방법
-- CMAQ nesting 여부
-- ISAM tag 체계
-- 후처리 도구
-- 자동화 방식
-- 저장공간 및 backup 체계
-
----
-
-# 26. 성공 기준
-
-본 프로젝트는 다음 조건을 만족할 때 기본 구축이 완료된 것으로 본다.
-
-1. Linux 시스템에서 WRF/WPS를 정상 compile 및 실행할 수 있다.
-2. WRF 결과를 MCIP로 정상 변환할 수 있다.
-3. SMOKE example case를 실행할 수 있다.
-4. CMAQ official benchmark를 reference 수준으로 재현할 수 있다.
-5. 실제 동아시아/부산 domain의 WRF-CMAQ base case를 실행할 수 있다.
-6. CAPSS 국내 배출량을 CMAQ input으로 사용할 수 있다.
-7. REAS 국외 배출량을 CMAQ input으로 사용할 수 있다.
-8. 식생배출을 정상 반영할 수 있다.
-9. ISAM을 이용해 지역/배출원 기여도를 계산할 수 있다.
-10. 관측자료와 모델 결과를 비교할 수 있다.
-11. case별 반복 실행이 가능한 구조를 갖춘다.
-12. 전체 설치·실행·오류·수정 이력이 문서화되어 있다.
-
----
-
-# 27. 프로젝트 운영 원칙
-
-이 문서는 프로젝트의 최상위 기준 문서로 사용한다.
-
-세부 설치 및 분석이 진행되면 다음 사항을 지속적으로 업데이트한다.
-
-- 확정된 버전
-- 실제 사용 명령어
-- 실제 directory path
-- 실제 compiler option
-- 기존 시스템에서 확인된 설정
-- 변경한 설정
-- benchmark 결과
-- 오류와 해결방법
-- 실제 case run 결과
-
-기존 운영 시스템의 스크립트와 자료는 가능한 한 그대로 분석하되,
-단순 복사보다는 각 단계의 역할과 의존성을 이해하여 신규 시스템에 재현 가능한 형태로 정리한다.
