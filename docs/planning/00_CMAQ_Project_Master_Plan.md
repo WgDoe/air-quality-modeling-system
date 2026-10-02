@@ -894,6 +894,18 @@ ncdump -h filename.nc
 
 # 22. 단계별 구축 계획
 
+## 현재 진행상황 (2026-10-02)
+
+실제 설치 명령과 확인 결과는 [공통 라이브러리 구축 기록](../libraries/Common_Libraries_Installation_Guide.md)을 기준으로 한다.
+
+- **Phase 2 완료**: GNU GCC/GFortran 11.5.0 및 OpenMPI 설치·동작 확인, 시스템 zlib 확인, HDF5 1.14.6, netCDF-C 4.9.3, netCDF-Fortran 4.6.2 설치·검증 완료.
+- **I/O API 3.2-20200828 완료**: `Linux2_x86_64gfort10`, `nocpl`, OpenMP 미사용 구성으로 라이브러리·모듈·M3TOOLS 빌드와 링크·실행 테스트 완료. 환경변수 등록 및 경로 확인 완료.
+- I/O API 라이브러리·모듈·실행파일: `/home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/Linux2_x86_64gfort10`.
+- I/O API include: `/home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/ioapi/fixed_src`.
+- **다음 단계: Phase 3 WRF/WPS**. 버전과 상세 빌드 설정은 후속 단계에서 확인한다. 현재 기록은 WRF/WPS 또는 CMAQ 실행 완료를 의미하지 않는다.
+
+아래 Phase 목록은 전체 구축 계획이며, 이후 단계의 완료 기록이 아니다.
+
 ## Phase 0. 기존 시스템 조사
 
 - 기존 운영 Linux 시스템 정보 수집
@@ -969,7 +981,15 @@ ncdump -h filename.nc
 
 # 23. 프로젝트 산출물
 
-최종 산출물은 다음과 같이 구성한다.
+아래 목록은 계획 당시 산출물명이다. 현재 작성된 설치 가이드는 번호 없는 설명형 파일명을 사용하며, 향후 문서명은 작성 시 확정한다.
+
+| 계획 당시 산출물명 | 현재 저장소 문서 |
+|---|---|
+| `01_Linux_Workstation_Setup.md` | [Rocky Linux 설치 가이드](../linux/Rocky_Linux_Installation_Guide.md) |
+| `02_GNU_Compiler_MPI_Setup.md` | [GNU Compiler 및 OpenMPI 설치 가이드](../compiler/GNU_Compiler_OpenMPI_Installation_Guide.md) |
+| `03_NetCDF_HDF5_IOAPI_Setup.md` | [공통 라이브러리 구축 기록](../libraries/Common_Libraries_Installation_Guide.md) |
+
+계획 당시 전체 산출물 목록:
 
 ```text
 00_CMAQ_Project_Master_Plan.md
@@ -1150,8 +1170,7 @@ REAS는 버전별 자료기간, species, grid, format이 다를 수 있으므로
 
 다음 항목은 기존 운영 시스템 확인 후 확정한다.
 
-- 실제 Linux 배포판
-- compiler family
+- 기존 운영 시스템의 실제 Linux 배포판 및 compiler family(신규 구축 환경은 Rocky Linux 9.8, GNU 11.5.0으로 확인됨)
 - WRF version
 - CMAQ version
 - SMOKE version
