@@ -28,13 +28,26 @@ I/O API 3.2-20200828
 - OpenMPI 설치 및 동작 확인
 - CPU 코어 확인: `nproc` → 4
 
-기본 디렉터리 구조:
+현재 구축 디렉터리의 최소 구조(2026-10-03):
 
 ```text
 /home/woogon/CMAQ_MODEL/
-├── libs/       # 설치된 라이브러리
-└── src/        # 다운로드 및 압축해제한 소스
+├── libs/
+│   ├── HDF5-1.14.6/
+│   ├── netCDF-C-4.9.3/
+│   ├── netCDF-Fortran-4.6.2/
+│   ├── netCDF-WRF/
+│   ├── grib2/
+│   └── ioapi-3.2-20200828/
+├── src/
+│   ├── grib2/
+│   ├── v4.5.1.tar.gz
+│   └── WPS-4.5.tar.gz
+├── WRFV4.5.1/
+└── WPS-4.5/
 ```
+
+`src/`는 원본 소스·압축파일 및 라이브러리 빌드용 소스 보관용이다. 아래 HDF5/netCDF 빌드에 사용한 소스 디렉터리 등은 최소 구조에서 생략했다. 실제 컴파일된 모델 본체는 프로젝트 루트의 버전별 폴더에 둔다.
 
 HDF5와 netCDF는 소스와 설치 결과를 분리하고 라이브러리 디렉터리명에는 정확한 버전을 표시한다. I/O API는 7.1절과 같이 `libs/` 아래에서 직접 빌드했다.
 
@@ -709,6 +722,8 @@ include               : /home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/ioapi/fi
 
 ## 8. 환경변수 등록
 
+이 문서의 netCDF 빌드 단계에서 사용한 `HDF5`, `NETCDF`는 당시의 빌드용 변수이다. 이후 WRF configure에서는 `HDF5_PATH=$CMAQ_LIBS/HDF5-1.14.6`과 `NETCDF=$CMAQ_LIBS/netCDF-WRF`를 사용한다. netCDF 빌드 때 남은 `HDF5` 변수는 WRF의 다른 I/O 기능을 활성화하므로 WRF 빌드 shell에서 해제하고, 상세 설정은 [WRF/WPS 구축 기록](../wrf/WRF_WPS_Installation_Guide.md) §5.6, §8.4, §12를 따른다.
+
 매 터미널마다 경로를 다시 지정하지 않도록 `~/.bashrc`에 등록했다.
 
 ```bash
@@ -787,7 +802,7 @@ IOAPI_INCL_DIR = /home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/ioapi/fixed_src
 IOAPI_LIB_DIR  = /home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/Linux2_x86_64gfort10
 ```
 
-이로써 Phase 2(Compiler 및 공통 library) 구축을 완료했다. 다음 구축 대상은 **Phase 3 WRF/WPS**이다.
+이로써 Phase 2(Compiler 및 공통 library) 구축을 완료했다. 후속 Phase 3의 현재 상태는 **WRF 4.5.1 / WPS 4.5 설치·컴파일·동적 라이브러리 연결 확인 완료, 실제 입력자료 실행검증 미완료**이다. 다음 작업은 WPS_GEOG와 실제 기상자료를 준비하여 `geogrid → ungrib → metgrid → real.exe → wrf.exe` 전체 실행을 검증하는 것이다.
 
 ## 10. 검토 근거 및 관련 문서
 
@@ -798,4 +813,4 @@ IOAPI_LIB_DIR  = /home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/Linux2_x86_64gf
 - [Makeinclude.Linux2_x86_64gfort10](https://github.com/cjcoats/ioapi-3.2/blob/20200828/ioapi/Makeinclude.Linux2_x86_64gfort10)
 - [구축 기본계획 및 Phase 현황](../planning/00_CMAQ_Project_Master_Plan.md)
 
-WRF/WPS 버전과 상세 빌드 설정은 아직 이 설치 기록에서 확정하지 않았다.
+WRF/WPS 버전·빌드 설정 및 오류 해결의 상세 기준은 [WRF/WPS 구축 기록](../wrf/WRF_WPS_Installation_Guide.md)이다. WRF용 `netCDF-WRF` 통합 링크(§5), GRIB2 라이브러리(§6), basic nesting의 `landread.c.dist` 대체와 moving nest 재검토(§8.6), warning 103건 및 실제 test run 검증 예정(§9.3), WPS 명령에 한정한 `MPI_LIB=` 처리(§11.5)는 해당 문서에서 관리한다.

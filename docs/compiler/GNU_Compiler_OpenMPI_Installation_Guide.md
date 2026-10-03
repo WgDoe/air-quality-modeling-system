@@ -335,6 +335,8 @@ mpifort --showme:command
 
 `--showme:command`로 C wrapper가 `gcc`, Fortran wrapper가 `gfortran`을 사용하는지 확인한다. 이는 [OpenMPI 공식 wrapper 문서](https://docs.open-mpi.org/en/v5.0.0/man-openmpi/man1/ompi-wrapper-compiler.1.html)의 확인 방법이다. 모델을 컴파일하거나 실행하는 새 shell에서도 동일한 MPI module을 활성화한다.
 
+WRF/WPS 설치에서 이 module이 설정한 `MPI_LIB=/usr/lib64/openmpi/lib`가 WPS serial 빌드의 Makefile 변수와 충돌했다. WPS 컴파일은 `LC_ALL=C MPI_LIB= ./compile`로 해당 명령에만 빈 값을 적용한다. `MPI_LIB=`를 `.bashrc`에 전역 등록하거나 MPI module을 해제하지 않는다. 상세 원인과 재컴파일 절차는 [WRF/WPS 구축 기록](../wrf/WRF_WPS_Installation_Guide.md) §11.5를 참조한다.
+
 확인된 경로 예:
 
 ```text
@@ -455,6 +457,8 @@ MPI 병렬 프로그램에서는 각 process의 출력 순서가 항상 0, 1, 2,
 출력 순서가 달라도 각 rank가 모두 실행되면 정상이다.
 
 ---
+
+WRF 4.5.1과 WPS 4.5는 설치·컴파일·동적 라이브러리 연결 확인 완료, 실제 입력자료 실행검증 미완료이다. 이 문서의 MPI 테스트 성공은 WPS_GEOG 및 실제 기상자료를 이용한 `geogrid → ungrib → metgrid → real.exe → wrf.exe` 전체 실행 검증을 뜻하지 않는다.
 
 # 11. 현재 검증된 환경
 

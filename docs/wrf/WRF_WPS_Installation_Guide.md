@@ -39,7 +39,7 @@ WPS 4.5 configure / compile
 
 디렉터리 구조:
 
-[구축 기본계획](../planning/00_CMAQ_Project_Master_Plan.md) §4.2의 구조에 따라 모델 본체는 `src/`가 아닌 프로젝트 루트 아래에 별도 폴더로 둔다. 폴더명에는 버전을 표시한다.
+[구축 기본계획](../planning/00_CMAQ_Project_Master_Plan.md) §4.2의 현재 구축 구조에 따라 `src/`에는 원본 소스·압축파일 및 라이브러리 빌드용 소스를 보관하고, 실제 컴파일된 모델 본체는 프로젝트 루트 아래의 버전별 폴더에 둔다. 아래는 현재 최소 구조이며, 기존 라이브러리 소스·로그 등의 경로는 생략했다.
 
 ```text
 /home/woogon/CMAQ_MODEL/
@@ -831,6 +831,7 @@ metgrid.exe -> metgrid/src/metgrid.exe
 ungrib.exe -> ungrib/src/ungrib.exe
 ```
 
+- 동적 라이브러리 연결 확인에서 `not found`: 없음
 - 재컴파일 로그에서 오류 메시지 없음
 - geogrid 링크 명령 끝의 `/usr/lib64/openmpi/lib` 제거 확인
 - `ungrib.exe`는 `-L/home/woogon/CMAQ_MODEL/libs/grib2/lib -ljasper -lpng -lz`로 GRIB2 라이브러리 연결
