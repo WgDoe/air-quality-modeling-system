@@ -226,8 +226,8 @@ MCIP/CMAQ가 처리 가능한 WRF/WPS 버전 결정
 | CMAQ | 5.5 (태그 `CMAQv5.5.0.3_11Jul2025`) | 기준 모델. 현재 공개된 5.5 계열 최신 bugfix 태그이며 GitHub Releases에서는 pre-release로 표시됨. 문서·benchmark 자료는 v5.5 기준 |
 | MCIP | CMAQ 5.5.0.3 포함 버전 | `PREP/mcip` |
 | ICON/BCON 등 전처리 | CMAQ 5.5.0.3 포함 버전 | `PREP/` |
-| WRF | 4.5.1 (태그 `v4.5.1`) | WRF-CMAQv5.5 결합 호환범위(4.4~4.5.1)의 상한. 설치·컴파일·동적 라이브러리 연결 확인 완료, 실제 입력자료 실행검증 미완료 |
-| WPS | 4.5 (태그 `v4.5`) | WPS는 4.5.1 태그가 없으며 WRF 4.5.x와 짝을 이루는 버전. 설치·컴파일·동적 라이브러리 연결 확인 완료, 실제 입력자료 실행검증 미완료 |
+| WRF | 4.5.1 (태그 `v4.5.1`) | WRF-CMAQv5.5 결합 호환범위(4.4~4.5.1)의 상한. 설치·컴파일·라이브러리 연결 확인 완료, WPS_GEOG 및 실제 입력자료 기반 실행 검증 미완료 |
+| WPS | 4.5 (태그 `v4.5`) | WPS는 4.5.1 태그가 없으며 WRF 4.5.x와 짝을 이루는 버전. 설치·컴파일·라이브러리 연결 확인 완료, WPS_GEOG 및 실제 입력자료 기반 실행 검증 미완료 |
 | I/O API | 3.2-20200828 | CMAQ v5.5 공식 문서에서 tested/stable version으로 제시되는 버전. 설치 완료 |
 | netCDF-C / netCDF-Fortran | 4.9.3 / 4.6.2 | 설치 완료. CMAQ 5.5는 C/Fortran 경로를 별도 변수로 지정 가능 |
 | HDF5 | 1.14.6 | 설치 완료 |
@@ -294,12 +294,16 @@ git clone -b CMAQv5.5.0.3_11Jul2025 https://github.com/USEPA/CMAQ.git CMAQ_REPO
 │   ├── v4.5.1.tar.gz
 │   └── WPS-4.5.tar.gz
 ├── WRFV4.5.1/
-└── WPS-4.5/
+├── WPS-4.5/
+├── DATA/                    # 자료 경로 (준비 완료 여부 미확인)
+│   ├── WPS_GEOG/            # 정적 지형자료
+│   └── MET/                 # 기상 입력자료
+└── CASES/                   # 사례별 실행 경로 (생성·실행 미완료)
 ```
 
-위 구조는 2026-10-03 현재 구축된 최소 구조이다. `src/`는 원본 소스·압축파일 및 라이브러리 빌드용 소스 보관용이며, 실제 컴파일된 모델 본체는 프로젝트 루트의 `WRFV4.5.1/`, `WPS-4.5/`에 둔다. 라이브러리 설치 결과는 `libs/`에 두고 I/O API의 직접 빌드 구조는 유지한다.
+위 구조는 2026-10-03 확인된 설치 구조에 합의된 DATA/CASES 사용 경로를 반영한 것이다(2026-10-04 문서 정리). DATA/CASES의 폴더 생성 및 자료 준비 완료를 의미하지 않는다. `src/`는 원본 소스·압축파일 및 라이브러리 빌드용 소스 보관용이며, 실제 컴파일된 모델 본체는 프로젝트 루트의 `WRFV4.5.1/`, `WPS-4.5/`에 둔다. 라이브러리 설치 결과는 `libs/`에 두고 I/O API의 직접 빌드 구조는 유지한다.
 
-운영 과정에서 모델 프로그램과 지형·기상자료, case input/output을 분리한다. WPS_GEOG, 기상자료, 사례별 실행폴더의 저장 위치는 아직 확정하지 않았다. 향후 별도 자료·사례 경로를 정한 뒤 §19와 실행 문서에 기록한다. 기존 `/MODELS`, `/DATA`, `/CASES`는 계획 당시 역할 구분 예시였으며 현재 실제 설치 경로로 사용하지 않는다.
+운영 과정에서 모델 프로그램과 지형·기상자료, case input/output을 분리한다. WPS_GEOG, 기상자료, 사례별 실행폴더의 사용 경로는 `/home/woogon/CMAQ_MODEL/DATA/WPS_GEOG`, `DATA/MET`, `CASES/<case_name>`로 정했다. 폴더 생성 및 자료 준비 완료 여부는 확인되지 않았고 사례 실행 검증은 미완료이다. 사례 구조는 §19를 따르며, 자료 준비·실행 결과는 향후 실행 문서에 기록한다. 기존 `/MODELS`, `/DATA`, `/CASES`는 계획 당시 역할 구분 예시였으며 현재 실제 설치 경로로 사용하지 않는다.
 
 ---
 
@@ -503,12 +507,12 @@ wrfout_d02_*
 - 빌드 스크립트용 `tcsh`(csh)를 설치하고 `perl`, `m4`를 확인했다.
 - CMAQ 연계를 고려하여 PX LSM, ACM2 PBL 등 CMAQ 권장 물리옵션 조합을 우선 검토한다.
 
-현재 상태: **WRF 4.5.1 / WPS 4.5 설치·컴파일·동적 라이브러리 연결 확인 완료, 실제 입력자료 실행검증 미완료**. WRF는 GNU dmpar, basic nesting으로, WPS는 GNU serial, GRIB2 지원으로 빌드했다. WPS_GEOG 및 실제 기상자료를 이용한 전체 실행 검증이 다음 작업이다.
+현재 상태: **WRF 4.5.1 / WPS 4.5 설치·컴파일·라이브러리 연결 확인 완료, WPS_GEOG 및 실제 입력자료 기반 실행 검증 미완료**. WRF는 GNU dmpar, basic nesting으로, WPS는 GNU serial, GRIB2 지원으로 빌드했다. WPS_GEOG 및 실제 기상자료를 이용한 전체 실행 검증이 다음 작업이다.
 
-설치 시 확인한 중요 사항(상세 기록: [WRF/WPS 구축 기록](../wrf/WRF_WPS_Installation_Guide.md)):
+설치 시 확인한 중요 사항(상세 기록: [WRF/WPS 설치 가이드](../wrf/WRF_WPS_Installation_Guide.md)):
 
-- §8.6: `landread.c.dist` 대체는 현재 basic nesting에서 허용하며, 향후 moving nest 사용 시 RPC/TIRPC 및 원본 `landread.c` 사용 여부를 재검토한다.
-- §9.3: WRF warning 103건은 실행파일 생성에 영향을 주지 않았고 fatal/link 오류는 없었다. 실제 test run으로 최종 검증 예정이다.
+- §10.3: `landread.c.dist` 대체는 현재 basic nesting에서 허용하며, 향후 moving nest 사용 시 RPC/TIRPC 및 원본 `landread.c` 사용 여부를 재검토한다.
+- §10.7: WRF warning 103건은 실행파일 생성에 영향을 주지 않았고 fatal/link 오류는 확인되지 않았다. 최종 동작 여부는 실제 테스트 case 실행으로 검증한다.
 - §11.5: OpenMPI module의 `MPI_LIB`가 WPS 링크 명령과 충돌하여 `LC_ALL=C MPI_LIB= ./compile`로 해결했다. `MPI_LIB=`는 WPS compile 명령에만 적용하고 전역 MPI 환경은 유지한다.
 
 ---
@@ -848,10 +852,10 @@ ISAM이 source contribution을 계산하는 데 비해 DDM-3D는 배출량 변�
 
 최종 시스템은 프로그램별 설치폴더와 사례별 실행폴더를 분리한다.
 
-아래는 향후 사례폴더의 내부 구조 예시이며, 실제 생성·실행 완료 기록이 아니다. 상위 저장 경로는 §4.2에 따라 별도 확정한다.
+아래는 향후 사례폴더의 내부 구조 예시이며, 실제 생성·실행 완료 기록이 아니다. 상위 저장 경로는 §4.2의 `/home/woogon/CMAQ_MODEL/CASES`를 사용한다.
 
 ```text
-<사례 저장 경로>
+/home/woogon/CMAQ_MODEL/CASES
     /CASE_202307_O3
         /config
         /WPS
@@ -977,16 +981,16 @@ ncdump -h filename.nc
 
 # 22. 단계별 구축 계획
 
-## 현재 진행상황 (2026-10-03)
+## 현재 진행상황 (설치 확인: 2026-10-03, 문서 정리: 2026-10-04)
 
-실제 설치 명령과 확인 결과는 [공통 라이브러리 구축 기록](../libraries/Common_Libraries_Installation_Guide.md) 및 [WRF/WPS 구축 기록](../wrf/WRF_WPS_Installation_Guide.md)을 기준으로 한다.
+실제 설치 명령과 확인 결과는 [공통 라이브러리 구축 기록](../libraries/Common_Libraries_Installation_Guide.md) 및 [WRF/WPS 설치 가이드](../wrf/WRF_WPS_Installation_Guide.md)을 기준으로 한다.
 
 - **Phase 2 완료**: GNU GCC/GFortran 11.5.0 및 OpenMPI 설치·동작 확인, 시스템 zlib 확인, HDF5 1.14.6, netCDF-C 4.9.3, netCDF-Fortran 4.6.2 설치·검증 완료.
 - **I/O API 3.2-20200828 완료**: `Linux2_x86_64gfort10`, `nocpl`, OpenMP 미사용 구성으로 라이브러리·모듈·M3TOOLS 빌드와 링크·실행 테스트 완료. 환경변수 등록 및 경로 확인 완료.
 - I/O API 라이브러리·모듈·실행파일: `/home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/Linux2_x86_64gfort10`.
 - I/O API include: `/home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/ioapi/fixed_src`.
 - **모델 버전 확정 (2026-10-03)**: CMAQ 5.5(`CMAQv5.5.0.3_11Jul2025`)를 기준으로 MCIP(CMAQ 포함), WRF 4.5.1, WPS 4.5로 결정. 상세 기준은 §3.5.
-- **Phase 3 설치 확인 완료**: WRF 4.5.1 / WPS 4.5 설치·컴파일·동적 라이브러리 연결 확인 완료, 실제 입력자료 실행검증 미완료. 모델 본체 경로는 §4.2, 상세 빌드·오류 해결은 WRF/WPS 구축 기록을 참조한다.
+- **Phase 3 설치 확인 완료**: WRF 4.5.1 / WPS 4.5 설치·컴파일·라이브러리 연결 확인 완료, WPS_GEOG 및 실제 입력자료 기반 실행 검증 미완료. 모델 본체 경로는 §4.2, 상세 빌드·오류 해결은 WRF/WPS 설치 가이드를 참조한다.
 - **다음 작업**: WPS_GEOG 및 실제 기상자료 준비 후 `geogrid → ungrib → metgrid → real.exe → wrf.exe` 전체 실행 검증. 성공 후 Phase 3 완료로 기록하고 MCIP(Phase 4)로 이어간다. 현재 기록은 WRF/WPS 또는 CMAQ 실행 완료를 의미하지 않는다.
 
 아래 Phase 목록은 전체 구축 계획이며, 이후 단계의 완료 기록이 아니다.
@@ -1026,8 +1030,8 @@ ncdump -h filename.nc
 | 항목 | 현재 상태 |
 |---|---|
 | netCDF 통합 링크, libpng 1.2.50, JasPer 1.900.1 | 구성·설치 완료 |
-| WRF 4.5.1 | 설치·컴파일·동적 라이브러리 연결 확인 완료, 실제 입력자료 실행검증 미완료 |
-| WPS 4.5 | 설치·컴파일·동적 라이브러리 연결 확인 완료, 실제 입력자료 실행검증 미완료 |
+| WRF 4.5.1 | 설치·컴파일·라이브러리 연결 확인 완료, WPS_GEOG 및 실제 입력자료 기반 실행 검증 미완료 |
+| WPS 4.5 | 설치·컴파일·라이브러리 연결 확인 완료, WPS_GEOG 및 실제 입력자료 기반 실행 검증 미완료 |
 | WPS_GEOG 및 실제 기상자료 준비 | 미완료 |
 | `geogrid → ungrib → metgrid → real.exe → wrf.exe` 전체 실행 검증 | 미완료 |
 | official test / 동아시아 domain test | 미완료 |
@@ -1081,7 +1085,7 @@ ncdump -h filename.nc
 | `01_Linux_Workstation_Setup.md` | [Rocky Linux 설치 가이드](../linux/Rocky_Linux_Installation_Guide.md) |
 | `02_GNU_Compiler_MPI_Setup.md` | [GNU Compiler 및 OpenMPI 설치 가이드](../compiler/GNU_Compiler_OpenMPI_Installation_Guide.md) |
 | `03_NetCDF_HDF5_IOAPI_Setup.md` | [공통 라이브러리 구축 기록](../libraries/Common_Libraries_Installation_Guide.md) |
-| `04_WRF_WPS_Install.md` | [WRF/WPS 구축 기록](../wrf/WRF_WPS_Installation_Guide.md) |
+| `04_WRF_WPS_Install.md` | [WRF/WPS 설치 가이드](../wrf/WRF_WPS_Installation_Guide.md) |
 
 계획 당시 전체 산출물 목록:
 
