@@ -47,6 +47,8 @@ I/O API 3.2-20200828
 └── WPS-4.5/
 ```
 
+위 구조는 공통 라이브러리 구축 단계의 경로만 표시한다. 현재 모델 본체·DATA·CASES·SCRIPTS를 포함한 전체 구조는 [기본계획 §4.2](../planning/00_CMAQ_Project_Master_Plan.md)를 따른다. 이 문서의 `logs/ioapi`는 라이브러리 빌드 로그 보관 경로이며 CASE의 `LOG` 및 `WRF/rsl.*`와 용도가 다르다.
+
 `src/`는 원본 소스·압축파일 및 라이브러리 빌드용 소스 보관용이다. 아래 HDF5/netCDF 빌드에 사용한 소스 디렉터리 등은 최소 구조에서 생략했다. 실제 컴파일된 모델 본체는 프로젝트 루트의 버전별 폴더에 둔다.
 
 HDF5와 netCDF는 소스와 설치 결과를 분리하고 라이브러리 디렉터리명에는 정확한 버전을 표시한다. I/O API는 7.1절과 같이 `libs/` 아래에서 직접 빌드했다.
@@ -802,7 +804,7 @@ IOAPI_INCL_DIR = /home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/ioapi/fixed_src
 IOAPI_LIB_DIR  = /home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/Linux2_x86_64gfort10
 ```
 
-이로써 Phase 2(Compiler 및 공통 library) 구축을 완료했다. 후속 Phase 3의 현재 상태는 **WRF 4.5.1 / WPS 4.5 설치·컴파일·라이브러리 연결 확인 완료, WPS_GEOG 및 실제 입력자료 기반 실행 검증 미완료**이다. 다음 작업은 WPS_GEOG와 실제 기상자료를 준비하여 `geogrid → ungrib → metgrid → real.exe → wrf.exe` 전체 실행을 검증하는 것이다.
+이로써 Phase 2(Compiler 및 공통 library) 구축을 완료했다. 후속 Phase 3은 실제 FNL 사례의 WPS·real.exe와 WRF 실행 및 wrfout 생성에 성공했다(2026-10-08 사용자 확인). 현재 WRF는 오류 없이 실행 중이며, 모의 종료 후 최종 시각을 확인하고 MCIP 구축·입력 변환으로 이어간다. 절차는 [WRF/WPS 설치·실행 가이드](../wrf/WRF_WPS_Installation_Guide.md) §14를 따른다.
 
 ## 10. 검토 근거 및 관련 문서
 
