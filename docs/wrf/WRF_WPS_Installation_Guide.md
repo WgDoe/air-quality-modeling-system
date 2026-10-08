@@ -25,7 +25,7 @@ Rocky Linux 기반 CMAQ 통합 대기질 모델링 시스템의 Phase 3(WRF/WPS)
 11장 WPS 4.5   (다운로드 → configure → compile → 확인)
 ```
 
-현재 상태(2026-10-04 문서 정리 기준): **WRF 4.5.1 / WPS 4.5 설치·컴파일·라이브러리 연결 확인 완료, WPS_GEOG 및 실제 입력자료 기반 실행 검증 미완료.** 지형자료 다운로드·압축 해제 완료 여부는 확인되지 않았으며, 테스트 사례 실행은 아직 수행하지 않았다.
+현재 상태(2026-10-08 사용자 제공 실행 기록 기준): **설치·컴파일 확인 완료. TEST_20260901의 WPS와 real.exe 성공, WRF 4코어 계산 진행 확인; 최종 정상 종료는 미확인**. 설치는 아래 절차, 자료 준비·namelist·실행·출력 확인은 [사례 실행 가이드](WRF_WPS_Case_Run.md)를 따른다.
 
 ## 2. 구축 환경
 
@@ -50,28 +50,28 @@ Rocky Linux 기반 CMAQ 통합 대기질 모델링 시스템의 Phase 3(WRF/WPS)
 
 ```text
 /home/woogon/CMAQ_MODEL/
-├── libs/
-│   ├── HDF5-1.14.6/
-│   ├── netCDF-C-4.9.3/
-│   ├── netCDF-Fortran-4.6.2/
-│   ├── netCDF-WRF/          # WRF용 netCDF 통합 링크 디렉터리 (7장)
-│   ├── grib2/               # libpng, JasPer 설치 결과 (8장)
-│   └── ioapi-3.2-20200828/
-├── src/
-│   ├── grib2/               # libpng, JasPer 소스
-│   ├── v4.5.1.tar.gz        # WRF 4.5.1 릴리스 파일
-│   └── WPS-4.5.tar.gz       # WPS 4.5 소스
-├── WRFV4.5.1/               # WRF 본체 (10장)
-├── WPS-4.5/                 # WPS 본체 (11장)
-├── DATA/                    # 자료 경로 (준비 완료 여부 미확인)
+├── libs/                    # 공통 라이브러리, netCDF-WRF, grib2
+├── src/                     # 원본 압축파일·라이브러리 빌드 소스
+├── WRFV4.5.1/               # 컴파일된 WRF 본체
+├── WPS-4.5/                 # 컴파일된 WPS 본체
+├── DATA/
 │   ├── WPS_GEOG/            # 정적 지형자료
-│   └── MET/                 # 기상 입력자료
-└── CASES/                   # 사례별 실행 경로 (생성·실행 미완료)
+│   └── MET/FNL/YYYY/MM/     # ds083.2 1도 GRIB2, 6시간 간격
+├── CASES/BUSAN/TEST_20260901/
+│   ├── WPS/
+│   ├── WRF/
+│   ├── MCIP/
+│   ├── EMIS/
+│   ├── CMAQ/
+│   ├── POST/
+│   └── LOG/
+└── SCRIPTS/
+    └── download_fnl.sh
 ```
 
 ---
 
-위 자료·사례 경로는 합의된 사용 구조이며, 폴더 생성이나 자료 준비 완료를 의미하지 않는다. 모델 설치 확인과 자료·실행 검증 상태를 구분한다.
+실제 경로와 역할은 [디렉터리 구조](../planning/Directory_Structure.md)를 기준으로 한다. CASE 하위 폴더 존재는 MCIP/CMAQ 실행 완료를 의미하지 않는다.
 
 ## 3. 버전 확정
 
@@ -113,7 +113,7 @@ LC_ALL=C ./compile ...
 
 화면에 보여주면서 동시에 파일에 저장한다. `2>&1`은 오류 메시지까지 함께 저장한다.
 
-> **참고: 예외** WPS configure처럼 **번호 입력을 받는 명령**에는 `tee`를 쓰지 않는다(11.3). 로그가 꼭 필요하면 `script -q -c "명령어" 로그파일이름`을 사용한다.
+> **참고: 예외** WRF 사례 실행은 별도 `wrf.log` 없이 `rsl.error.*` / `rsl.out.*`를 사용한다. WPS configure처럼 **번호 입력을 받는 명령**에는 `tee`를 쓰지 않는다(11.3). 로그가 꼭 필요하면 `script -q -c "명령어" 로그파일이름`을 사용한다.
 
 ### 4.3 configure 이후 `configure.wrf`는 직접 수정하지 않는다
 
@@ -563,7 +563,7 @@ libmpi.so.40      => /usr/lib64/openmpi/lib/libmpi.so.40
 
 netCDF와 HDF5가 시스템의 다른 라이브러리가 아닌 **프로젝트 `libs/`의 라이브러리**에 연결되어 있어야 한다.
 
-**상태: WRF 4.5.1 설치·컴파일·라이브러리 연결 확인 완료, WPS_GEOG 및 실제 입력자료 기반 실행 검증 미완료 (컴파일 확인: 2026-10-03)**
+**상태: WRF 4.5.1 설치·컴파일 확인 완료. TEST_20260901의 WPS와 real.exe 성공, WRF 4코어 계산 진행 확인; 최종 정상 종료는 미확인 (컴파일 확인: 2026-10-03)**
 
 ---
 
@@ -688,7 +688,7 @@ ungrib.exe -> ungrib/src/ungrib.exe
 
 두 번째와 세 번째 명령은 아무것도 출력하지 않아야 한다.
 
-**상태: WPS 4.5 설치·컴파일·라이브러리 연결 확인 완료, WPS_GEOG 및 실제 입력자료 기반 실행 검증 미완료 (컴파일 확인: 2026-10-03)**
+**상태: WPS 4.5 설치·컴파일 확인 완료. TEST_20260901의 WPS와 real.exe 성공, WRF 4코어 계산 진행 확인; 최종 정상 종료는 미확인 (컴파일 확인: 2026-10-03)**
 
 ---
 
@@ -741,18 +741,16 @@ export LD_LIBRARY_PATH=$CMAQ_LIBS/grib2/lib:$LD_LIBRARY_PATH
 | libpng | 1.2.50 | `libs/grib2` | - | 설치 완료 |
 | JasPer | 1.900.1 | `libs/grib2` | - | 설치 완료 |
 | netCDF 통합 링크 | 4.9.3 / 4.6.2 | `libs/netCDF-WRF` | - | 구성 완료 |
-| WRF | 4.5.1 | `WRFV4.5.1` | `wrf.exe`, `real.exe`, `ndown.exe`, `tc.exe` | 설치·컴파일·라이브러리 연결 확인 완료, WPS_GEOG 및 실제 입력자료 기반 실행 검증 미완료 |
-| WPS | 4.5 | `WPS-4.5` | `geogrid.exe`, `ungrib.exe`, `metgrid.exe` | 설치·컴파일·라이브러리 연결 확인 완료, WPS_GEOG 및 실제 입력자료 기반 실행 검증 미완료 |
+| WRF | 4.5.1 | `WRFV4.5.1` | `wrf.exe`, `real.exe`, `ndown.exe`, `tc.exe` | 설치·컴파일 확인 완료. TEST_20260901의 WPS와 real.exe 성공, WRF 4코어 계산 진행 확인; 최종 정상 종료는 미확인 |
+| WPS | 4.5 | `WPS-4.5` | `geogrid.exe`, `ungrib.exe`, `metgrid.exe` | 설치·컴파일 확인 완료. TEST_20260901의 WPS와 real.exe 성공, WRF 4코어 계산 진행 확인; 최종 정상 종료는 미확인 |
 
-Phase 3(WRF/WPS)의 현재 상태는 **설치·컴파일·라이브러리 연결 확인 완료, WPS_GEOG 및 실제 입력자료 기반 실행 검증 미완료**이다. WPS_GEOG 준비 완료 여부는 확인되지 않았으며, Phase 3 전체 완료는 실제 테스트 case 실행 후 판단한다.
+Phase 3은 WPS·real.exe 성공 및 WRF 계산 진행까지 확인했다. 최종 정상 종료는 미확인이므로 전체 완료로 기록하지 않는다.
 
-## 14. 다음 단계
+## 14. 실행 및 다음 단계
 
-1. 정적 지형자료(WPS_GEOG, 고해상도 필수 자료) 다운로드 및 압축 해제. 저장 위치: `/home/woogon/CMAQ_MODEL/DATA/WPS_GEOG` (준비 완료 여부 미확인)
-2. 테스트 사례용 기상자료(GFS 또는 ERA5)를 `/home/woogon/CMAQ_MODEL/DATA/MET`에 준비
-3. 사례별 실행폴더 구성: `/home/woogon/CMAQ_MODEL/CASES/<case_name>`에서 실행(기본계획 §19, 사례 폴더 생성·실행 미완료)
-4. `geogrid.exe` → `ungrib.exe` → `metgrid.exe` → `real.exe` → `wrf.exe` 순서로 실제 입력자료 테스트 실행. GRIB2 입력 처리, `FILE:*` 중간파일 생성, WRF 정상 종료 및 `wrfout` 출력을 확인한 뒤 Phase 3 실행 검증 완료로 기록
-5. 실제 입력자료 실행 검증 완료 후 WRF 출력(`wrfout`)을 MCIP 입력으로 사용(Phase 4)
+[WRF/WPS 사례 실행 가이드](WRF_WPS_Case_Run.md)에서 FNL 준비, MODIS 21 category, geogrid → ungrib → metgrid, real.exe 산출물 확인, runtime data 선별 링크, dmpar 4코어 실행 및 로그 확인을 설명한다. [GHG 오류 기록](WRF_GHG_Error_Fix.md)은 이 실행 절차의 문제 해결 참고 문서다.
+
+다음 단계는 WRF 정상 종료와 출력 시각 확인, 이어서 MCIP 입력 변환 검증이다.
 
 ---
 
