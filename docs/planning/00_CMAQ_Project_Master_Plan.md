@@ -1019,7 +1019,7 @@ ncdump -h filename.nc
 | `geogrid → ungrib → metgrid → real.exe → wrf.exe` 전체 실행 검증 | 실행 및 wrfout 생성 성공(사용자 확인); 현재 WRF 오류 없이 실행 중 |
 | official test / 동아시아 domain test | 미완료 |
 
-현재 사례는 FNL GRIB2 → FILE:* → met_em → real.exe → WRF 실행과 wrfout 생성까지 성공했다. 이 성공 기록은 현재까지 오류 없는 실행·출력 생성을 뜻하며 전체 모의 기간의 정상 종료는 종료 메시지와 최종 Times를 확인한 뒤 별도 기록한다.
+현재 사례는 FNL GRIB2 → FNL:* → met_em → real.exe → WRF 실행과 wrfout 생성까지 성공했다. 이 성공 기록은 현재까지 오류 없는 실행·출력 생성을 뜻하며 전체 모의 기간의 정상 종료는 종료 메시지와 최종 Times를 확인한 뒤 별도 기록한다.
 
 ## Phase 4. MCIP
 

@@ -1,6 +1,6 @@
 # CMAQ 모델링 시스템 WRF/WPS 구축 가이드
 
-**다음 CASE 실행 명령을 보려면 [입력파일 준비와 프로그램별 실행 순서](#case-run)로 이동한다.** WPS/WRF namelist 복사·편집, geogrid, ungrib, metgrid, real.exe, wrf.exe 명령을 §14에 순서대로 정리했다.
+**다음 CASE 실행 명령을 보려면 [입력파일 준비와 프로그램별 실행 순서](#case-run)로 이동한다.** WPS/WRF 전체 namelist 생성·편집, geogrid, ungrib, metgrid, real.exe, wrf.exe 명령을 §14에 순서대로 정리했다.
 
 ## 1. 목적
 Rocky Linux 기반 CMAQ 통합 대기질 모델링 시스템의 Phase 3(WRF/WPS) 설치·자료 준비·사례 실행·오류 해결 절차를 하나의 문서로 기록한다.
@@ -756,12 +756,12 @@ Phase 3의 설치·사례 실행과 결과파일 생성은 성공으로 기록�
 
 이 장의 명령은 **Linux Bash 터미널**에서 위에서 아래로 실행한다. 설치를 다시 하는 절차가 아니라 이미 구축한 WRF/WPS로 다음 CASE를 실행하는 절차다.
 
-현재 `TEST_20260901`은 실행 중인 성공 사례이므로 그 입력·출력을 덮어쓰지 않는다. 다음 명령 예시는 새 폴더 `TEST_20260901_REPEAT`에 현재 성공한 입력파일을 복사하여 재실행하는 방식이다. 다른 사례명으로 실행하려면 아래 모든 `TEST_20260901_REPEAT` 경로를 원하는 이름으로 함께 바꾼다. 실행파일은 계속 설치 폴더의 **절대경로**로 직접 호출한다.
+현재 `TEST_20260901`은 실행 중인 성공 사례이므로 그 입력·출력을 덮어쓰지 않는다. 다음 명령 예시는 새 폴더 `TEST_20260901_REPEAT`에 제공된 성공 입력파일의 전체 내용으로 재실행하는 방식이다. 다른 사례명으로 실행하려면 아래 모든 `TEST_20260901_REPEAT` 경로를 원하는 이름으로 함께 바꾼다. 실행파일은 계속 설치 폴더의 **절대경로**로 직접 호출한다.
 
 | 순서 | 작업 | 명령 위치 |
 |---|---|---|
 | 1 | 환경 불러오기·폴더 생성 | §14.3 |
-| 2 | 성공한 namelist 보존·복사·기간 변경 | §14.3.1~14.3.3 |
+| 2 | 성공한 namelist 보존·전체 파일 생성·기간 변경 | §14.3.1~14.3.3 |
 | 3 | 지형자료·FNL 준비 | §14.3.4 |
 | 4 | WPS 테이블 링크 및 geogrid 실행 | §14.4.1 |
 | 5 | FNL 링크 및 ungrib 실행 | §14.4.2 |
@@ -795,9 +795,14 @@ WPS와 real.exe는 성공했다. WRF도 현재까지 오류 없이 실행되고 
 | 모의 기간/출력 주기 | 사례별 변경 | start/end, run_*, history_interval, FDDA 시간창 및 자료 범위 정합 |
 | 사례 폴더 | TEST_20260901 | 폴더명에서 실제 모의 시작·종료를 추정하지 않음 |
 
-현재 namelist 원문은 이 저장소에 없다. 격자 크기, nest ratio, 물리옵션 번호, FDDA 계수는 확인되지 않은 값을 만들어 적지 않는다. 동일 사례를 완전히 재현하려면 실제 성공한 `namelist.wps`, `namelist.input`을 보존해야 한다. §14.3.2는 성공한 원본 파일을 복사하는 명령이며, §14.3.3은 날짜 변경 위치를 보여준다. 날짜 조각만으로 완전한 namelist를 새로 만들 수는 없다.
+2026-10-08 사용자가 제공한 namelist.wps와 namelist.input 원문을 확인했다. §14.3.2에 전체 입력파일을 생성하는 명령을 담았다. 같은 사례를 재현할 때는 아래 값을 유지하며, 다른 기간·경로로 실행할 때는 날짜와 출력 경로를 함께 바꾼다.
 
-날짜는 모두 UTC 모델 시각이다. 예를 들어 2026-08-31 00 UTC ~ 2026-09-02 00 UTC는 설명용 기간이며 확정된 실제 기간이 아니다. 네 도메인의 start/end를 일치시키고 run_*와 FDDA 종료 시간, 입력자료 마지막 시각을 함께 조정한다. domain/physics/FDDA의 현재 공간·물리 설정과 날짜 변경을 구분한다.
+
+제공 원문으로 확인한 고정 설정: d01~d04는 27/9/3/1 km, e_we=177/82/88/85, e_sn=131/97/88/76, e_vert=35, time_step=90초이다. 물리옵션은 mp=6, 장파=1, 단파=2, 지면층=1, 지면모델=2, PBL=1, 적운=1(네 도메인 모두)이다. FDDA는 네 도메인 grid_fdda=1, 360분 간격, guv/gt/gq=0.0003이며 원문 그대로 보존했다. 이는 현재 사례 설정 기록이며 다른 연구 사례에 자동 적용하는 권장값을 뜻하지 않는다.
+
+WPS geog_data_res는 원문 10m/30s/3s/3s이다. 토지이용이 MODIS 21 category인지 실제 geo_em의 MMINLU와 NUM_LAND_CAT로 확인한다. 이 문자열만으로 MODIS 사용을 단정하지 않는다. GEOGRID.TBL이 선택하는 자료와 설치된 지형자료가 맞아야 한다.
+
+날짜는 모두 UTC 모델 시각이다. 제공된 원본의 기간은 2026-08-31 00 UTC ~ 2026-09-02 00 UTC(48시간)이다. 이 값은 TEST_20260901의 사례값이며 다른 사례에서는 변경한다. 네 도메인의 start/end를 일치시키고 run_*와 FDDA 종료 시간, 입력자료 마지막 시각을 함께 조정한다. domain/physics/FDDA의 현재 공간·물리 설정과 날짜 변경을 구분한다.
 
 ### 14.3. 새 시스템에서 자료·CASE 준비
 
@@ -835,23 +840,307 @@ cp -p /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/WRF/namelist.input "$inp
 
 ls에서 파일이 없으면 진행하지 않는다. 아래 준비는 새 실행 폴더에서만 한다.
 
-#### 14.3.2. WPS와 WRF 입력파일을 새 CASE에 복사한다
+#### 14.3.2. WPS와 WRF 전체 입력파일을 생성한다
+
+아래는 사용자가 제공한 원본 전체를 사용한다. 새 실행 폴더 `TEST_20260901_REPEAT`에 맞춰 WPS의 지형·기상 출력 경로 두 곳만 바꿨다. 원본은 geogrid 결과를 TEST_20260901/WPS, metgrid 결과를 TEST_20260901/WRF에 출력한다. **새 CASE에서는 이 두 경로를 반드시 함께 변경한다.**
+
+폴더를 생성한 뒤 기존 입력·출력이 없는 새 CASE인지 확인한다.
 
 ```bash
 mkdir -p /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/{WPS,WRF,MCIP,EMIS,CMAQ,POST,LOG}
-# 두 대상 파일이 모두 없을 때만 복사한다.
-if [ ! -e /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS/namelist.wps ] &&
-   [ ! -e /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF/namelist.input ]; then
-    cp -p /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/WPS/namelist.wps /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS/
-    cp -p /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/WRF/namelist.input /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF/
-else
-    echo "STOP: 대상 CASE에 입력파일이 이미 있습니다. 새로운 CASE 이름을 사용하세요."
-fi
-ls -lh /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS/namelist.wps
-ls -lh /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF/namelist.input
+ls -la /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS
+ls -la /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF
 ```
 
-STOP이 출력되면 아래 실행을 진행하지 않고 새로운 CASE 이름으로 준비한다. 동일 기간·도메인을 재현하면 복사한 성공 설정을 그대로 사용한다. 새 시스템에서는 성공 사례의 두 파일을 먼저 위 원본 경로로 가져와야 하며, 이 저장소에는 원문이 아직 없어 다운로드 명령으로 대체할 수 없다.
+이미 입력이나 결과가 있으면 새 CASE 이름을 사용한다. 아래 `cat` 명령은 대상 namelist를 덮어쓴다. 새 폴더에서 각 블록을 첫 줄부터 마지막 EOF까지 한 번에 붙여넣는다.
+
+**WPS namelist.wps 생성:**
+
+```bash
+cat > /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS/namelist.wps <<'EOF'
+&share
+ wrf_core = 'ARW',
+ max_dom = 4,
+
+ start_date = '2026-08-31_00:00:00',
+              '2026-08-31_00:00:00',
+              '2026-08-31_00:00:00',
+              '2026-08-31_00:00:00',
+
+ end_date   = '2026-09-02_00:00:00',
+              '2026-09-02_00:00:00',
+              '2026-09-02_00:00:00',
+              '2026-09-02_00:00:00',
+
+ interval_seconds = 21600,
+
+ io_form_geogrid = 2,
+ opt_output_from_geogrid_path =
+ '/home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS/',
+
+ debug_level = 0
+/
+
+&geogrid
+ parent_id         =   0,   1,   2,   3,
+ parent_grid_ratio =   1,   3,   3,   3,
+ i_parent_start    =   1,  80,  39,  44,
+ j_parent_start    =   1,  42,  27,  28,
+
+ e_we              = 177,  82,  88,  85,
+ e_sn              = 131,  97,  88,  76,
+
+ geog_data_res     = '10m','30s','3s','3s',
+
+ dx = 27000,
+ dy = 27000,
+
+ map_proj = 'lambert',
+
+ ref_lat   = 38.00,
+ ref_lon   = 126.00,
+
+ truelat1  = 30.0,
+ truelat2  = 60.0,
+
+ stand_lon = 126.00,
+
+ geog_data_path =
+ '/home/woogon/CMAQ_MODEL/DATA/WPS_GEOG'
+
+ opt_geogrid_tbl_path = 
+ '/home/woogon/CMAQ_MODEL/WPS-4.5/geogrid/'
+/
+
+&ungrib
+ out_format = 'WPS',
+ prefix = 'FNL',
+ pmin = 100
+/
+
+&metgrid
+ fg_name = 'FNL',
+ io_form_metgrid = 2,
+
+ opt_output_from_metgrid_path =
+ '/home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF/',
+
+ opt_metgrid_tbl_path =
+ '/home/woogon/CMAQ_MODEL/WPS-4.5/metgrid/'
+/
+
+&mod_levs
+ press_pa = 201300, 200100, 100000,
+             95000,  90000,
+             85000,  80000,
+             75000,  70000,
+             65000,  60000,
+             55000,  50000,
+             45000,  40000,
+             35000,  30000,
+             25000,  20000,
+             15000,  10000,
+              5000,   1000
+/
+EOF
+```
+
+**WRF namelist.input 생성:**
+
+```bash
+cat > /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF/namelist.input <<'EOF'
+&time_control
+ run_days                            = 2,
+ run_hours                           = 0,
+ run_minutes                         = 0,
+ run_seconds                         = 0,
+
+ start_year                          = 2026, 2026, 2026, 2026,
+ start_month                         = 08,   08,   08,   08,
+ start_day                           = 31,   31,   31,   31,
+ start_hour                          = 00,   00,   00,   00,
+ start_minute                        = 00,   00,   00,   00,
+ start_second                        = 00,   00,   00,   00,
+
+ end_year                            = 2026, 2026, 2026, 2026,
+ end_month                           = 09,   09,   09,   09,
+ end_day                             = 02,   02,   02,   02,
+ end_hour                            = 00,   00,   00,   00,
+ end_minute                          = 00,   00,   00,   00,
+ end_second                          = 00,   00,   00,   00,
+
+ interval_seconds                    = 21600,
+ input_from_file                     = .true., .true., .true., .true.,
+ history_interval                    = 60, 60, 60, 60,
+ frames_per_outfile                  = 24, 24, 24, 24,
+
+ restart                             = .false.,
+ restart_interval                    = 100000,
+
+ io_form_history                     = 2,
+ io_form_restart                     = 2,
+ io_form_input                       = 2,
+ io_form_boundary                    = 2,
+ io_form_auxinput2                   = 2,
+ debug_level                         = 0,
+/
+
+&domains
+ time_step                           = 90,
+ time_step_fract_num                 = 0,
+ time_step_fract_den                 = 1,
+
+ max_dom                             = 4,
+
+ s_we                                = 1, 1, 1, 1,
+ s_sn                                = 1, 1, 1, 1,
+ e_we                                = 177, 82, 88, 85,
+ e_sn                                = 131, 97, 88, 76,
+
+ s_vert                              = 1, 1, 1, 1,
+ e_vert                              = 35, 35, 35, 35,
+ num_metgrid_levels                  = 34,
+
+ dx                                  = 27000, 9000, 3000, 1000,
+ dy                                  = 27000, 9000, 3000, 1000,
+
+ grid_id                             = 1, 2, 3, 4,
+ parent_id                           = 0, 1, 2, 3,
+ i_parent_start                      = 1, 80, 39, 44,
+ j_parent_start                      = 1, 42, 27, 28,
+ parent_grid_ratio                   = 1, 3, 3, 3,
+ parent_time_step_ratio              = 1, 3, 3, 3,
+
+ feedback                            = 1,
+ smooth_option                       = 0,
+
+ p_top_requested                     = 10000,
+ interp_type                         = 1,
+ lowest_lev_from_sfc                 = .false.,
+ lagrange_order                      = 1,
+ force_sfc_in_vinterp                = 1,
+ zap_close_levels                    = 500,
+ sfcp_to_sfcp                        = .false.,
+ adjust_heights                      = .true.,
+
+ eta_levels                          = 1.000, 0.996, 0.990, 0.985, 0.980, 0.970,
+                                       0.960, 0.950, 0.940, 0.930, 0.920, 0.910,
+                                       0.900, 0.880, 0.860, 0.840, 0.820, 0.800,
+                                       0.770, 0.740, 0.700, 0.650, 0.600, 0.550,
+                                       0.500, 0.450, 0.400, 0.350, 0.300, 0.250,
+                                       0.200, 0.150, 0.121, 0.050, 0.000,
+/
+
+&dfi_control
+ dfi_opt                             = 0,
+/
+
+&physics
+ mp_physics                          = 6, 6, 6, 6,
+ ra_lw_physics                       = 1, 1, 1, 1,
+ ra_sw_physics                       = 2, 2, 2, 2,
+ radt                                = 27, 9, 3, 1,
+
+ sf_sfclay_physics                   = 1, 1, 1, 1,
+ sf_surface_physics                  = 2, 2, 2, 2,
+ bl_pbl_physics                      = 1, 1, 1, 1,
+ bldt                                = 0, 0, 0, 0,
+
+ cu_physics                          = 1, 1, 1, 1,
+ cudt                                = 5, 5, 5, 5,
+
+ isfflx                              = 1,
+ ifsnow                              = 0,
+ icloud                              = 1,
+ surface_input_source                = 1,
+ num_soil_layers                     = 4,
+ pxlsm_smois_init                    = 1, 1, 1, 1,
+
+ mp_zero_out                         = 2,
+ mp_zero_out_thresh                  = 1.e-8,
+
+ maxiens                             = 1,
+ maxens                              = 3,
+ maxens2                             = 3,
+ maxens3                             = 16,
+ ensdim                              = 144,
+
+ num_land_cat                        = 21,
+/
+
+&fdda
+ grid_fdda                           = 1, 1, 1, 1,
+ gfdda_inname                        = "wrffdda_d<domain>",
+ gfdda_interval_m                    = 360, 360, 360, 360,
+ gfdda_end_h                         = 999, 999, 999, 999,
+ io_form_gfdda                       = 2,
+
+ fgdt                                = 0, 0, 0, 0,
+
+ if_no_pbl_nudging_uv                = 1, 0, 0, 0,
+ if_no_pbl_nudging_t                 = 1, 0, 0, 0,
+ if_no_pbl_nudging_q                 = 1, 0, 0, 0,
+
+ if_zfac_uv                          = 0, 0, 0, 0,
+ k_zfac_uv                           = 10, 10, 10, 10,
+ if_zfac_t                           = 0, 0, 0, 0,
+ k_zfac_t                            = 10, 10, 10, 10,
+ if_zfac_q                           = 0, 0, 0, 0,
+ k_zfac_q                            = 10, 10, 10, 10,
+
+ guv                                 = 0.0003, 0.0003, 0.0003, 0.0003,
+ gt                                  = 0.0003, 0.0003, 0.0003, 0.0003,
+ gq                                  = 0.0003, 0.0003, 0.0003, 0.0003,
+
+ if_ramping                          = 0,
+ dtramp_min                          = 60.0,
+/
+
+&dynamics
+ w_damping                           = 0,
+ diff_opt                            = 1,
+ km_opt                              = 4,
+ diff_6th_opt                        = 0,
+ diff_6th_factor                     = 0.12,
+ base_temp                           = 288.,
+ damp_opt                            = 1,
+
+ zdamp                               = 5000., 5000., 5000., 5000.,
+ dampcoef                            = 0.01, 0.01, 0.01, 0.01,
+ khdif                               = 0, 0, 0, 0,
+ kvdif                               = 0, 0, 0, 0,
+
+ non_hydrostatic                     = .true., .true., .true., .true.,
+ moist_adv_opt                       = 1, 1, 1, 1,
+ scalar_adv_opt                      = 1, 1, 1, 1,
+/
+
+&bdy_control
+ spec_bdy_width                      = 5,
+ spec_zone                           = 1,
+ relax_zone                          = 4,
+ specified                           = .true., .false., .false., .false.,
+ nested                              = .false., .true., .true., .true.,
+/
+
+&grib2
+/
+
+&namelist_quilt
+ nio_tasks_per_group                 = 0,
+ nio_groups                          = 1,
+/
+EOF
+```
+
+생성한 파일을 확인한다.
+
+```bash
+ls -lh /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS/namelist.wps
+ls -lh /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF/namelist.input
+cat /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS/namelist.wps
+cat /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF/namelist.input
+```
 
 #### 14.3.3. 기간을 바꿀 때 입력파일을 편집하고 확인한다
 
@@ -895,7 +1184,7 @@ WRF의 기존 `&time_control` section은 같은 UTC 기간으로 맞춘다. 아�
  interval_seconds = 21600,
 ```
 
-기존 `&fdda`의 `gfdda_end_h` 등 시간창도 새 모의 기간에 맞춰 검토한다. FDDA 방식·도메인별 적용·계수는 성공한 설정을 유지한다. `&domains`의 `num_metgrid_levels=34`와 `&physics`의 `num_land_cat=21`을 확인하되 격자·물리 설정은 임의로 바꾸지 않는다.
+원본 `gfdda_end_h=999`는 48시간 모의 전체를 포함하도록 종료 상한을 둔 값이며 원문대로 유지했다. 기간이 변경되면 기존 `&fdda`의 시간창이 모의 기간을 포함하는지 검토한다. FDDA 방식·도메인별 적용·계수는 성공한 설정을 유지한다. `&domains`의 `num_metgrid_levels=34`와 `&physics`의 `num_land_cat=21`을 확인하되 격자·물리 설정은 임의로 바꾸지 않는다.
 
 ```bash
 grep -nE 'max_dom|start_date|end_date|interval_seconds|geog_data_path|geog_data_res|prefix|fg_name' /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS/namelist.wps
@@ -904,7 +1193,7 @@ diff -u /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/WPS/namelist.wps /home
 diff -u /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/WRF/namelist.input /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF/namelist.input
 ```
 
-동일 기간 복사라면 diff 출력이 없어야 한다. 기간 변경 사례라면 의도한 날짜·실행기간·시간창만 바뀌었는지 확인한다.
+원본 대비 WPS의 출력 경로 두 곳은 새 CASE 경로로 달라져야 한다. 같은 기간이면 WRF 파일은 원본과 같아야 하며, 기간 변경이면 의도한 날짜·실행기간·시간창만 바뀌었는지 확인한다.
 
 #### 14.3.4. 정적 자료와 FNL 준비
 
@@ -924,7 +1213,7 @@ ls -lh /home/woogon/CMAQ_MODEL/DATA/MET/FNL/2026/09/fnl_*.grib2
 
 ### 14.4. WPS: geogrid → ungrib → metgrid
 
-성공한 CASE의 namelist.wps를 CASE/WPS에 준비하고 기간을 변경한다. &share에 `max_dom=4`, `interval_seconds=21600`, &geogrid에 `geog_data_path='/home/woogon/CMAQ_MODEL/DATA/WPS_GEOG'`, &ungrib에 `out_format='WPS'`, `prefix='FILE'`, &metgrid에 `fg_name='FILE'`을 설정한다. out_opt=2는 netCDF 출력 기준이다. 도메인의 parent_id, parent_grid_ratio, i/j_parent_start, e_we/e_sn, dx/dy 및 투영은 검증된 값을 유지한다.
+§14.3.2에서 생성한 namelist.wps를 사용한다. 기간 변경 시 §14.3.3을 따른다. &share에 `max_dom=4`, `interval_seconds=21600`, &geogrid에 `geog_data_path='/home/woogon/CMAQ_MODEL/DATA/WPS_GEOG'`, &ungrib에 `out_format='WPS'`, `prefix='FNL'`, &metgrid에 `fg_name='FNL'`을 설정한다. io_form_geogrid=2와 io_form_metgrid=2는 netCDF 출력 기준이다. 원본 opt_geogrid_tbl_path와 opt_metgrid_tbl_path는 설치 폴더의 테이블을 직접 참조한다. 아래 CASE 내 테이블 링크는 명시적으로 연결 위치를 보이는 용도이며 실행 시에는 namelist가 지정한 설치 폴더 테이블을 사용한다. 도메인의 parent_id, parent_grid_ratio, i/j_parent_start, e_we/e_sn, dx/dy 및 투영은 검증된 값을 유지한다.
 
 #### 14.4.1. WPS 테이블 준비와 geogrid.exe 실행
 
@@ -951,14 +1240,14 @@ geogrid 성공 메시지와 d01~d04 geo_em, MODIS 21 category를 확인한다. d
 
 ```bash
 cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS
-/home/woogon/CMAQ_MODEL/WPS-4.5/link_grib.csh /home/woogon/CMAQ_MODEL/DATA/MET/FNL/2026/08/fnl_20260831_*.grib2 /home/woogon/CMAQ_MODEL/DATA/MET/FNL/2026/09/fnl_2026090[12]_*.grib2
+/home/woogon/CMAQ_MODEL/WPS-4.5/link_grib.csh /home/woogon/CMAQ_MODEL/DATA/MET/FNL/2026/08/fnl_20260831_*.grib2 /home/woogon/CMAQ_MODEL/DATA/MET/FNL/2026/09/fnl_20260901_*.grib2 /home/woogon/CMAQ_MODEL/DATA/MET/FNL/2026/09/fnl_20260902_00_00.grib2
 ls -l GRIBFILE.*
 /home/woogon/CMAQ_MODEL/WPS-4.5/ungrib.exe
 tail -30 ungrib.log
-ls -lh FILE:*
+ls -lh FNL:*
 ```
 
-ungrib 성공 메시지와 FILE:*의 시작·종료 시각 및 6시간 간격을 확인한다.
+ungrib 성공 메시지와 FNL:*의 시작·종료 시각 및 6시간 간격을 확인한다.
 
 #### 14.4.3. metgrid.exe 실행
 
@@ -966,30 +1255,30 @@ ungrib 성공 메시지와 FILE:*의 시작·종료 시각 및 6시간 간격을
 cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS
 /home/woogon/CMAQ_MODEL/WPS-4.5/metgrid.exe
 tail -30 metgrid.log
-ls -lh met_em.d0*.nc
+ls -lh /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF/met_em.d0*.nc
 ```
 
 header는 아래처럼 실제 생성된 한 파일을 명시해 확인한다.
 
 ```bash
 # 날짜는 예시이며 실제 생성된 파일명으로 변경한다.
-ncdump -h met_em.d01.2026-08-31_00:00:00.nc | grep -E 'num_metgrid_levels|num_st_layers'
+ncdump -h /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF/met_em.d01.2026-08-31_00:00:00.nc | grep -E 'num_metgrid_levels|num_st_layers'
 ```
 
-ungrib/metgrid 각각 성공 메시지를 확인한 뒤 다음 단계로 진행한다. FILE:*가 6시간 간격으로 시작~종료 시각을 포함하는지, met_em이 네 도메인과 전체 입력 시각에 대해 생성됐는지 확인한다. 현재 met_em의 num_metgrid_levels는 34이며 namelist.input도 34로 맞춘다. 토양층수 num_metgrid_soil_levels는 실제 num_st_layers와 맞춘다. 34를 WRF 모델층 e_vert에 복사하지 않는다.
+ungrib/metgrid 각각 성공 메시지를 확인한 뒤 다음 단계로 진행한다. FNL:*가 6시간 간격으로 시작~종료 시각을 포함하는지, met_em이 네 도메인과 전체 입력 시각에 대해 생성됐는지 확인한다. 현재 met_em의 num_metgrid_levels는 34이며 namelist.input도 34로 맞춘다. 토양층수 num_metgrid_soil_levels는 실제 num_st_layers와 맞춘다. 34를 WRF 모델층 e_vert에 복사하지 않는다.
 
 ### 14.5. WRF runtime data와 real.exe
 
 CASE/WRF에 검증된 namelist.input을 준비한다. &time_control의 start/end와 run_*는 WPS 기간과 일치시키고 `interval_seconds=21600`을 사용한다. &domains의 `max_dom=4`, `num_metgrid_levels=34`, &physics의 `num_land_cat=21` 및 현재 물리 설정을 확인한다. FDDA 원문 설정을 유지하고 시간창은 변경한 모의 기간과 맞춘다.
 
-#### 14.5.1. met_em 입력과 runtime data 링크 준비
+#### 14.5.1. met_em 입력 확인과 runtime data 링크 준비
+
+제공된 namelist.wps의 opt_output_from_metgrid_path가 CASE/WRF를 지정하므로 met_em은 이미 WRF 폴더에 있다. WPS 폴더에서 다시 링크하지 않는다. metgrid 출력 위치를 WPS로 바꾸는 다른 구성에서만 해당 출력 경로의 met_em을 WRF에 링크한다.
 
 런타임 자료는 real.exe와 wrf.exe 실행 전에 준비한다. run 전체를 링크하지 않고 현재 설정에 필요한 일곱 파일만 연결한다.
 
 ```bash
 cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF
-ls -lh /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS/met_em.d0*.nc
-ln -s /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS/met_em.d0*.nc .
 ls -lh namelist.input met_em.d0*.nc
 WRFRUN=/home/woogon/CMAQ_MODEL/WRFV4.5.1/run
 for runtime_file in LANDUSE.TBL VEGPARM.TBL SOILPARM.TBL GENPARM.TBL RRTM_DATA RRTM_DATA_DBL CAMtr_volume_mixing_ratio; do
@@ -1057,7 +1346,7 @@ ncdump -v Times wrfout_d01_2026-08-31_00:00:00 | tail -30
 
 ### 14.7. 재현에 필요한 보존 자료
 
-CASE의 namelist.wps/namelist.input, FNL 파일 목록·기간, geo_em/met_em header, runtime 링크 목록, compiler/MPI/library 버전, rsl 로그와 성공 메시지를 보존한다. 현재 다운로드 스크립트와 실제 namelist 원문은 미수집이므로, 새 시스템에서 동일 과학 설정을 완전히 재현하는 데에는 이 원문 확보가 필요하다.
+CASE의 namelist.wps/namelist.input, FNL 파일 목록·기간, geo_em/met_em header, runtime 링크 목록, compiler/MPI/library 버전, rsl 로그와 성공 메시지를 보존한다. 두 namelist 원문은 §14.3.2에 반영했다. 다운로드 스크립트 원문·호출 인자는 아직 미수집이며, 새 시스템에서는 정적 자료와 FNL 자료를 별도로 준비해야 한다.
 
 절차와 Vtable의 공식 근거: [WRF Users Guide — WPS](https://www2.mmm.ucar.edu/wrf/users/wrf_users_guide/build/html/wps.html).
 
