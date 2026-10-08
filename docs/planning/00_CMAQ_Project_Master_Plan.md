@@ -226,8 +226,8 @@ MCIP/CMAQ가 처리 가능한 WRF/WPS 버전 결정
 | CMAQ | 5.5 (태그 `CMAQv5.5.0.3_11Jul2025`) | 기준 모델. 현재 공개된 5.5 계열 최신 bugfix 태그이며 GitHub Releases에서는 pre-release로 표시됨. 문서·benchmark 자료는 v5.5 기준 |
 | MCIP | CMAQ 5.5.0.3 포함 버전 | `PREP/mcip` |
 | ICON/BCON 등 전처리 | CMAQ 5.5.0.3 포함 버전 | `PREP/` |
-| WRF | 4.5.1 (태그 `v4.5.1`) | WRF-CMAQv5.5 결합 호환범위(4.4~4.5.1)의 상한. 설치·컴파일 확인 완료. TEST_20260901의 WPS와 real.exe 성공, WRF 4코어 계산 진행 확인; 최종 정상 종료는 미확인 |
-| WPS | 4.5 (태그 `v4.5`) | WPS는 4.5.1 태그가 없으며 WRF 4.5.x와 짝을 이루는 버전. 설치·컴파일 확인 완료. TEST_20260901의 WPS와 real.exe 성공, WRF 4코어 계산 진행 확인; 최종 정상 종료는 미확인 |
+| WRF | 4.5.1 (태그 `v4.5.1`) | WRF-CMAQv5.5 결합 호환범위(4.4~4.5.1)의 상한. 설치·컴파일 및 사례 실행 성공. TEST_20260901의 WPS·real.exe 성공, WRF dmpar 4코어 오류 없이 실행 중이며 wrfout 결과파일 생성 확인(사용자 확인) |
+| WPS | 4.5 (태그 `v4.5`) | WPS는 4.5.1 태그가 없으며 WRF 4.5.x와 짝을 이루는 버전. 설치·컴파일 및 사례 실행 성공. TEST_20260901의 WPS·real.exe 성공, WRF dmpar 4코어 오류 없이 실행 중이며 wrfout 결과파일 생성 확인(사용자 확인) |
 | I/O API | 3.2-20200828 | CMAQ v5.5 공식 문서에서 tested/stable version으로 제시되는 버전. 설치 완료 |
 | netCDF-C / netCDF-Fortran | 4.9.3 / 4.6.2 | 설치 완료. CMAQ 5.5는 C/Fortran 경로를 별도 변수로 지정 가능 |
 | HDF5 | 1.14.6 | 설치 완료 |
@@ -504,7 +504,7 @@ wrfout_d02_*
 - 빌드 스크립트용 `tcsh`(csh)를 설치하고 `perl`, `m4`를 확인했다.
 - CMAQ 연계를 고려하여 PX LSM, ACM2 PBL 등 CMAQ 권장 물리옵션 조합을 우선 검토한다.
 
-현재 상태: **WRF 4.5.1 / WPS 4.5 설치·컴파일 확인 완료. TEST_20260901의 WPS와 real.exe 성공, WRF 4코어 계산 진행 확인; 최종 정상 종료는 미확인**. WRF는 GNU dmpar, basic nesting으로, WPS는 GNU serial, GRIB2 지원으로 빌드했다. 현재 FNL 사례 실행은 [사례 실행 가이드](../wrf/WRF_WPS_Installation_Guide.md)를 따른다. WRF 최종 정상 종료와 출력 종료 시각 확인이 다음 작업이다.
+현재 상태: **WRF 4.5.1 / WPS 4.5 설치·컴파일 및 사례 실행 성공. TEST_20260901의 WPS·real.exe 성공, WRF dmpar 4코어 오류 없이 실행 중이며 wrfout 결과파일 생성 확인(사용자 확인)**. WRF는 GNU dmpar, basic nesting으로, WPS는 GNU serial, GRIB2 지원으로 빌드했다. 현재 FNL 사례 실행은 [사례 실행 가이드](../wrf/WRF_WPS_Installation_Guide.md)를 따른다. WRF 실행·출력 생성은 성공으로 기록한다. 다음 단계는 MCIP 구축·입력 변환 준비이며, 현재 모의 종료 후 최종 시각을 확인해 출력을 전달한다.
 
 설치 시 확인한 중요 사항(상세 기록: [WRF/WPS 설치 가이드](../wrf/WRF_WPS_Installation_Guide.md)):
 
@@ -869,12 +869,12 @@ case별 변경항목:
 
 # 20. 자동화 목표
 
-장기적으로 다음 형태의 실행체계를 목표로 한다.
+현재 운영은 CASE 폴더에서 WPS/WRF 실행파일을 절대경로로 직접 호출한다. `run_case.sh`는 아직 구현되지 않은 장기 자동화 목표이며 다음 호출은 계획 예시이다.
 
 예:
 
 ```bash
-./run_case.sh CASE_202307_O3
+./run_case.sh BUSAN/TEST_20260901
 ```
 
 또는
@@ -883,7 +883,7 @@ case별 변경항목:
 ./run_case.sh   --start 2023-07-01   --end 2023-07-10   --domain BUSAN_D03   --met FNL   --emis CAPSS_REAS_MEGAN   --cmaq 5.5   --isam yes
 ```
 
-단계별 성공 여부를 log로 기록하도록 한다. 아래 `OK`는 향후 성공 로그의 형식 예시이며 현재 실행 상태가 아니다. 현재 WPS와 real.exe는 성공했고 WRF 계산 진행이 확인되었으나 전체 실행의 최종 정상 종료는 미확인이다.
+단계별 성공 여부를 log로 기록하도록 한다. 아래 `OK`는 향후 성공 로그의 형식 예시이며 현재 실행 상태가 아니다. 현재 WPS·real.exe와 WRF 실행·결과파일 생성은 성공으로 기록했다. WRF는 오류 없이 실행 중이며 종료 메시지와 최종 출력 시각은 모의 종료 후 확인한다.
 
 ```text
 01_WPS      OK
@@ -973,8 +973,8 @@ ncdump -h filename.nc
 - I/O API 라이브러리·모듈·실행파일: `/home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/Linux2_x86_64gfort10`.
 - I/O API include: `/home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/ioapi/fixed_src`.
 - **모델 버전 확정 (2026-10-03)**: CMAQ 5.5(`CMAQv5.5.0.3_11Jul2025`)를 기준으로 MCIP(CMAQ 포함), WRF 4.5.1, WPS 4.5로 결정. 상세 기준은 §3.5.
-- **Phase 3 설치 확인 완료**: WRF 4.5.1 / WPS 4.5 설치·컴파일 확인 완료. TEST_20260901의 WPS와 real.exe 성공, WRF 4코어 계산 진행 확인; 최종 정상 종료는 미확인. 모델 본체 경로는 §4.2, 상세 빌드·오류 해결은 WRF/WPS 설치 가이드를 참조한다.
-- **다음 작업**: `SUCCESS COMPLETE WRF`, d01~d04 출력의 모의 종료 시각 확인 후 Phase 3 완료 판단, 이어서 MCIP 검증. 계산 진행만으로 WRF/CMAQ 전체 완료를 기록하지 않는다.
+- **Phase 3 설치·사례 실행 성공**: WRF 4.5.1 / WPS 4.5 설치·컴파일 및 사례 실행 성공. TEST_20260901의 WPS·real.exe 성공, WRF dmpar 4코어 오류 없이 실행 중이며 wrfout 결과파일 생성 확인(사용자 확인). 모델 본체 경로는 §4.2, 상세 빌드·오류 해결은 WRF/WPS 설치 가이드를 참조한다.
+- **다음 작업**: MCIP(Phase 4) 설치·컴파일 및 입력 변환 준비. 현재 WRF 모의 종료 후 `SUCCESS COMPLETE WRF`와 d01~d04 최종 출력 시각을 확인하여 MCIP에 전달한다. MCIP·CMAQ 결과는 아직 완료로 기록하지 않는다.
 
 아래 Phase 목록은 전체 구축 계획이며, 이후 단계의 완료 기록이 아니다.
 
@@ -1013,15 +1013,17 @@ ncdump -h filename.nc
 | 항목 | 현재 상태 |
 |---|---|
 | netCDF 통합 링크, libpng 1.2.50, JasPer 1.900.1 | 구성·설치 완료 |
-| WRF 4.5.1 | 설치·컴파일 확인 완료. TEST_20260901의 WPS와 real.exe 성공, WRF 4코어 계산 진행 확인; 최종 정상 종료는 미확인 |
-| WPS 4.5 | 설치·컴파일 확인 완료. TEST_20260901의 WPS와 real.exe 성공, WRF 4코어 계산 진행 확인; 최종 정상 종료는 미확인 |
+| WRF 4.5.1 | 설치·컴파일 및 사례 실행 성공. TEST_20260901의 WPS·real.exe 성공, WRF dmpar 4코어 오류 없이 실행 중이며 wrfout 결과파일 생성 확인(사용자 확인) |
+| WPS 4.5 | 설치·컴파일 및 사례 실행 성공. TEST_20260901의 WPS·real.exe 성공, WRF dmpar 4코어 오류 없이 실행 중이며 wrfout 결과파일 생성 확인(사용자 확인) |
 | WPS_GEOG 및 FNL ds083.2 자료 준비 | 현재 사례 실행에 사용 |
-| `geogrid → ungrib → metgrid → real.exe → wrf.exe` 전체 실행 검증 | WPS·real.exe 성공, WRF 진행 확인; 최종 종료 미확인 |
+| `geogrid → ungrib → metgrid → real.exe → wrf.exe` 전체 실행 검증 | 실행 및 wrfout 생성 성공(사용자 확인); 현재 WRF 오류 없이 실행 중 |
 | official test / 동아시아 domain test | 미완료 |
 
-실행 검증에서 `ungrib`의 실제 GRIB2 입력과 `FILE:*` 중간파일 생성, WRF 정상 완료 및 `wrfout` 출력을 확인한다. 설치·컴파일 완료만으로 Phase 3 전체를 완료 처리하지 않는다.
+현재 사례는 FNL GRIB2 → FILE:* → met_em → real.exe → WRF 실행과 wrfout 생성까지 성공했다. 이 성공 기록은 현재까지 오류 없는 실행·출력 생성을 뜻하며 전체 모의 기간의 정상 종료는 종료 메시지와 최종 Times를 확인한 뒤 별도 기록한다.
 
 ## Phase 4. MCIP
+
+현재 다음 구축 단계이다. 폴더가 있다는 것과 설치·실행 완료는 구분한다. WRF 모의 종료 후 d01~d04 출력·시간 범위를 확인하고 변환을 수행한다.
 
 - compile
 - WRF output 변환

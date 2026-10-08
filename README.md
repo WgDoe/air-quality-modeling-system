@@ -35,7 +35,7 @@ Master Plan §22의 구축 단계는 그대로 적용한다. §23의 산출물�
 | Phase 2. Compiler 및 공통 library | `03_NetCDF_HDF5_IOAPI_Setup.md` | [공통 라이브러리](docs/libraries/Common_Libraries_Installation_Guide.md) |
 | Phase 3. WRF/WPS | `04_WRF_WPS_Install.md` | [WRF/WPS 설치](docs/wrf/WRF_WPS_Installation_Guide.md) |
 
-Rocky Linux 문서는 Phase 1의 OS 설치와 기본 확인을, Compiler/MPI 문서는 Phase 1의 SFTP 설정 및 Phase 2의 compiler/MPI 구축을 다룬다. 공통 라이브러리 문서는 I/O API 3.2-20200828의 빌드, M3TOOLS 생성, 모듈 링크·실행 테스트 및 환경변수 등록까지 다룬다. 실제 설치 기록을 기준으로 **Phase 2(Compiler 및 공통 library)는 완료**되었다. **Phase 3 WRF/WPS(WRF 4.5.1 / WPS 4.5)는 설치·컴파일 확인 완료. TEST_20260901의 WPS와 real.exe 성공, WRF 4코어 계산 진행 확인; 최종 정상 종료는 미확인** 상태이다. 다음 작업은 `SUCCESS COMPLETE WRF` 및 도메인별 출력의 종료 시각을 확인하여 Phase 3 실행 검증을 마무리하고 MCIP(Phase 4)로 이어가는 것이다.
+Rocky Linux 문서는 Phase 1의 OS 설치와 기본 확인을, Compiler/MPI 문서는 Phase 1의 SFTP 설정 및 Phase 2의 compiler/MPI 구축을 다룬다. 공통 라이브러리 문서는 I/O API 3.2-20200828의 빌드, M3TOOLS 생성, 모듈 링크·실행 테스트 및 환경변수 등록까지 다룬다. 실제 설치 기록을 기준으로 **Phase 2(Compiler 및 공통 library)는 완료**되었다. **Phase 3 WRF/WPS(WRF 4.5.1 / WPS 4.5)는 설치·컴파일 및 사례 실행 성공. TEST_20260901의 WPS·real.exe 성공, WRF dmpar 4코어 오류 없이 실행 중이며 wrfout 결과파일 생성 확인(사용자 확인)** 상태이다. WRF 실행과 결과파일 생성은 성공으로 기록한다. 모의가 끝나면 `SUCCESS COMPLETE WRF`와 도메인별 출력의 종료 시각을 확인하고 MCIP(Phase 4)의 설치·입력 변환으로 이어간다.
 
 설치 가이드는 기존 Linux 및 Compiler/MPI 문서처럼 번호 없는 설명형 파일명을 사용한다. 공통 라이브러리 문서의 기존 `01_common_libraries_installation.md`는 `Common_Libraries_Installation_Guide.md`로 변경했다. 기본계획의 `00_`와 향후 산출물 번호는 계획 문서 체계로 유지한다.
 
@@ -49,7 +49,7 @@ Rocky Linux 문서는 Phase 1의 OS 설치와 기본 확인을, Compiler/MPI 문
 |---|---|---|
 | CMAQ | 5.5 (`CMAQv5.5.0.3_11Jul2025`) | 확정. 현재 GitHub Releases에서 pre-release로 표시되는 5.5 계열 최신 bugfix 태그, 설치 예정(Phase 6) |
 | MCIP | CMAQ 5.5.0.3 포함 버전 | 확정, 설치 예정(Phase 4) |
-| WRF / WPS | 4.5.1 / 4.5 | 설치·컴파일 확인 완료. TEST_20260901의 WPS와 real.exe 성공, WRF 4코어 계산 진행 확인; 최종 정상 종료는 미확인 (Phase 3) |
+| WRF / WPS | 4.5.1 / 4.5 | 설치·컴파일 및 사례 실행 성공. TEST_20260901의 WPS·real.exe 성공, WRF dmpar 4코어 오류 없이 실행 중이며 wrfout 결과파일 생성 확인(사용자 확인) (Phase 3) |
 | I/O API | 3.2-20200828 | 설치 완료 |
 
 ### 구축 디렉터리와 자료·사례 사용 경로 (2026-10-08 문서 정리)

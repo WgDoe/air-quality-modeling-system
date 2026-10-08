@@ -458,7 +458,7 @@ MPI 병렬 프로그램에서는 각 process의 출력 순서가 항상 0, 1, 2,
 
 ---
 
-WRF 4.5.1과 WPS 4.5는 설치·컴파일·동적 라이브러리 연결 확인 완료, 실제 입력자료 실행검증 미완료이다. 이 문서의 MPI 테스트 성공은 WPS_GEOG 및 실제 기상자료를 이용한 `geogrid → ungrib → metgrid → real.exe → wrf.exe` 전체 실행 검증을 뜻하지 않는다.
+후속 WRF 4.5.1 / WPS 4.5는 설치·컴파일 및 실제 FNL 사례 실행에 성공했다. TEST_20260901에서 WPS·real.exe 성공, WRF dmpar 4코어 오류 없는 실행과 wrfout 생성이 사용자 확인으로 기록되었다(2026-10-08). 자세한 절차와 결과는 [WRF/WPS 설치·실행 가이드](../wrf/WRF_WPS_Installation_Guide.md) §14를 따른다. 이 문서의 MPI 자체 테스트와 실제 사례 실행 기록은 구분한다.
 
 # 11. 현재 검증된 환경
 
