@@ -326,7 +326,7 @@ df -h /home/woogon/CMAQ_MODEL
 | HDF5/netCDF 원본 다운로드·빌드·I/O API | [공통 라이브러리](../libraries/Common_Libraries_Installation_Guide.md) §2.1~9 |
 | WRF/WPS 빌드와 전체 namelist·개별 실행 | [WRF/WPS 가이드](../wrf/WRF_WPS_Installation_Guide.md) §4~14 |
 
-이미 설치된 프로그램은 재컴파일하지 않고 CASE만 새로 만든다. MCIP·배출량·CMAQ 등 아직 수행되지 않은 단계는 계획이다. 실제로 성공한 명령이 확보되는 즉시 해당 기존 문서 체계에 기록한다. 다운로드 스크립트의 원문·호출 규약은 아직 확인되지 않아 인자를 임의로 적지 않는다.
+이미 설치된 프로그램은 재컴파일하지 않고 CASE만 새로 만든다. MCIP·배출량·CMAQ 등 아직 수행되지 않은 단계는 계획이다. 실제로 성공한 명령이 확보되는 즉시 해당 기존 문서 체계에 기록한다. FNL 다운로드 스크립트 원문·파일 생성·시작/종료 UTC 인자·기간별 검사 명령은 [WRF/WPS §14.3.4](../wrf/WRF_WPS_Installation_Guide.md#fnl-download)에 통합했다.
 
 # 5. Linux 기본 환경
 

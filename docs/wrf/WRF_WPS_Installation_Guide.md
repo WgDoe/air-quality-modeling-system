@@ -1201,15 +1201,185 @@ diff -u /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/WRF/namelist.input /ho
 
 FNL은 [NCAR ds083.2 / d083002](https://gdex.ucar.edu/datasets/d083002/)의 1도 GRIB2 분석자료를 사용한다. 00/06/12/18 UTC 자료를 모의 시작부터 종료까지 빠짐없이 준비한다. 월 경계를 넘으면 모든 해당 월을 준비한다. 예시 파일명은 `fnl_20260831_00_00.grib2`이다.
 
-서버의 다운로드 스크립트는 `/home/woogon/CMAQ_MODEL/SCRIPTS/download_fnl.sh`이다. 원문과 인자 규약은 아직 저장소에 없으므로 실행 인자를 추정하지 않는다.
+<a id="fnl-download"></a>
+
+**사용자 제공 download_fnl.sh 생성과 실행**
+
+아래 원문은 사용자가 제공한 스크립트이다. 새 시스템에서는 아래 블록을 EOF까지 붙여넣어 실제 파일을 생성한다. 기존 서버에 같은 파일이 있으면 생성 블록은 생략하고 실행 단계부터 따른다. Bash·GNU date·wget을 사용한다.
 
 ```bash
-sed -n '1,200p' /home/woogon/CMAQ_MODEL/SCRIPTS/download_fnl.sh
-ls -lh /home/woogon/CMAQ_MODEL/DATA/MET/FNL/2026/08/fnl_*.grib2
-ls -lh /home/woogon/CMAQ_MODEL/DATA/MET/FNL/2026/09/fnl_*.grib2
+mkdir -p /home/woogon/CMAQ_MODEL/SCRIPTS
+cat > /home/woogon/CMAQ_MODEL/SCRIPTS/download_fnl.sh <<'EOF'
+#!/bin/bash
+
+# ============================================================
+# NCEP FNL (ds083.2) Download Script
+#
+# FNL:
+#   - 1 degree x 1 degree
+#   - 6-hour interval (00, 06, 12, 18 UTC)
+#   - GRIB2
+#
+# Usage:
+#   ./download_fnl.sh YYYYMMDDHH YYYYMMDDHH
+#
+# Example:
+#   ./download_fnl.sh 2026083100 2026090200
+#
+# Data directory:
+#   /home/woogon/CMAQ_MODEL/DATA/MET/FNL/YYYY/MM/
+# ============================================================
+
+set -e
+
+BASE_DIR="/home/woogon/CMAQ_MODEL/DATA/MET/FNL"
+
+BASE_URL="https://thredds.rda.ucar.edu/thredds/fileServer/files/g/d083002/grib2"
+
+START="$1"
+END="$2"
+
+
+# ------------------------------------------------------------
+# Check arguments
+# ------------------------------------------------------------
+
+if [ $# -ne 2 ]; then
+    echo
+    echo "Usage:"
+    echo "  $0 YYYYMMDDHH YYYYMMDDHH"
+    echo
+    echo "Example:"
+    echo "  $0 2026083100 2026090200"
+    echo
+    exit 1
+fi
+
+
+# ------------------------------------------------------------
+# Check date format
+# ------------------------------------------------------------
+
+if [[ ! "$START" =~ ^[0-9]{10}$ ]] || [[ ! "$END" =~ ^[0-9]{10}$ ]]; then
+    echo "ERROR: Date format must be YYYYMMDDHH"
+    exit 1
+fi
+
+
+START_DATE="${START:0:8} ${START:8:2}:00 UTC"
+END_DATE="${END:0:8} ${END:8:2}:00 UTC"
+
+CURRENT=$(date -d "$START_DATE" +%s)
+END_SEC=$(date -d "$END_DATE" +%s)
+
+
+if [ "$CURRENT" -gt "$END_SEC" ]; then
+    echo "ERROR: START time is later than END time."
+    exit 1
+fi
+
+
+echo
+echo "============================================================"
+echo " NCEP FNL DOWNLOAD"
+echo "============================================================"
+echo " Start : $START UTC"
+echo " End   : $END UTC"
+echo " Base  : $BASE_DIR"
+echo "============================================================"
+echo
+
+
+# ------------------------------------------------------------
+# Download every 6 hours
+# ------------------------------------------------------------
+
+while [ "$CURRENT" -le "$END_SEC" ]; do
+
+    YYYY=$(date -u -d "@$CURRENT" +%Y)
+    MM=$(date -u -d "@$CURRENT" +%m)
+    DD=$(date -u -d "@$CURRENT" +%d)
+    HH=$(date -u -d "@$CURRENT" +%H)
+
+    YYYYMM="${YYYY}.${MM}"
+    YYYYMMDD="${YYYY}${MM}${DD}"
+
+    OUTDIR="${BASE_DIR}/${YYYY}/${MM}"
+
+    mkdir -p "$OUTDIR"
+
+    FILE="fnl_${YYYYMMDD}_${HH}_00.grib2"
+
+    URL="${BASE_URL}/${YYYY}/${YYYYMM}/${FILE}"
+
+    echo "------------------------------------------------------------"
+    echo "File : $FILE"
+    echo "Path : $OUTDIR"
+
+    wget -c -P "$OUTDIR" "$URL"
+
+    CURRENT=$((CURRENT + 21600))
+
+done
+
+
+echo
+echo "============================================================"
+echo " FNL download completed."
+echo "============================================================"
+echo
+
+
+# ------------------------------------------------------------
+# List downloaded files
+# ------------------------------------------------------------
+
+find "$BASE_DIR" \
+    -type f \
+    -name "fnl_*.grib2" \
+    -newermt "$START_DATE UTC" \
+    2>/dev/null | sort
+
+echo
+EOF
+chmod +x /home/woogon/CMAQ_MODEL/SCRIPTS/download_fnl.sh
+bash -n /home/woogon/CMAQ_MODEL/SCRIPTS/download_fnl.sh
 ```
 
-위 월은 예시이다. 자료 크기와 시각 목록을 확인하고, 다운로드된 파일이 로그인 HTML이나 빈 파일이 아닌 GRIB2인지 점검한다. 계정 인증 정보는 문서나 Git에 넣지 않는다.
+**실제 호출 명령:**
+
+```bash
+/home/woogon/CMAQ_MODEL/SCRIPTS/download_fnl.sh 2026083100 2026090200
+```
+
+두 인자는 시작·종료 UTC 시각(YYYYMMDDHH)이며 종료 시각도 포함한다. 현재 CASE의 2026-08-31 00 UTC~2026-09-02 00 UTC는 6시간 간격 총 9개 파일이다. 이 날짜는 케이스별 변경값이다. 다른 기간에는 namelist.wps/namelist.input과 함께 바꾼다. 시작·종료는 반드시 00/06/12/18 UTC 분석 시각을 사용한다. 원본은 10자리 형식과 시작≤종료를 검사하지만 6시간 분석 시각 여부는 별도로 검사하지 않는다.
+
+저장 위치는 /home/woogon/CMAQ_MODEL/DATA/MET/FNL/YYYY/MM/이며 월 경계를 자동으로 넘긴다. URL은 스크립트의 BASE_URL 아래 YYYY/YYYY.MM/fnl_YYYYMMDD_HH_00.grib2를 사용한다. wget -c로 중단된 다운로드를 이어받는다. 다운로드 오류가 나면 해당 시각의 자료 제공 여부와 접속 상태를 확인하고 같은 명령을 다시 실행한다.
+
+**모의 기간의 파일 누락·빈 파일·GRIB2 시작 헤더 확인:**
+
+```bash
+(
+set -e
+fnl_start=2026083100
+fnl_end=2026090200
+fnl_current=$(date -u -d "${fnl_start:0:8} ${fnl_start:8:2}:00 UTC" +%s)
+fnl_end_sec=$(date -u -d "${fnl_end:0:8} ${fnl_end:8:2}:00 UTC" +%s)
+fnl_count=0
+while [ "$fnl_current" -le "$fnl_end_sec" ]; do
+    fnl_file=/home/woogon/CMAQ_MODEL/DATA/MET/FNL/$(date -u -d "@$fnl_current" +%Y/%m)/fnl_$(date -u -d "@$fnl_current" +%Y%m%d_%H)_00.grib2
+    test -s "$fnl_file" || { echo "누락 또는 빈 파일: $fnl_file"; exit 1; }
+    test "$(head -c 4 "$fnl_file")" = GRIB || { echo "GRIB 헤더 오류: $fnl_file"; exit 1; }
+    test "$(od -An -tu1 -j7 -N1 "$fnl_file" | tr -d '[:space:]')" = 2 || { echo "GRIB2 edition 오류: $fnl_file"; exit 1; }
+    ls -lh "$fnl_file"
+    fnl_count=$((fnl_count + 1))
+    fnl_current=$((fnl_current + 21600))
+done
+echo "확인된 기간 내 파일 수: $fnl_count"
+)
+```
+
+검사 블록의 날짜도 다운로드 인자와 함께 바꾼다. 헤더 검사는 파일 전체 무결성 검사를 대신하지 않으므로 이후 ungrib 성공 여부도 확인한다. 원본 마지막 find는 파일 수정시각으로 목록을 고르며 "$START_DATE UTC"에 UTC가 중복되어 목록이 비어 있을 수 있다. 따라서 마지막 목록만 보고 기간별 자료 확보를 판단하지 않고 위 파일명 기반 검사를 사용한다. 원본은 이 문서에 그대로 보존했다. 계정 인증 정보는 문서나 Git에 넣지 않는다.
 
 ### 14.4. WPS: geogrid → ungrib → metgrid
 
@@ -1346,7 +1516,7 @@ ncdump -v Times wrfout_d01_2026-08-31_00:00:00 | tail -30
 
 ### 14.7. 재현에 필요한 보존 자료
 
-CASE의 namelist.wps/namelist.input, FNL 파일 목록·기간, geo_em/met_em header, runtime 링크 목록, compiler/MPI/library 버전, rsl 로그와 성공 메시지를 보존한다. 두 namelist 원문은 §14.3.2에 반영했다. 다운로드 스크립트 원문·호출 인자는 아직 미수집이며, 새 시스템에서는 정적 자료와 FNL 자료를 별도로 준비해야 한다.
+CASE의 namelist.wps/namelist.input, FNL 파일 목록·기간, geo_em/met_em header, runtime 링크 목록, compiler/MPI/library 버전, rsl 로그와 성공 메시지를 보존한다. 두 namelist 원문은 §14.3.2에 반영했다. 사용자 제공 다운로드 스크립트 원문·생성·호출 명령은 §14.3.4에 반영했다. 새 시스템에서는 정적 자료와 FNL 자료를 해당 절차로 준비한다.
 
 절차와 Vtable의 공식 근거: [WRF Users Guide — WPS](https://www2.mmm.ucar.edu/wrf/users/wrf_users_guide/build/html/wps.html).
 
