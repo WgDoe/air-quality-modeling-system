@@ -23,9 +23,6 @@
 ### WRF / WPS
 
 - [WRF/WPS 설치 가이드](docs/wrf/WRF_WPS_Installation_Guide.md)
-- [WRF/WPS 사례 실행](docs/wrf/WRF_WPS_Case_Run.md)
-- [GHG runtime data 오류 해결](docs/wrf/WRF_GHG_Error_Fix.md)
-- [실제 디렉터리 구조](docs/planning/Directory_Structure.md)
 
 ### Master Plan과 현재 문서의 대응
 
@@ -78,7 +75,7 @@ Rocky Linux 문서는 Phase 1의 OS 설치와 기본 확인을, Compiler/MPI 문
     └── download_fnl.sh
 ```
 
-`src/`에는 원본 소스·압축파일 및 라이브러리 빌드용 소스를 보관한다. 실제 컴파일된 모델 본체는 프로젝트 루트의 버전별 폴더에 둔다. 라이브러리 설치 결과는 `libs/`에 두며, I/O API는 이 아래에서 직접 빌드한 기존 구성을 유지한다. 지형·기상자료와 사례별 실행폴더는 모델 설치폴더와 분리한다. 실제 경로와 케이스 변경 기준은 [디렉터리 구조](docs/planning/Directory_Structure.md), 실행 명령은 [WRF/WPS 사례 실행](docs/wrf/WRF_WPS_Case_Run.md)을 기준으로 한다.
+`src/`에는 원본 소스·압축파일 및 라이브러리 빌드용 소스를 보관한다. 실제 컴파일된 모델 본체는 프로젝트 루트의 버전별 폴더에 둔다. 라이브러리 설치 결과는 `libs/`에 두며, I/O API는 이 아래에서 직접 빌드한 기존 구성을 유지한다. 지형·기상자료와 사례별 실행폴더는 모델 설치폴더와 분리한다. 실제 경로와 케이스 변경 기준은 [WRF/WPS 설치·실행 가이드](docs/wrf/WRF_WPS_Installation_Guide.md)을 기준으로 한다.
 
 ### 설치 시 확인한 사항
 
@@ -92,11 +89,11 @@ Rocky Linux 문서는 Phase 1의 OS 설치와 기본 확인을, Compiler/MPI 문
 
 ```text
 docs/
-  planning/   # master plan, Directory_Structure.md
+  planning/   # master plan
   linux/
   compiler/
   libraries/
-  wrf/        # 설치, 사례 실행, GHG 오류 기록
+  wrf/        # 설치·실행·GHG 오류를 하나의 문서에 통합
 ```
 
 `scripts/`, `config/`, `examples/`, `tests/`는 향후 저장소 구성 계획이다. 서버의 `SCRIPTS/download_fnl.sh`와 GitHub에 등록된 파일을 구분한다.

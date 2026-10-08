@@ -301,7 +301,7 @@ git clone -b CMAQv5.5.0.3_11Jul2025 https://github.com/USEPA/CMAQ.git CMAQ_REPO
     └── download_fnl.sh
 ```
 
-위 구조는 2026-10-08 사용자 제공 실제 경로를 반영한다. `src/`는 원본 보관, 모델 본체는 프로젝트 루트, 라이브러리는 `libs/`, 공유 자료는 `DATA/`, 실행 결과는 CASE별로 분리한다. 자세한 역할과 현재/계획 구조는 [디렉터리 구조](Directory_Structure.md)를 따른다.
+위 구조는 2026-10-08 사용자 제공 실제 경로를 반영한다. `src/`는 원본 보관, 모델 본체는 프로젝트 루트, 라이브러리는 `libs/`, 공유 자료는 `DATA/`, 실행 결과는 CASE별로 분리한다. 자세한 역할과 현재/계획 구조는 [WRF/WPS 가이드 §2](../wrf/WRF_WPS_Installation_Guide.md)를 따른다.
 ---
 
 # 5. Linux 기본 환경
@@ -504,7 +504,7 @@ wrfout_d02_*
 - 빌드 스크립트용 `tcsh`(csh)를 설치하고 `perl`, `m4`를 확인했다.
 - CMAQ 연계를 고려하여 PX LSM, ACM2 PBL 등 CMAQ 권장 물리옵션 조합을 우선 검토한다.
 
-현재 상태: **WRF 4.5.1 / WPS 4.5 설치·컴파일 확인 완료. TEST_20260901의 WPS와 real.exe 성공, WRF 4코어 계산 진행 확인; 최종 정상 종료는 미확인**. WRF는 GNU dmpar, basic nesting으로, WPS는 GNU serial, GRIB2 지원으로 빌드했다. 현재 FNL 사례 실행은 [사례 실행 가이드](../wrf/WRF_WPS_Case_Run.md)를 따른다. WRF 최종 정상 종료와 출력 종료 시각 확인이 다음 작업이다.
+현재 상태: **WRF 4.5.1 / WPS 4.5 설치·컴파일 확인 완료. TEST_20260901의 WPS와 real.exe 성공, WRF 4코어 계산 진행 확인; 최종 정상 종료는 미확인**. WRF는 GNU dmpar, basic nesting으로, WPS는 GNU serial, GRIB2 지원으로 빌드했다. 현재 FNL 사례 실행은 [사례 실행 가이드](../wrf/WRF_WPS_Installation_Guide.md)를 따른다. WRF 최종 정상 종료와 출력 종료 시각 확인이 다음 작업이다.
 
 설치 시 확인한 중요 사항(상세 기록: [WRF/WPS 설치 가이드](../wrf/WRF_WPS_Installation_Guide.md)):
 
@@ -849,7 +849,7 @@ ISAM이 source contribution을 계산하는 데 비해 DDM-3D는 배출량 변�
 
 최종 시스템은 프로그램별 설치폴더와 사례별 실행폴더를 분리한다.
 
-현재 실행 사례는 `/home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901`이다. 내부 폴더는 `WPS`, `WRF`, `MCIP`, `EMIS`, `CMAQ`, `POST`, `LOG`이며, `config`와 `ISAM`은 향후 확장 계획이다. 실행은 CASE 폴더에서 모델 실행파일의 절대경로를 직접 호출한다. [실행 기준](../wrf/WRF_WPS_Case_Run.md)을 따른다.
+현재 실행 사례는 `/home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901`이다. 내부 폴더는 `WPS`, `WRF`, `MCIP`, `EMIS`, `CMAQ`, `POST`, `LOG`이며, `config`와 `ISAM`은 향후 확장 계획이다. 실행은 CASE 폴더에서 모델 실행파일의 절대경로를 직접 호출한다. [실행 기준](../wrf/WRF_WPS_Installation_Guide.md)을 따른다.
 
 case별 변경항목:
 
@@ -1069,7 +1069,7 @@ ncdump -h filename.nc
 | `02_GNU_Compiler_MPI_Setup.md` | [GNU Compiler 및 OpenMPI 설치 가이드](../compiler/GNU_Compiler_OpenMPI_Installation_Guide.md) |
 | `03_NetCDF_HDF5_IOAPI_Setup.md` | [공통 라이브러리 구축 기록](../libraries/Common_Libraries_Installation_Guide.md) |
 | `04_WRF_WPS_Install.md` | [WRF/WPS 설치 가이드](../wrf/WRF_WPS_Installation_Guide.md) |
-| `05_WRF_Case_Run.md` | [WRF/WPS 사례 실행](../wrf/WRF_WPS_Case_Run.md) |
+| `05_WRF_Case_Run.md` | 별도 파일 대신 WRF/WPS 설치 가이드 §14에 통합 |
 
 계획 당시 전체 산출물 목록:
 
