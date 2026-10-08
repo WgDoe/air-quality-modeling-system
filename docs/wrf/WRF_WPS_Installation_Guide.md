@@ -1,5 +1,7 @@
 # CMAQ 모델링 시스템 WRF/WPS 구축 가이드
 
+**다음 CASE 실행 명령을 보려면 [입력파일 준비와 프로그램별 실행 순서](#case-run)로 이동한다.** WPS/WRF namelist 복사·편집, geogrid, ungrib, metgrid, real.exe, wrf.exe 명령을 §14에 순서대로 정리했다.
+
 ## 1. 목적
 Rocky Linux 기반 CMAQ 통합 대기질 모델링 시스템의 Phase 3(WRF/WPS) 설치·자료 준비·사례 실행·오류 해결 절차를 하나의 문서로 기록한다.
 
@@ -746,7 +748,30 @@ export LD_LIBRARY_PATH=$CMAQ_LIBS/grib2/lib:$LD_LIBRARY_PATH
 
 Phase 3의 설치·사례 실행과 결과파일 생성은 성공으로 기록한다(2026-10-08 사용자 확인). WRF는 현재 오류 없이 실행 중이다. 이 성공은 실행·출력 생성 기준이며, 전체 기간 정상 종료는 모의 종료 후 `SUCCESS COMPLETE WRF`와 마지막 Times를 확인해 별도 기록한다. 다음 구축 단계는 MCIP 설치·입력 변환이다.
 
+<a id="case-run"></a>
+
 ## 14. 자료 준비 및 사례 실행: BUSAN / TEST_20260901
+
+### 14.0. 다음 실행 때 따라 할 순서
+
+이 장의 명령은 **Linux Bash 터미널**에서 위에서 아래로 실행한다. 설치를 다시 하는 절차가 아니라 이미 구축한 WRF/WPS로 다음 CASE를 실행하는 절차다.
+
+현재 `TEST_20260901`은 실행 중인 성공 사례이므로 그 입력·출력을 덮어쓰지 않는다. 다음 명령 예시는 새 폴더 `TEST_20260901_REPEAT`에 현재 성공한 입력파일을 복사하여 재실행하는 방식이다. 다른 사례명으로 실행하려면 아래 모든 `TEST_20260901_REPEAT` 경로를 원하는 이름으로 함께 바꾼다. 실행파일은 계속 설치 폴더의 **절대경로**로 직접 호출한다.
+
+| 순서 | 작업 | 명령 위치 |
+|---|---|---|
+| 1 | 환경 불러오기·폴더 생성 | §14.3 |
+| 2 | 성공한 namelist 보존·복사·기간 변경 | §14.3.1~14.3.3 |
+| 3 | 지형자료·FNL 준비 | §14.3.4 |
+| 4 | WPS 테이블 링크 및 geogrid 실행 | §14.4.1 |
+| 5 | FNL 링크 및 ungrib 실행 | §14.4.2 |
+| 6 | metgrid 실행·34층 확인 | §14.4.3 |
+| 7 | WRF 입력 링크·runtime data 준비 | §14.5.1 |
+| 8 | real.exe 실행·9개 산출물 확인 | §14.5.2 |
+| 9 | wrf.exe 4코어 실행 | §14.6 |
+| 10 | 다른 터미널에서 진행·결과 확인 | §14.6 |
+
+각 프로그램의 성공 메시지와 산출물을 확인한 뒤 다음 단계로 간다. **모든 프로그램을 한 번에 붙여넣어 연속 실행하지 않는다.**
 
 ### 14.1. 범위와 확인된 상태
 
@@ -770,7 +795,7 @@ WPS와 real.exe는 성공했다. WRF도 현재까지 오류 없이 실행되고 
 | 모의 기간/출력 주기 | 사례별 변경 | start/end, run_*, history_interval, FDDA 시간창 및 자료 범위 정합 |
 | 사례 폴더 | TEST_20260901 | 폴더명에서 실제 모의 시작·종료를 추정하지 않음 |
 
-현재 namelist 원문은 이 저장소에 없다. 격자 크기, nest ratio, 물리옵션 번호, FDDA 계수는 확인되지 않은 값을 만들어 적지 않는다. 동일 사례를 완전히 재현하려면 실제 성공한 `namelist.wps`, `namelist.input`을 보존해야 한다. 아래 조각은 해당 section에 반영할 항목이며 완전한 namelist 대체 파일이 아니다.
+현재 namelist 원문은 이 저장소에 없다. 격자 크기, nest ratio, 물리옵션 번호, FDDA 계수는 확인되지 않은 값을 만들어 적지 않는다. 동일 사례를 완전히 재현하려면 실제 성공한 `namelist.wps`, `namelist.input`을 보존해야 한다. §14.3.2는 성공한 원본 파일을 복사하는 명령이며, §14.3.3은 날짜 변경 위치를 보여준다. 날짜 조각만으로 완전한 namelist를 새로 만들 수는 없다.
 
 날짜는 모두 UTC 모델 시각이다. 예를 들어 2026-08-31 00 UTC ~ 2026-09-02 00 UTC는 설명용 기간이며 확정된 실제 기간이 아니다. 네 도메인의 start/end를 일치시키고 run_*와 FDDA 종료 시간, 입력자료 마지막 시각을 함께 조정한다. domain/physics/FDDA의 현재 공간·물리 설정과 날짜 변경을 구분한다.
 
@@ -788,12 +813,100 @@ ldd /home/woogon/CMAQ_MODEL/WRFV4.5.1/main/wrf.exe
 ldd /home/woogon/CMAQ_MODEL/WPS-4.5/geogrid/src/geogrid.exe
 ldd /home/woogon/CMAQ_MODEL/WPS-4.5/ungrib/src/ungrib.exe
 ldd /home/woogon/CMAQ_MODEL/WPS-4.5/metgrid/src/metgrid.exe
-mkdir -p /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/{WPS,WRF,MCIP,EMIS,CMAQ,POST,LOG}
+mkdir -p /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/{WPS,WRF,MCIP,EMIS,CMAQ,POST,LOG}
 mkdir -p /home/woogon/CMAQ_MODEL/DATA/WPS_GEOG
 mkdir -p /home/woogon/CMAQ_MODEL/DATA/MET/FNL
 ```
 
 ldd에 `not found`가 있으면 먼저 공통 라이브러리 환경을 복구한다.
+
+#### 14.3.1. 성공한 입력파일을 먼저 보존한다
+
+현재 성공한 입력파일은 아래 두 경로에 있다. 이 파일들은 새 namelist를 만드는 기준이다. 설치 폴더의 기본 namelist 예제를 복사하면 현재 도메인·물리·FDDA 설정이 사라질 수 있으므로 사용하지 않는다.
+
+```bash
+ls -lh /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/WPS/namelist.wps
+ls -lh /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/WRF/namelist.input
+input_archive=/home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/LOG/inputs_$(date -u +%Y%m%dT%H%M%SZ)
+mkdir -p "$input_archive"
+cp -p /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/WPS/namelist.wps "$input_archive"/
+cp -p /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/WRF/namelist.input "$input_archive"/
+```
+
+ls에서 파일이 없으면 진행하지 않는다. 아래 준비는 새 실행 폴더에서만 한다.
+
+#### 14.3.2. WPS와 WRF 입력파일을 새 CASE에 복사한다
+
+```bash
+mkdir -p /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/{WPS,WRF,MCIP,EMIS,CMAQ,POST,LOG}
+# 두 대상 파일이 모두 없을 때만 복사한다.
+if [ ! -e /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS/namelist.wps ] &&
+   [ ! -e /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF/namelist.input ]; then
+    cp -p /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/WPS/namelist.wps /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS/
+    cp -p /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/WRF/namelist.input /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF/
+else
+    echo "STOP: 대상 CASE에 입력파일이 이미 있습니다. 새로운 CASE 이름을 사용하세요."
+fi
+ls -lh /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS/namelist.wps
+ls -lh /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF/namelist.input
+```
+
+STOP이 출력되면 아래 실행을 진행하지 않고 새로운 CASE 이름으로 준비한다. 동일 기간·도메인을 재현하면 복사한 성공 설정을 그대로 사용한다. 새 시스템에서는 성공 사례의 두 파일을 먼저 위 원본 경로로 가져와야 하며, 이 저장소에는 원문이 아직 없어 다운로드 명령으로 대체할 수 없다.
+
+#### 14.3.3. 기간을 바꿀 때 입력파일을 편집하고 확인한다
+
+기간이 같으면 날짜를 바꾸지 않는다. 기간을 바꿀 때만 새 CASE의 두 입력파일을 편집한다.
+
+```bash
+vi /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS/namelist.wps
+vi /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF/namelist.input
+```
+
+vi에서는 `i`로 수정하고 Esc → `:wq` → Enter로 저장한다. 아래는 **수정 위치를 보여주는 조각**이며 전체 namelist를 덮어쓰는 입력파일이 아니다. 시작/종료 시각은 예시이다.
+
+WPS의 기존 `&share` section에서 네 도메인의 날짜를 같은 기간으로 맞춘다.
+
+```fortran
+ max_dom = 4,
+ start_date = '2026-08-31_00:00:00', '2026-08-31_00:00:00', '2026-08-31_00:00:00', '2026-08-31_00:00:00',
+ end_date   = '2026-09-02_00:00:00', '2026-09-02_00:00:00', '2026-09-02_00:00:00', '2026-09-02_00:00:00',
+ interval_seconds = 21600,
+```
+
+WRF의 기존 `&time_control` section은 같은 UTC 기간으로 맞춘다. 아래 run_days=2는 위 48시간 예시 기간에만 해당한다.
+
+```fortran
+ run_days = 2,
+ run_hours = 0,
+ run_minutes = 0,
+ run_seconds = 0,
+ start_year   = 2026, 2026, 2026, 2026,
+ start_month  = 08, 08, 08, 08,
+ start_day    = 31, 31, 31, 31,
+ start_hour   = 00, 00, 00, 00,
+ start_minute = 00, 00, 00, 00,
+ start_second = 00, 00, 00, 00,
+ end_year     = 2026, 2026, 2026, 2026,
+ end_month    = 09, 09, 09, 09,
+ end_day      = 02, 02, 02, 02,
+ end_hour     = 00, 00, 00, 00,
+ end_minute   = 00, 00, 00, 00,
+ end_second   = 00, 00, 00, 00,
+ interval_seconds = 21600,
+```
+
+기존 `&fdda`의 `gfdda_end_h` 등 시간창도 새 모의 기간에 맞춰 검토한다. FDDA 방식·도메인별 적용·계수는 성공한 설정을 유지한다. `&domains`의 `num_metgrid_levels=34`와 `&physics`의 `num_land_cat=21`을 확인하되 격자·물리 설정은 임의로 바꾸지 않는다.
+
+```bash
+grep -nE 'max_dom|start_date|end_date|interval_seconds|geog_data_path|geog_data_res|prefix|fg_name' /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS/namelist.wps
+grep -nE 'run_days|run_hours|run_minutes|run_seconds|start_|end_|interval_seconds|max_dom|num_metgrid_levels|num_metgrid_soil_levels|num_land_cat|grid_fdda|gfdda' /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF/namelist.input
+diff -u /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/WPS/namelist.wps /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS/namelist.wps
+diff -u /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/WRF/namelist.input /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF/namelist.input
+```
+
+동일 기간 복사라면 diff 출력이 없어야 한다. 기간 변경 사례라면 의도한 날짜·실행기간·시간창만 바뀌었는지 확인한다.
+
+#### 14.3.4. 정적 자료와 FNL 준비
 
 정적 자료는 [공식 WPS 지형자료 페이지](https://www2.mmm.ucar.edu/wrf/users/download/get_sources_wps_geog.html)에서 현재 GEOGRID.TBL이 요구하는 지형·토양·식생·MODIS 자료를 준비하고 WPS_GEOG에 압축 해제한다. 기존 서버에서는 준비된 자료를 재사용한다. 신규 geogrid는 MODIS 21 category를 표준으로 한다. `geog_data_res='default',...`는 로컬 GEOGRID.TBL의 LANDUSEF 항목이 21-category MODIS 자료를 선택하는지 확인한 뒤 사용한다. USGS 기반 기존 geo_em에 WRF의 num_land_cat만 21로 바꾸지 않는다.
 
@@ -813,10 +926,12 @@ ls -lh /home/woogon/CMAQ_MODEL/DATA/MET/FNL/2026/09/fnl_*.grib2
 
 성공한 CASE의 namelist.wps를 CASE/WPS에 준비하고 기간을 변경한다. &share에 `max_dom=4`, `interval_seconds=21600`, &geogrid에 `geog_data_path='/home/woogon/CMAQ_MODEL/DATA/WPS_GEOG'`, &ungrib에 `out_format='WPS'`, `prefix='FILE'`, &metgrid에 `fg_name='FILE'`을 설정한다. out_opt=2는 netCDF 출력 기준이다. 도메인의 parent_id, parent_grid_ratio, i/j_parent_start, e_we/e_sn, dx/dy 및 투영은 검증된 값을 유지한다.
 
+#### 14.4.1. WPS 테이블 준비와 geogrid.exe 실행
+
 현재 작업 디렉터리가 입력·출력 위치를 결정한다. 실행파일은 설치 폴더의 절대경로로 호출한다.
 
 ```bash
-cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/WPS
+cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS
 mkdir -p geogrid metgrid
 ln -sfn /home/woogon/CMAQ_MODEL/WPS-4.5/geogrid/GEOGRID.TBL.ARW geogrid/GEOGRID.TBL
 ln -sfn /home/woogon/CMAQ_MODEL/WPS-4.5/metgrid/METGRID.TBL.ARW metgrid/METGRID.TBL
@@ -830,14 +945,25 @@ ncdump -h geo_em.d01.nc | grep -E 'MMINLU|NUM_LAND_CAT'
 
 geogrid 성공 메시지와 d01~d04 geo_em, MODIS 21 category를 확인한다. d02~d04 header도 동일하게 확인한다. 사용 자료나 도메인을 바꾸면 geogrid부터 재생성한다.
 
-다음 명령의 날짜 패턴은 위 설명용 기간에 맞춘 예시이다. 실제 기간의 파일만 링크하고 다른 사례 GRIBFILE 링크가 섞이지 않은 새 실행 폴더를 사용한다.
+#### 14.4.2. FNL 링크와 ungrib.exe 실행
+
+다음 명령의 날짜 패턴은 위 설명용 기간에 맞춘 예시이다. 실제 기간의 파일만 링크하고 다른 사례 GRIBFILE 링크가 섞이지 않은 새 실행 폴더를 사용한다. WPS 입력자료 목록이 파일로 출력되는지 확인한 뒤 ungrib을 시작한다.
 
 ```bash
+cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS
 /home/woogon/CMAQ_MODEL/WPS-4.5/link_grib.csh /home/woogon/CMAQ_MODEL/DATA/MET/FNL/2026/08/fnl_20260831_*.grib2 /home/woogon/CMAQ_MODEL/DATA/MET/FNL/2026/09/fnl_2026090[12]_*.grib2
 ls -l GRIBFILE.*
 /home/woogon/CMAQ_MODEL/WPS-4.5/ungrib.exe
 tail -30 ungrib.log
 ls -lh FILE:*
+```
+
+ungrib 성공 메시지와 FILE:*의 시작·종료 시각 및 6시간 간격을 확인한다.
+
+#### 14.4.3. metgrid.exe 실행
+
+```bash
+cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS
 /home/woogon/CMAQ_MODEL/WPS-4.5/metgrid.exe
 tail -30 metgrid.log
 ls -lh met_em.d0*.nc
@@ -856,11 +982,15 @@ ungrib/metgrid 각각 성공 메시지를 확인한 뒤 다음 단계로 진행�
 
 CASE/WRF에 검증된 namelist.input을 준비한다. &time_control의 start/end와 run_*는 WPS 기간과 일치시키고 `interval_seconds=21600`을 사용한다. &domains의 `max_dom=4`, `num_metgrid_levels=34`, &physics의 `num_land_cat=21` 및 현재 물리 설정을 확인한다. FDDA 원문 설정을 유지하고 시간창은 변경한 모의 기간과 맞춘다.
 
+#### 14.5.1. met_em 입력과 runtime data 링크 준비
+
 런타임 자료는 real.exe와 wrf.exe 실행 전에 준비한다. run 전체를 링크하지 않고 현재 설정에 필요한 일곱 파일만 연결한다.
 
 ```bash
-cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/WRF
-ln -s /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/WPS/met_em.d0*.nc .
+cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF
+ls -lh /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS/met_em.d0*.nc
+ln -s /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS/met_em.d0*.nc .
+ls -lh namelist.input met_em.d0*.nc
 WRFRUN=/home/woogon/CMAQ_MODEL/WRFV4.5.1/run
 for runtime_file in LANDUSE.TBL VEGPARM.TBL SOILPARM.TBL GENPARM.TBL RRTM_DATA RRTM_DATA_DBL CAMtr_volume_mixing_ratio; do
     test -s "$WRFRUN/$runtime_file" || { echo "Missing runtime data: $runtime_file"; break; }
@@ -872,9 +1002,12 @@ for runtime_file in LANDUSE.TBL VEGPARM.TBL SOILPARM.TBL GENPARM.TBL RRTM_DATA R
 done
 ```
 
-STOP 또는 누락 메시지가 있으면 실행을 진행하지 않는다. 물리옵션을 바꾸었을 때는 요구하는 추가 runtime data만 검토해 연결한다. GHG 오류의 실제 원인은 CASE 실행 폴더의 runtime data 누락이며 부록 B을 참고한다.
+STOP 또는 누락 메시지가 있으면 실행을 진행하지 않는다. 물리옵션을 바꾸었을 때는 요구하는 추가 runtime data만 검토해 연결한다. GHG 오류의 실제 원인은 CASE 실행 폴더의 runtime data 누락이며 부록 B를 참고한다.
+
+#### 14.5.2. real.exe 실행
 
 ```bash
+cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF
 source /etc/profile.d/modules.sh
 module load mpi/openmpi-x86_64
 mpirun -np 4 /home/woogon/CMAQ_MODEL/WRFV4.5.1/main/real.exe
@@ -889,7 +1022,7 @@ SUCCESS COMPLETE REAL과 모든 산출물을 확인한 뒤 진행한다. 현재 
 real.exe 로그를 보존한 뒤 wrf.exe를 시작한다. 기존 계산이 실행 중이면 아래 명령으로 재실행하지 않는다. 실패 실행의 wrfout/rsl은 별도 보관하고, 새 사례 폴더를 사용하는 것을 우선한다. 정상 출력 파일을 일괄 삭제하는 절차는 포함하지 않는다.
 
 ```bash
-cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/WRF
+cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF
 real_log_archive=../LOG/real_$(date -u +%Y%m%dT%H%M%SZ)
 mkdir -p "$real_log_archive"
 cp -p rsl.error.* rsl.out.* "$real_log_archive"/
@@ -899,19 +1032,19 @@ mpirun -np 4 /home/woogon/CMAQ_MODEL/WRFV4.5.1/main/wrf.exe
 wrf.log를 별도 생성하지 않는다. 로그는 CASE/WRF의 rsl.error.* / rsl.out.*를 사용한다. 실행 중 두 번째 터미널에서 확인한다.
 
 ```bash
-tail -f /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/WRF/rsl.error.0000
+tail -f /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF/rsl.error.0000
 ```
 
 tail 감시를 끝내는 Ctrl+C는 해당 감시 터미널에서만 누른다. 실제 모델 실행 터미널에서 누르면 계산을 중단할 수 있다. 커서 깜빡임이나 로그 숫자 증가만으로 정상 계산을 단정하지 않고 모델 시각을 확인한다.
 
 ```bash
-grep "Timing for main" /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/WRF/rsl.error.0000 | tail
+grep "Timing for main" /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF/rsl.error.0000 | tail
 ```
 
 모델 시간이 증가하면 계산 진행 중이다. 종료 후 확인:
 
 ```bash
-cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/WRF
+cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF
 grep "SUCCESS COMPLETE WRF" rsl.error.0000
 tail -30 rsl.error.0000
 grep -niE 'FATAL|segmentation|MPI_ABORT' rsl.error.* rsl.out.*
