@@ -1,5 +1,7 @@
 # Rocky Linux 설치 가이드
 
+**설치 USB·OS 설치는 §3~16의 화면 선택을 따르고, 설치 후 터미널 명령은 §17.1부터 실행한다.** USB 제작과 설치 화면은 기존 GUI 순서를 유지한다.
+
 ## 1. 문서 목적
 
 본 문서는 x86_64 기반 데스크톱 또는 워크스테이션에 **Rocky Linux 9 계열**을 설치하기 위한 표준 절차를 정리한 설치 가이드이다.
@@ -36,7 +38,19 @@ Rocky Linux 9 x86_64 ISO 저장소:
 
 https://download.rockylinux.org/pub/rocky/9/isos/x86_64/
 
-### 3.2 권장 이미지
+### 3.2 다운로드한 ISO 확인
+
+Windows에서 내려받은 ISO 파일을 다음 명령으로 확인할 수 있다. 경로는 입력 창에 실제 파일의 전체 경로를 넣는다.
+
+```powershell
+$rockyIsoPath = Read-Host '다운로드한 Rocky ISO의 전체 경로'
+Get-Item -LiteralPath $rockyIsoPath
+Get-FileHash -LiteralPath $rockyIsoPath -Algorithm SHA256
+```
+
+출력 해시를 같은 ISO에 대해 공식 다운로드 페이지가 제공한 SHA256 값과 비교한다. 값이 같을 때 USB를 제작한다. 이 명령은 해시를 계산하며 USB에 기록하지 않는다.
+
+### 3.3 권장 이미지
 
 일반적인 워크스테이션 설치에서는 **DVD ISO** 사용을 권장한다.
 
@@ -345,6 +359,14 @@ Minimal Install
 Ralink Technology, Corp. MT7601U Wireless Adapter
 ```
 
+### 14.0 진단 명령이 없을 때
+
+lsusb는 usbutils, iw는 iw 패키지에서 제공한다. 아직 인터넷이 없으면 DVD 설치 미디어 등 사용 가능한 패키지 저장소가 필요하다. 인터넷이 연결된 뒤 다음을 설치할 수 있다.
+
+```bash
+sudo dnf install -y usbutils iw
+```
+
 ### 14.1 USB 장치 인식 확인
 
 USB 무선랜을 연결한 뒤 다음 명령으로 장치가 보이는지 확인한다.
@@ -461,18 +483,18 @@ nmcli connection modify AirNew2G wifi-sec.key-mgmt wpa-psk
 비밀번호는 실제 값을 문서에 기록하지 않고 다음과 같이 입력한다.
 
 ```bash
-nmcli connection modify AirNew2G wifi-sec.psk 'WIFI_PASSWORD'
+nmcli --ask connection up AirNew2G
 ```
 
-위 설정까지 완료하면 GNOME의 Wi-Fi 설정 화면에서 해당 숨김 네트워크가 인식될 수 있으며, 화면에서 비밀번호를 입력하여 연결할 수도 있다.
+위 명령은 비밀번호를 대화형으로 물어 연결한다. GNOME의 Wi-Fi 설정 화면에서 입력해 연결할 수도 있다.
 
-명령줄에서 직접 연결하려면 다음을 실행한다.
+이미 저장된 연결 프로파일을 다시 활성화하려면 다음을 실행한다.
 
 ```bash
 nmcli connection up AirNew2G
 ```
 
-> 비밀번호에 `!` 문자가 포함된 경우 Bash history expansion 때문에 `event not found` 오류가 발생할 수 있으므로 비밀번호는 **작은따옴표(' ')** 로 감싼다.
+> `--ask`는 비밀번호를 명령줄의 인자로 넣지 않고 입력받는다. SSID와 프로파일명은 실제 네트워크에 맞춰 바꾼다.
 
 실제 운영 비밀번호는 문서나 Git 저장소에 기록하지 않는다.
 
@@ -537,7 +559,7 @@ nmcli device wifi list
 iPhone hotspot SSID가 보이면 연결한다.
 
 ```bash
-nmcli device wifi connect "IPHONE_SSID" password 'HOTSPOT_PASSWORD'
+nmcli --ask device wifi connect "IPHONE_SSID"
 ```
 
 본 환경에서는 **ipTIME N150UA (MT7601U) + iPhone 개인용 핫스팟의 호환성 최대화 설정으로 인터넷 연결이 정상적으로 동작함을 확인하였다.**
@@ -646,6 +668,57 @@ hostnamectl
 
 ---
 
+### 17.1 설치 후 업데이트·필수 도구 준비
+
+아래는 OS 설치가 끝나고 일반 사용자로 로그인한 뒤 실행한다. 인터넷이나 사용 가능한 패키지 저장소가 먼저 연결되어 있어야 한다. 기존 기록의 누락을 메운 재구축용 명령이다.
+
+```bash
+whoami
+id
+sudo -v
+sudo dnf update -y
+sudo dnf install -y wget curl git tar gzip unzip vim-enhanced \
+  file which make perl m4 tcsh openssh-server
+timedatectl
+```
+
+시간대가 Asia/Seoul이 아니면 설정한다. WRF/FNL의 모델 시각은 이 시스템 시간대와 별도로 UTC를 사용한다.
+
+```bash
+sudo timedatectl set-timezone Asia/Seoul
+timedatectl
+date
+date -u
+```
+
+기존 사용자 woogon으로 구축한다. sudo 권한이 없으면 설치 화면에서 해당 사용자를 관리자 계정으로 선택했는지 확인한다. 다른 사용자명으로 구축할 경우 모든 문서의 /home/woogon 경로를 함께 바꾼다.
+
+### 17.2 설치·네트워크 확인 기록 저장
+
+```bash
+mkdir -p /home/woogon/CMAQ_MODEL/logs/system
+system_record=/home/woogon/CMAQ_MODEL/logs/system/system_$(date -u +%Y%m%dT%H%M%SZ).txt
+{
+    date -u
+    cat /etc/os-release
+    uname -a
+    lscpu
+    free -h
+    lsblk
+    df -h
+    hostnamectl
+    timedatectl
+    nmcli device
+    ip addr
+    ip route
+} > "$system_record"
+cat "$system_record"
+getent hosts github.com
+curl -I https://github.com
+```
+
+getent로 주소가 조회되고 curl이 HTTP 응답을 받는지 확인한다. 조회·접속이 실패하면 소스 다운로드와 패키지 설치 전에 네트워크를 해결한다.
+
 ## 18. 설치 기록 권장 항목
 
 상업용 시스템, 연구용 시스템 또는 장기간 유지해야 하는 모델링 시스템에서는 다음 항목을 기록한다.
@@ -675,6 +748,8 @@ USB 작성 방식(DD/ISO)
 설치 후 GNU Compiler와 OpenMPI 구성은 [GNU Compiler 및 OpenMPI 설치 가이드](../compiler/GNU_Compiler_OpenMPI_Installation_Guide.md)를 참고한다.
 
 ## 19. 참고 사이트
+
+2026-10-08 문서 보완 시 네트워크 확인 명령은 [Rocky Linux Network Configuration](https://docs.rockylinux.org/guides/network/basic_network_configuration/)과 대조했다. 기존 설치 화면·USB·무선랜 성공 기록은 유지했고, 누락된 사전 패키지·확인 명령을 추가했다.
 
 - Rocky Linux: https://rockylinux.org/
 - Rocky Linux Documentation: https://docs.rockylinux.org/

@@ -1,5 +1,7 @@
 # GNU Compiler 및 OpenMPI 설치 가이드
 
+**처음 설치할 때는 §3→4→7→8→10 순서로 실행한다. MPI 테스트 입력파일 생성 명령은 §10.1에 있다.** 모든 명령은 Linux Bash 기준이며 Windows 명령은 별도 표시한다.
+
 # 1. 문서 목적
 
 본 문서는 Rocky Linux 9 계열 환경에서 대기질 모델링 시스템 구축에 필요한 기본 GNU Compiler와 OpenMPI를 설치하고, Windows와 Linux 간 파일 전송 환경을 구성하고 GNU Compiler와 OpenMPI의 설치 및 MPI 병렬 실행 여부를 확인하는 절차를 정리한다.
@@ -61,6 +63,12 @@ SFTP는 SSH 기반으로 통신하므로 전송 구간이 암호화되며, 별�
 
 ## 3.2 Linux SSH 서비스 확인
 
+새 시스템에서 SSH 서버 패키지를 먼저 설치하고 서비스 상태를 확인한다.
+
+```bash
+sudo dnf install -y openssh-server
+```
+
 Linux에서 SSH 서비스 상태를 확인한다.
 
 ```bash
@@ -70,7 +78,7 @@ systemctl status sshd
 서비스가 비활성 상태이면 root 권한으로 활성화한다.
 
 ```bash
-systemctl enable --now sshd
+sudo systemctl enable --now sshd
 ```
 
 다시 확인:
@@ -79,7 +87,23 @@ systemctl enable --now sshd
 systemctl status sshd
 ```
 
-정상적인 경우 `active (running)` 상태로 표시된다.
+정상적인 경우 `active (running)` 상태로 표시된다. firewalld가 실행 중이면 현재 네트워크 인터페이스의 활성 zone을 확인하고 그 zone에 SSH를 허용한다.
+
+```bash
+sudo firewall-cmd --state
+sudo firewall-cmd --get-active-zones
+```
+
+아래 zone 이름은 예시이다. 위 출력에서 접속에 사용하는 인터페이스가 속한 zone 이름을 입력한다.
+
+```bash
+read -r -p 'SSH를 허용할 활성 zone 이름: ' ssh_zone
+sudo firewall-cmd --zone="$ssh_zone" --permanent --add-service=ssh
+sudo firewall-cmd --reload
+sudo firewall-cmd --zone="$ssh_zone" --query-service=ssh
+```
+
+firewalld가 실행되지 않으면 이 방화벽 명령은 적용하지 않는다.
 
 ---
 
@@ -146,6 +170,31 @@ sudo dnf install dos2unix
 
 ```bash
 dos2unix filename
+```
+
+---
+
+## 3.6 Windows PowerShell에서 SSH·파일 전송 확인
+
+WinSCP 대신 Windows OpenSSH가 설치된 경우 다음 명령으로 접속과 전송을 확인할 수 있다. Linux IP 주소를 입력한다.
+
+```powershell
+Get-Command ssh, scp
+$linuxModelHost = Read-Host 'Linux IP 주소'
+ssh "woogon@$linuxModelHost"
+```
+
+SSH 접속이 성공하면 Linux shell이 열리며 exit로 Windows로 돌아온다. Windows에서 단일 파일을 보내려면 다음을 사용한다.
+
+```powershell
+$modelSourceFile = Read-Host '전송할 로컬 파일의 전체 경로'
+scp $modelSourceFile "woogon@${linuxModelHost}:/home/woogon/"
+```
+
+Linux에서 받은 파일을 확인하고 실제 목표 경로로 복사한다. WRF namelist는 WRF 문서 §14의 생성 명령을 사용할 수도 있다.
+
+```bash
+ls -lh /home/woogon/
 ```
 
 ---
@@ -257,6 +306,29 @@ C, C++, Fortran이 모두 GCC 11.5.0 계열이므로 compiler family가 일치�
 
 ---
 
+## 5.6 C와 Fortran 실제 컴파일 확인
+
+버전 출력만 확인하지 않고 간단한 소스를 생성해 실행한다. 일반 사용자로 실행한다.
+
+```bash
+mkdir -p /home/woogon/CMAQ_MODEL/tests/compiler_mpi
+cd /home/woogon/CMAQ_MODEL/tests/compiler_mpi
+cat > hello.c <<'EOF'
+#include <stdio.h>
+int main(void) { puts("GNU C OK"); return 0; }
+EOF
+cat > hello.f90 <<'EOF'
+program hello_gnu
+  implicit none
+  print *, 'GNU Fortran OK'
+end program hello_gnu
+EOF
+gcc hello.c -o hello_c && ./hello_c
+gfortran hello.f90 -o hello_fortran && ./hello_fortran
+```
+
+각각 GNU C OK, GNU Fortran OK가 나오고 종료 코드가 0이어야 한다. 이 두 테스트는 재구축 확인용으로 보완한 명령이며 이전 실행 결과를 새로 관측했다는 뜻은 아니다.
+
 # 6. Compiler 버전 정보를 파일로 저장
 
 설치 환경을 기록하기 위해 버전 정보를 텍스트 파일로 저장할 수 있다.
@@ -294,13 +366,13 @@ cat compiler_version.txt
 root 계정에서:
 
 ```bash
-dnf install openmpi openmpi-devel
+dnf install openmpi openmpi-devel environment-modules
 ```
 
 일반 사용자 계정에서는:
 
 ```bash
-sudo dnf install openmpi openmpi-devel
+sudo dnf install openmpi openmpi-devel environment-modules
 ```
 
 주요 패키지:
@@ -314,7 +386,7 @@ sudo dnf install openmpi openmpi-devel
 
 # 8. OpenMPI 환경 활성화
 
-Rocky Linux 패키지로 설치한 OpenMPI는 Environment Modules를 이용하여 경로를 활성화할 수 있다.
+Rocky Linux 패키지로 설치한 OpenMPI는 Environment Modules를 이용하여 경로를 활성화할 수 있다. 위 설치에서 environment-modules도 함께 설치한다.
 
 일반 사용자 계정에서:
 
@@ -347,6 +419,28 @@ WRF/WPS 설치에서 이 module이 설정한 `MPI_LIB=/usr/lib64/openmpi/lib`가
 
 ---
 
+## 8.1 새 터미널에서도 MPI 환경 사용
+
+WRF 가이드 §6에서도 같은 설정을 등록하므로 이미 등록되어 있으면 반복 추가하지 않는다. 먼저 확인한다.
+
+```bash
+grep -nF 'module load mpi/openmpi-x86_64' ~/.bashrc
+```
+
+등록되지 않았을 때만 다음 블록을 실행한다.
+
+```bash
+cp -p ~/.bashrc ~/.bashrc.bak_mpi_$(date -u +%Y%m%dT%H%M%SZ)
+cat >> ~/.bashrc <<'EOF'
+
+# OpenMPI (Rocky package)
+source /etc/profile.d/modules.sh
+module load mpi/openmpi-x86_64
+EOF
+source ~/.bashrc
+which mpicc mpifort mpirun
+```
+
 # 9. OpenMPI 버전 확인
 
 ```bash
@@ -377,15 +471,12 @@ OpenMPI는 설치 여부만 확인하지 않고 실제 병렬 실행까지 확�
 
 ## 10.1 테스트 프로그램 작성
 
-파일명 예:
+일반 사용자 계정으로 작업 폴더를 만들고, 아래 블록을 EOF까지 한 번에 붙여넣어 실제 소스 파일을 생성한다.
 
-```text
-mpi_test.f90
-```
-
-파일 내용:
-
-```fortran
+```bash
+mkdir -p /home/woogon/CMAQ_MODEL/tests/compiler_mpi
+cd /home/woogon/CMAQ_MODEL/tests/compiler_mpi
+cat > mpi_test.f90 <<'EOF'
 program hello_mpi
   use mpi
   implicit none
@@ -400,6 +491,8 @@ program hello_mpi
 
   call MPI_Finalize(ierr)
 end program hello_mpi
+EOF
+ls -lh mpi_test.f90
 ```
 
 ### 주의
@@ -411,6 +504,9 @@ end program hello_mpi
 ## 10.2 컴파일
 
 ```bash
+cd /home/woogon/CMAQ_MODEL/tests/compiler_mpi
+source /etc/profile.d/modules.sh
+module load mpi/openmpi-x86_64
 mpifort mpi_test.f90 -o hello_mpi
 ```
 
@@ -440,7 +536,7 @@ hello_mpi
 ## 10.3 4개 MPI process로 실행
 
 ```bash
-mpirun -np 4 ./hello_mpi
+mpirun -np 4 /home/woogon/CMAQ_MODEL/tests/compiler_mpi/hello_mpi
 ```
 
 정상 예:

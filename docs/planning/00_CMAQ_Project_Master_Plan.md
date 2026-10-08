@@ -304,6 +304,30 @@ git clone -b CMAQv5.5.0.3_11Jul2025 https://github.com/USEPA/CMAQ.git CMAQ_REPO
 위 구조는 2026-10-08 사용자 제공 실제 경로를 반영한다. `src/`는 원본 보관, 모델 본체는 프로젝트 루트, 라이브러리는 `libs/`, 공유 자료는 `DATA/`, 실행 결과는 CASE별로 분리한다. 자세한 역할과 현재/계획 구조는 [WRF/WPS 가이드 §2](../wrf/WRF_WPS_Installation_Guide.md)를 따른다.
 ---
 
+## 4.3 새 시스템 프로젝트 폴더 생성
+
+OS 설치 및 일반 사용자 woogon 로그인 후 실행한다. 모델 설치·자료·CASE는 같은 루트 아래에서 역할을 분리한다.
+
+```bash
+mkdir -p /home/woogon/CMAQ_MODEL/{libs,src,DATA/WPS_GEOG,DATA/MET/FNL,SCRIPTS,logs/system,logs/ioapi,tests/compiler_mpi}
+mkdir -p /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/{WPS,WRF,MCIP,EMIS,CMAQ,POST,LOG}
+find /home/woogon/CMAQ_MODEL -maxdepth 3 -type d | sort
+df -h /home/woogon/CMAQ_MODEL
+```
+
+설치 폴더 WRFV4.5.1/WPS-4.5는 WRF 문서의 소스 압축 해제 단계에서 생성한다. 위 mkdir는 모델을 설치하거나 download_fnl.sh를 생성하지 않는다. libs/src만 있던 예전 구조와 DATA/CASES/SCRIPTS 운영 구조를 구분한다.
+
+## 4.4 재구축 때 읽을 순서
+
+| 단계 | 실제 명령·입력파일 위치 |
+|---|---|
+| Linux 설치·네트워크·사전 도구 | [Linux 설치 가이드](../linux/Rocky_Linux_Installation_Guide.md) §3~17 |
+| Compiler 설치·SSH·MPI 소스 생성 및 실행 | [Compiler/MPI 가이드](../compiler/GNU_Compiler_OpenMPI_Installation_Guide.md) §3~10 |
+| HDF5/netCDF 원본 다운로드·빌드·I/O API | [공통 라이브러리](../libraries/Common_Libraries_Installation_Guide.md) §2.1~9 |
+| WRF/WPS 빌드와 전체 namelist·개별 실행 | [WRF/WPS 가이드](../wrf/WRF_WPS_Installation_Guide.md) §4~14 |
+
+이미 설치된 프로그램은 재컴파일하지 않고 CASE만 새로 만든다. MCIP·배출량·CMAQ 등 아직 수행되지 않은 단계는 계획이다. 실제로 성공한 명령이 확보되는 즉시 해당 기존 문서 체계에 기록한다. 다운로드 스크립트의 원문·호출 규약은 아직 확인되지 않아 인자를 임의로 적지 않는다.
+
 # 5. Linux 기본 환경
 
 ## 5.1 권장 Linux

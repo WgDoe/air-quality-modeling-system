@@ -1,5 +1,7 @@
 # CMAQ 모델링 시스템 공통 라이브러리 구축 기록
 
+**새 시스템에서 시작할 때는 [사전 준비와 소스 다운로드](#library-start)를 먼저 실행한 뒤 §3~9를 순서대로 따른다.**
+
 ## 1. 목적
 Rocky Linux 기반 CMAQ 통합 대기질 모델링 시스템 구축 과정에서 CMAQ 계열 모델 빌드에 필요한 공통 라이브러리(zlib, HDF5, netCDF, I/O API) 설치 절차를 재현할 수 있도록 기록한다.
 
@@ -57,6 +59,87 @@ Compiler/MPI 설치 및 검증은 [GNU Compiler 및 OpenMPI 설치 가이드](..
 
 ---
 
+<a id="library-start"></a>
+
+## 2.1 재구축 순서와 실행 규칙
+
+아래 명령은 Linux Bash, 일반 사용자 woogon 기준이다. 시스템 패키지 설치만 sudo로 수행한다. 기존 성공 설치를 재빌드할 필요는 없다. 새 시스템에서 빠졌던 다운로드·폴더 준비 명령은 공식 버전별 소스를 확인해 보완했다(2026-10-08). 과거 대화에서 실제 실행된 것으로 확인한 명령·결과와 이 보완 명령을 구분한다.
+
+| 순서 | 작업 | 위치 |
+|---|---|---|
+| 1 | GNU Compiler/OpenMPI 설치·테스트 | Compiler/MPI 가이드 |
+| 2 | 사전 패키지·폴더·소스 준비 | §2.2~2.3 |
+| 3 | zlib 확인 | §3 |
+| 4 | HDF5 configure → make → check → install | §4 |
+| 5 | netCDF-C configure → make → check → install | §5 |
+| 6 | netCDF-Fortran configure → make → check → install | §6 |
+| 7 | I/O API 태그 → Makefile → 빌드 → 실행 테스트 | §7 |
+| 8 | .bashrc 등록·최종 확인 | §8~9 |
+
+명령 실행 후 성공 여부를 확인하고 다음 단계로 간다. echo $?는 확인할 명령 직후에 실행해야 한다. 이전 단계 실패를 무시하고 make install로 넘어가지 않는다. 기존 src 소스가 있으면 압축을 다시 풀어 덮어쓰지 않는다.
+
+## 2.2 사전 패키지와 폴더 생성
+
+Compiler/MPI 가이드의 gcc/g++/gfortran/make 설치가 먼저 완료되어 있어야 한다.
+
+```bash
+sudo dnf install -y wget git tar gzip autoconf automake libtool zlib-devel libxml2-devel
+mkdir -p /home/woogon/CMAQ_MODEL/src
+mkdir -p /home/woogon/CMAQ_MODEL/libs
+mkdir -p /home/woogon/CMAQ_MODEL/logs/ioapi
+gcc --version
+gfortran --version
+make --version
+rpm -q zlib zlib-devel libxml2-devel
+export CC=gcc
+export CXX=g++
+export FC=gfortran
+# 새 shell에서 빌드용 옵션을 초기화한다.
+unset CPPFLAGS LDFLAGS LIBS
+```
+
+zlib-devel은 시스템 zlib header를 제공한다. libxml2-devel은 §5.4에서 실제로 필요했던 패키지이므로 새 시스템에서는 미리 설치한다.
+
+## 2.3 버전을 고정한 소스 다운로드와 압축 해제
+
+아래는 공식 HDF5 1.14.6 릴리스와 Unidata의 netCDF-C v4.9.3 / netCDF-Fortran v4.6.2 태그를 사용한다. 최신 버전을 자동 선택하지 않는다. netCDF 태그 소스에 configure가 포함되어 있는 것을 확인했다. 이 URL들은 재구축용으로 보완한 경로이며 과거에 사용한 다운로드 URL이라고 단정하지 않는다.
+
+**HDF5 1.14.6:**
+
+```bash
+cd /home/woogon/CMAQ_MODEL/src
+wget -O hdf5-1.14.6.tar.gz https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.14.6/hdf5-1.14.6.tar.gz
+tar -tzf hdf5-1.14.6.tar.gz | head
+tar -xzf hdf5-1.14.6.tar.gz
+ls -l /home/woogon/CMAQ_MODEL/src/hdf5-1.14.6/configure
+```
+
+**netCDF-C 4.9.3:**
+
+```bash
+cd /home/woogon/CMAQ_MODEL/src
+wget -O netcdf-c-4.9.3.tar.gz https://github.com/Unidata/netcdf-c/archive/refs/tags/v4.9.3.tar.gz
+tar -tzf netcdf-c-4.9.3.tar.gz | head
+tar -xzf netcdf-c-4.9.3.tar.gz
+ls -l /home/woogon/CMAQ_MODEL/src/netcdf-c-4.9.3/configure
+```
+
+**netCDF-Fortran 4.6.2:**
+
+```bash
+cd /home/woogon/CMAQ_MODEL/src
+wget -O netcdf-fortran-4.6.2.tar.gz https://github.com/Unidata/netcdf-fortran/archive/refs/tags/v4.6.2.tar.gz
+tar -tzf netcdf-fortran-4.6.2.tar.gz | head
+tar -xzf netcdf-fortran-4.6.2.tar.gz
+ls -l /home/woogon/CMAQ_MODEL/src/netcdf-fortran-4.6.2/configure
+sha256sum hdf5-1.14.6.tar.gz netcdf-c-4.9.3.tar.gz netcdf-fortran-4.6.2.tar.gz > source_sha256.txt
+cat source_sha256.txt
+```
+
+wgetが失敗した場合やtarで読めない場合は続行しない。configureが各所に存在することを確認し、§3→4→5→6の順でビルドする。sha256sumは取得した原本の記録であり、公表済みチェックサムとの照合を代わりに行うものではない。
+
+公式ソース: [HDF5 1.14.6](https://github.com/HDFGroup/hdf5/releases/tag/hdf5_1.14.6)、[netCDF-C v4.9.3](https://github.com/Unidata/netcdf-c/releases/tag/v4.9.3)、[netCDF-Fortran v4.6.2](https://github.com/Unidata/netcdf-fortran/releases/tag/v4.6.2)。
+
 ## 3. zlib 확인
 
 Rocky Linux에 설치된 시스템 zlib을 사용했다. 별도 소스 컴파일은 하지 않았다.
@@ -109,6 +192,8 @@ pwd
 ```
 
 ### 4.3 컴파일러 지정
+
+새 shell에서 실행하거나 WRF 빌드 뒤 다시 구축한다면 §2.2의 옵션 초기화를 먼저 적용한다. HDF5를 새로 빌드할 때 기존 CPPFLAGS/LDFLAGS를 그대로 물려받지 않는다.
 
 ```bash
 export CC=gcc
@@ -380,6 +465,8 @@ cd /home/woogon/CMAQ_MODEL/src/netcdf-fortran-4.6.2
 ### 6.3 netCDF-C 환경 설정
 
 ```bash
+export CC=gcc
+export FC=gfortran
 export NETCDF=/home/woogon/CMAQ_MODEL/libs/netCDF-C-4.9.3
 export CPPFLAGS="-I$NETCDF/include"
 export LDFLAGS="-L$NETCDF/lib"
@@ -552,7 +639,15 @@ pwd
 /home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828
 ```
 
-> 7.4~7.7의 모든 명령은 이 디렉터리에서 실행한다. 새 터미널을 열었다면 `ROOT`, `BIN`, `IOAPI_DIR` 변수를 다시 지정해야 한다.
+> 7.4~7.7의 모든 명령은 이 디렉터리에서 실행한다. 새 터미널에서 이어갈 때는 아래를 실행한다.
+
+```bash
+export ROOT=/home/woogon/CMAQ_MODEL
+export BIN=Linux2_x86_64gfort10
+export IOAPI_DIR=$ROOT/libs/ioapi-3.2-20200828
+cd "$IOAPI_DIR"
+export LD_LIBRARY_PATH=$ROOT/libs/netCDF-Fortran-4.6.2/lib:$ROOT/libs/netCDF-C-4.9.3/lib:$ROOT/libs/HDF5-1.14.6/lib:${LD_LIBRARY_PATH:-}
+```
 
 ### 7.4 최상위 Makefile 작성
 
@@ -631,13 +726,17 @@ export LD_LIBRARY_PATH=$ROOT/libs/netCDF-Fortran-4.6.2/lib:$ROOT/libs/netCDF-C-4
 Makefile 생성 및 빌드:
 
 ```bash
+set -o pipefail
 make configure 2>&1 | tee configure.log
+# 직후 종료 코드가 0인지 확인하고 make all을 실행한다.
+echo $?
 make all 2>&1 | tee make.log
+echo $?
 ```
 
 > I/O API는 빌드 순서 의존성이 있으므로 `-j` 옵션 없이 실행한다.
 
-> `| tee`를 사용하면 `echo $?`는 make가 아닌 tee의 종료 코드를 반환하므로 빌드가 실패해도 `0`이 나올 수 있다. 성공 여부는 7.7의 산출물·로그·공유 라이브러리 확인과 7.8의 링크·실행 테스트를 함께 확인하여 판단한다. 이 테스트는 모듈 연결과 초기화·종료를 확인하며, 실제 Models-3 파일 입출력이나 CMAQ 실행 검증은 후속 단계에서 수행한다.
+> 위 명령은 `set -o pipefail`을 적용하여 make 실패가 파이프 종료 코드에 반영되게 했다. pipefail 없이 `| tee`를 사용하면 `echo $?`는 tee의 코드만 반환하여 빌드 실패에도 `0`일 수 있다. 성공 여부는 7.7의 산출물·로그·공유 라이브러리 확인과 7.8의 링크·실행 테스트를 함께 확인하여 판단한다. 이 테스트는 모듈 연결과 초기화·종료를 확인하며, 실제 Models-3 파일 입출력이나 CMAQ 실행 검증은 후속 단계에서 수행한다.
 
 ### 7.7 설치 결과 확인
 
@@ -729,6 +828,7 @@ include               : /home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/ioapi/fi
 매 터미널마다 경로를 다시 지정하지 않도록 `~/.bashrc`에 등록했다.
 
 ```bash
+cp -p ~/.bashrc ~/.bashrc.bak_libraries_$(date -u +%Y%m%dT%H%M%SZ)
 cat >> ~/.bashrc <<'EOF'
 # CMAQ libraries
 export CMAQ_LIBS=/home/woogon/CMAQ_MODEL/libs
@@ -808,7 +908,7 @@ IOAPI_LIB_DIR  = /home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/Linux2_x86_64gf
 
 ## 10. 검토 근거 및 관련 문서
 
-위 명령과 확인 결과는 실제 구축 기록이다. 검토 시 `20200828` 태그의 커밋 `ef5d5f4e112c249b593b19426421f25d79ae094b`, Makefile 변수 및 GFortran 옵션을 다음 공식 소스와 대조했다.
+§3~9의 기존 빌드 명령과 확인 결과는 실제 구축 기록이다. §2.1~2.3은 기존 기록에서 빠진 새 시스템 사전 준비·다운로드를 공식 소스로 보완한 명령이다. 검토 시 `20200828` 태그의 커밋 `ef5d5f4e112c249b593b19426421f25d79ae094b`, Makefile 변수 및 GFortran 옵션을 다음 공식 소스와 대조했다.
 
 - [I/O API 20200828 소스](https://github.com/cjcoats/ioapi-3.2/tree/20200828)
 - [최상위 Makefile.template](https://github.com/cjcoats/ioapi-3.2/blob/20200828/Makefile.template)

@@ -2,6 +2,17 @@
 
 대기질 모델링 시스템의 설치, 환경 구성, 실행 스크립트 및 기술 문서를 관리하는 저장소입니다.
 
+## 다음 구축·실행 때 따라 할 문서
+
+아래 링크의 순서대로 기존 문서를 따른다. 입력파일 생성과 설치 명령을 설명만으로 생략하지 않고 각 문서 안에 기록한다.
+
+1. [Linux 설치·네트워크·필수 도구](docs/linux/Rocky_Linux_Installation_Guide.md)
+2. [GNU Compiler·SSH·MPI 테스트 파일 생성과 실행](docs/compiler/GNU_Compiler_OpenMPI_Installation_Guide.md)
+3. [소스 다운로드부터 HDF5·netCDF·I/O API 설치](docs/libraries/Common_Libraries_Installation_Guide.md#library-start)
+4. [WRF/WPS 설치·전체 namelist 생성·개별 프로그램 실행](docs/wrf/WRF_WPS_Installation_Guide.md#case-run)
+
+새 시스템 프로젝트 폴더 생성은 Master Plan §4.3을 따른다. 현재 성공 기록, 재구축용 보완 명령, 향후 계획을 각 문서에서 구분한다. 서버의 `SCRIPTS/download_fnl.sh` 원문·인자와 업로드 GHG 문서 원문은 아직 미확보이며, 확인된 범위만 문서에 기록했다.
+
 ## Documentation
 
 ### Project Planning
