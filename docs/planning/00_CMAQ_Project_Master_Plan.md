@@ -226,8 +226,8 @@ MCIP/CMAQ가 처리 가능한 WRF/WPS 버전 결정
 | CMAQ | 5.5 (태그 `CMAQv5.5.0.3_11Jul2025`) | 기준 모델. 현재 공개된 5.5 계열 최신 bugfix 태그이며 GitHub Releases에서는 pre-release로 표시됨. 문서·benchmark 자료는 v5.5 기준 |
 | MCIP | CMAQ 5.5.0.3 포함 버전 | `PREP/mcip` |
 | ICON/BCON 등 전처리 | CMAQ 5.5.0.3 포함 버전 | `PREP/` |
-| WRF | 4.5.1 (태그 `v4.5.1`) | WRF-CMAQv5.5 결합 호환범위(4.4~4.5.1)의 상한. 설치·컴파일 및 사례 실행 성공. TEST_20260901의 WPS·real.exe 성공, WRF dmpar 4코어 오류 없이 실행 중이며 wrfout 결과파일 생성 확인(사용자 확인) |
-| WPS | 4.5 (태그 `v4.5`) | WPS는 4.5.1 태그가 없으며 WRF 4.5.x와 짝을 이루는 버전. 설치·컴파일 및 사례 실행 성공. TEST_20260901의 WPS·real.exe 성공, WRF dmpar 4코어 오류 없이 실행 중이며 wrfout 결과파일 생성 확인(사용자 확인) |
+| WRF | 4.5.1 (태그 `v4.5.1`) | WRF-CMAQv5.5 결합 호환범위(4.4~4.5.1)의 상한. **설치·컴파일·반복 사례 실행 검증 완료.** `TEST_20260901_REPEAT`에서 WRF dmpar 4코어가 `SUCCESS COMPLETE WRF`로 종료되고 d01~d04가 `2026-09-02_00:00:00`까지 도달함 |
+| WPS | 4.5 (태그 `v4.5`) | WRF 4.5.x와 짝을 이루는 버전. **설치·컴파일·반복 사례 실행 검증 완료.** `TEST_20260901_REPEAT`에서 geogrid→ungrib→metgrid 정상 완료 |
 | I/O API | 3.2-20200828 | CMAQ v5.5 공식 문서에서 tested/stable version으로 제시되는 버전. 설치 완료 |
 | netCDF-C / netCDF-Fortran | 4.9.3 / 4.6.2 | 설치 완료. CMAQ 5.5는 C/Fortran 경로를 별도 변수로 지정 가능 |
 | HDF5 | 1.14.6 | 설치 완료 |
