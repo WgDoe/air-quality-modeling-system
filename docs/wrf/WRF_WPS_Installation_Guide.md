@@ -1383,19 +1383,29 @@ echo "확인된 기간 내 파일 수: $fnl_count"
 
 ### 14.4. WPS: geogrid → ungrib → metgrid
 
-§14.3.2에서 생성한 namelist.wps를 사용한다. 기간 변경 시 §14.3.3을 따른다. &share에 `max_dom=4`, `interval_seconds=21600`, &geogrid에 `geog_data_path='/home/woogon/CMAQ_MODEL/DATA/WPS_GEOG'`, &ungrib에 `out_format='WPS'`, `prefix='FNL'`, &metgrid에 `fg_name='FNL'`을 설정한다. io_form_geogrid=2와 io_form_metgrid=2는 netCDF 출력 기준이다. 원본 opt_geogrid_tbl_path와 opt_metgrid_tbl_path는 설치 폴더의 테이블을 직접 참조한다. 아래 CASE 내 테이블 링크는 명시적으로 연결 위치를 보이는 용도이며 실행 시에는 namelist가 지정한 설치 폴더 테이블을 사용한다. 도메인의 parent_id, parent_grid_ratio, i/j_parent_start, e_we/e_sn, dx/dy 및 투영은 검증된 값을 유지한다.
+§14.3.2에서 생성한 `namelist.wps`를 **해당 CASE의 `WPS/` 작업폴더에 둔다.** WPS 설치폴더에 두지 않는다. 예시는 `/home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS/namelist.wps`이다. 기간 변경 시 §14.3.3을 따른다.
 
-#### 14.4.1. WPS 테이블 준비와 geogrid.exe 실행
+`&share`에 `max_dom=4`, `interval_seconds=21600`, `&geogrid`에 `geog_data_path='/home/woogon/CMAQ_MODEL/DATA/WPS_GEOG'`, `&ungrib`에 `out_format='WPS'`, `prefix='FNL'`, `&metgrid`에 `fg_name='FNL'`을 설정한다. `io_form_geogrid=2`와 `io_form_metgrid=2`는 netCDF 출력 기준이다.
 
-현재 작업 디렉터리가 입력·출력 위치를 결정한다. 실행파일은 설치 폴더의 절대경로로 호출한다.
+현재 표준은 **절대경로 직접 실행 방식**이다. `namelist.wps`의 `opt_geogrid_tbl_path`와 `opt_metgrid_tbl_path`가 각각 WPS 설치폴더의 테이블 디렉터리를 직접 가리키므로, CASE 폴더 안에 `geogrid/`, `metgrid/`를 만들거나 `GEOGRID.TBL`, `METGRID.TBL` 심볼릭 링크를 만들지 않는다. `ungrib.exe`용 `Vtable`만 CASE/WPS에 `Vtable.GFS`를 링크한다. 도메인의 `parent_id`, `parent_grid_ratio`, `i/j_parent_start`, `e_we/e_sn`, `dx/dy` 및 투영은 검증된 값을 유지한다.
+
+#### 14.4.1. CASE/WPS 준비와 geogrid.exe 실행
+
+현재 작업 디렉터리가 입력·출력 위치를 결정한다. 먼저 CASE의 `WPS/`로 이동한 뒤, 설치폴더의 실행파일을 절대경로로 호출한다.
 
 ```bash
 cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WPS
-mkdir -p geogrid metgrid
-ln -sfn /home/woogon/CMAQ_MODEL/WPS-4.5/geogrid/GEOGRID.TBL.ARW geogrid/GEOGRID.TBL
-ln -sfn /home/woogon/CMAQ_MODEL/WPS-4.5/metgrid/METGRID.TBL.ARW metgrid/METGRID.TBL
+
+# CASE별 namelist.wps가 이 위치에 있어야 한다.
+ls -l namelist.wps
+
+# GEOGRID.TBL / METGRID.TBL은 namelist.wps의 opt_*_tbl_path로 직접 참조한다.
+grep -E 'opt_geogrid_tbl_path|opt_metgrid_tbl_path' namelist.wps
+
+# ungrib용 Vtable만 CASE/WPS에 링크한다.
 ln -sfn /home/woogon/CMAQ_MODEL/WPS-4.5/ungrib/Variable_Tables/Vtable.GFS Vtable
-ls -l namelist.wps geogrid/GEOGRID.TBL metgrid/METGRID.TBL Vtable
+ls -l Vtable
+
 /home/woogon/CMAQ_MODEL/WPS-4.5/geogrid.exe
 tail -30 geogrid.log
 ls -lh geo_em.d0*.nc
@@ -1441,27 +1451,16 @@ ungrib/metgrid 각각 성공 메시지를 확인한 뒤 다음 단계로 진행�
 
 CASE/WRF에 검증된 namelist.input을 준비한다. &time_control의 start/end와 run_*는 WPS 기간과 일치시키고 `interval_seconds=21600`을 사용한다. &domains의 `max_dom=4`, `num_metgrid_levels=34`, &physics의 `num_land_cat=21` 및 현재 물리 설정을 확인한다. FDDA 원문 설정을 유지하고 시간창은 변경한 모의 기간과 맞춘다.
 
-#### 14.5.1. met_em 입력 확인과 runtime data 링크 준비
+#### 14.5.1. met_em 입력 확인
 
-제공된 namelist.wps의 opt_output_from_metgrid_path가 CASE/WRF를 지정하므로 met_em은 이미 WRF 폴더에 있다. WPS 폴더에서 다시 링크하지 않는다. metgrid 출력 위치를 WPS로 바꾸는 다른 구성에서만 해당 출력 경로의 met_em을 WRF에 링크한다.
-
-런타임 자료는 real.exe와 wrf.exe 실행 전에 준비한다. run 전체를 링크하지 않고 현재 설정에 필요한 일곱 파일만 연결한다.
+제공된 `namelist.wps`의 `opt_output_from_metgrid_path`가 CASE/WRF를 지정하므로 `met_em`은 이미 WRF 폴더에 있다. WPS 폴더에서 다시 링크하지 않는다. metgrid 출력 위치를 WPS로 바꾸는 다른 구성에서만 해당 출력 경로의 `met_em`을 WRF에 링크한다.
 
 ```bash
 cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF
 ls -lh namelist.input met_em.d0*.nc
-WRFRUN=/home/woogon/CMAQ_MODEL/WRFV4.5.1/run
-for runtime_file in LANDUSE.TBL VEGPARM.TBL SOILPARM.TBL GENPARM.TBL RRTM_DATA RRTM_DATA_DBL CAMtr_volume_mixing_ratio; do
-    test -s "$WRFRUN/$runtime_file" || { echo "Missing runtime data: $runtime_file"; break; }
-    ln -sfn "$WRFRUN/$runtime_file" .
-done
-ls -l LANDUSE.TBL VEGPARM.TBL SOILPARM.TBL GENPARM.TBL RRTM_DATA RRTM_DATA_DBL CAMtr_volume_mixing_ratio
-for runtime_file in LANDUSE.TBL VEGPARM.TBL SOILPARM.TBL GENPARM.TBL RRTM_DATA RRTM_DATA_DBL CAMtr_volume_mixing_ratio; do
-    test -s "$runtime_file" || echo "STOP: missing/broken $runtime_file"
-done
 ```
 
-STOP 또는 누락 메시지가 있으면 실행을 진행하지 않는다. 물리옵션을 바꾸었을 때는 요구하는 추가 runtime data만 검토해 연결한다. GHG 오류의 실제 원인은 CASE 실행 폴더의 runtime data 누락이며 부록 B를 참고한다.
+`real.exe` 단계에서는 WRF `run/` 폴더 전체 또는 여러 runtime table을 CASE에 미리 링크하지 않는다. 실제 실행에서 확인된 온실가스 자료 누락은 `wrf.exe` 실행 직전에 §14.6의 `CAMtr_volume_mixing_ratio` 링크 한 개로 처리한다.
 
 #### 14.5.2. real.exe 실행
 
@@ -1478,13 +1477,27 @@ SUCCESS COMPLETE REAL과 모든 산출물을 확인한 뒤 진행한다. 현재 
 
 ### 14.6. WRF dmpar 4코어 실행과 확인
 
-real.exe 로그를 보존한 뒤 wrf.exe를 시작한다. 기존 계산이 실행 중이면 아래 명령으로 재실행하지 않는다. 실패 실행의 wrfout/rsl은 별도 보관하고, 새 사례 폴더를 사용하는 것을 우선한다. 정상 출력 파일을 일괄 삭제하는 절차는 포함하지 않는다.
+`real.exe` 로그를 보존한 뒤 `wrf.exe`를 시작한다. 기존 계산이 실행 중이면 아래 명령으로 재실행하지 않는다. 실패 실행의 wrfout/rsl은 별도 보관하고, 새 사례 폴더를 사용하는 것을 우선한다. 정상 출력 파일을 일괄 삭제하는 절차는 포함하지 않는다.
+
+이번 구축에서 실제로 확인된 GHG 오류는 CASE/WRF에 `CAMtr_volume_mixing_ratio`가 없어서 발생했다. 따라서 **WRF `run/` 전체를 링크하거나 여러 runtime table을 미리 링크하지 않고, `wrf.exe` 실행 직전에 이 온실가스 자료 한 파일만 심볼릭 링크한다.**
 
 ```bash
 cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF
+
+# real.exe 로그 보존
 real_log_archive=../LOG/real_$(date -u +%Y%m%dT%H%M%SZ)
 mkdir -p "$real_log_archive"
 cp -p rsl.error.* rsl.out.* "$real_log_archive"/
+
+# GHG runtime data: 실제 확인된 필요 파일만 링크
+ln -sfn /home/woogon/CMAQ_MODEL/WRFV4.5.1/run/CAMtr_volume_mixing_ratio     CAMtr_volume_mixing_ratio
+ls -l CAMtr_volume_mixing_ratio
+
+# OpenMPI 환경
+source /etc/profile.d/modules.sh
+module load mpi/openmpi-x86_64
+
+# wrf.exe 실행
 mpirun -np 4 /home/woogon/CMAQ_MODEL/WRFV4.5.1/main/wrf.exe
 ```
 
@@ -1568,11 +1581,11 @@ grep -n -B2 "Is a directory" /home/woogon/CMAQ_MODEL/WPS-4.5/log.compile
 
 TEST_20260901에서 real.exe 성공 후 wrf.exe의 GHG 관련 오류는 CASE 실행 디렉터리에 WRF runtime data 파일이 없어서 발생했다. 실행파일을 절대경로로 호출해도 프로그램은 현재 CASE/WRF에서 런타임 자료를 찾는다.
 
-현재 구성에서는 LANDUSE.TBL, VEGPARM.TBL, SOILPARM.TBL, GENPARM.TBL, RRTM_DATA, RRTM_DATA_DBL, CAMtr_volume_mixing_ratio를 `/home/woogon/CMAQ_MODEL/WRFV4.5.1/run`에서 CASE/WRF로 선별 심볼릭 링크한다. run 폴더 전체를 링크하지 않는다.
+현재 확인된 해결은 `/home/woogon/CMAQ_MODEL/WRFV4.5.1/run/CAMtr_volume_mixing_ratio` 한 파일을 CASE/WRF에 심볼릭 링크하는 것이다. WRF `run/` 폴더 전체를 링크하지 않으며, 이번 오류 해결을 위해 LANDUSE.TBL, VEGPARM.TBL, SOILPARM.TBL, GENPARM.TBL, RRTM_DATA, RRTM_DATA_DBL 등을 일괄 링크하지 않는다.
 
 ### 해결 및 확인
 
-§14.5의 링크·파일 존재 점검 후 §14.6의 `mpirun -np 4` 실행을 따른다. ls -l에 링크가 보여도 실제 대상이 없으면 해결되지 않은 것이므로 test -s로 확인한다. 진행과 종료는 rsl.error.* / rsl.out.*에서 확인한다.
+§14.6에서 `wrf.exe` 실행 직전에 `CAMtr_volume_mixing_ratio`를 링크하고 `ls -l`로 대상 경로를 확인한 뒤 `mpirun -np 4`를 실행한다. 진행과 종료는 `rsl.error.*` / `rsl.out.*`에서 확인한다.
 
 `ghg_input`을 namelist에 추가하는 방법은 이 오류의 해결책이 아니다. 잘못 추가한 항목이 있으면 제거하고 검증된 namelist 설정을 유지한다. 해당 항목의 추가 명령이나 예제는 제공하지 않는다.
 
