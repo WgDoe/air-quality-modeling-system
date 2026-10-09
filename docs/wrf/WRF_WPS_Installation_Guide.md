@@ -1451,16 +1451,44 @@ ungrib/metgrid 각각 성공 메시지를 확인한 뒤 다음 단계로 진행�
 
 CASE/WRF에 검증된 namelist.input을 준비한다. &time_control의 start/end와 run_*는 WPS 기간과 일치시키고 `interval_seconds=21600`을 사용한다. &domains의 `max_dom=4`, `num_metgrid_levels=34`, &physics의 `num_land_cat=21` 및 현재 물리 설정을 확인한다. FDDA 원문 설정을 유지하고 시간창은 변경한 모의 기간과 맞춘다.
 
-#### 14.5.1. met_em 입력 확인
+#### 14.5.1. met_em 입력 확인과 WRF runtime 기본 링크 준비
 
 제공된 `namelist.wps`의 `opt_output_from_metgrid_path`가 CASE/WRF를 지정하므로 `met_em`은 이미 WRF 폴더에 있다. WPS 폴더에서 다시 링크하지 않는다. metgrid 출력 위치를 WPS로 바꾸는 다른 구성에서만 해당 출력 경로의 `met_em`을 WRF에 링크한다.
 
+`WRFV4.5.1/run/` 전체를 CASE에 링크하지는 않는다. 대신 현재 물리설정에서 실제로 사용하는 기본 runtime 자료만 CASE/WRF에 심볼릭 링크한다. 이번 테스트에서 `CAMtr_volume_mixing_ratio` 누락 오류 뒤에 `LANDUSE.TBL` 누락 오류가 연속해서 확인되었으므로, 재현 가능한 표준 절차에서는 어제 사용한 기본 7개 파일을 모두 준비한다.
+
 ```bash
 cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF
+
 ls -lh namelist.input met_em.d0*.nc
+
+WRFRUN=/home/woogon/CMAQ_MODEL/WRFV4.5.1/run
+
+ln -sfn "$WRFRUN/LANDUSE.TBL" .
+ln -sfn "$WRFRUN/VEGPARM.TBL" .
+ln -sfn "$WRFRUN/SOILPARM.TBL" .
+ln -sfn "$WRFRUN/GENPARM.TBL" .
+ln -sfn "$WRFRUN/RRTM_DATA" .
+ln -sfn "$WRFRUN/RRTM_DATA_DBL" .
+ln -sfn "$WRFRUN/CAMtr_volume_mixing_ratio" .
+
+ls -l LANDUSE.TBL VEGPARM.TBL SOILPARM.TBL GENPARM.TBL \
+      RRTM_DATA RRTM_DATA_DBL CAMtr_volume_mixing_ratio
 ```
 
-`real.exe` 단계에서는 WRF `run/` 폴더 전체 또는 여러 runtime table을 CASE에 미리 링크하지 않는다. 실제 실행에서 확인된 온실가스 자료 누락은 `wrf.exe` 실행 직전에 §14.6의 `CAMtr_volume_mixing_ratio` 링크 한 개로 처리한다.
+기본 runtime 링크 목록:
+
+| 파일 | 역할 |
+|---|---|
+| `LANDUSE.TBL` | 토지이용 분류별 지표면 물리 파라미터 |
+| `VEGPARM.TBL` | 식생 관련 지표면 파라미터 |
+| `SOILPARM.TBL` | 토양 분류별 파라미터 |
+| `GENPARM.TBL` | 지표면 일반 파라미터 |
+| `RRTM_DATA` | RRTM 복사과정 자료 |
+| `RRTM_DATA_DBL` | double precision RRTM 자료 |
+| `CAMtr_volume_mixing_ratio` | 온실가스 혼합비 시계열 자료 |
+
+이 작업은 파일 복사가 아니라 심볼릭 링크 생성이므로 실제 자료는 `/home/woogon/CMAQ_MODEL/WRFV4.5.1/run/`에 한 번만 존재한다. 물리옵션을 변경해 추가 runtime 자료가 필요하다는 오류가 발생하면 그 파일만 추가 검토한다.
 
 #### 14.5.2. real.exe 실행
 
@@ -1479,7 +1507,7 @@ SUCCESS COMPLETE REAL과 모든 산출물을 확인한 뒤 진행한다. 현재 
 
 `real.exe` 로그를 보존한 뒤 `wrf.exe`를 시작한다. 기존 계산이 실행 중이면 아래 명령으로 재실행하지 않는다. 실패 실행의 wrfout/rsl은 별도 보관하고, 새 사례 폴더를 사용하는 것을 우선한다. 정상 출력 파일을 일괄 삭제하는 절차는 포함하지 않는다.
 
-이번 구축에서 실제로 확인된 GHG 오류는 CASE/WRF에 `CAMtr_volume_mixing_ratio`가 없어서 발생했다. 따라서 **WRF `run/` 전체를 링크하거나 여러 runtime table을 미리 링크하지 않고, `wrf.exe` 실행 직전에 이 온실가스 자료 한 파일만 심볼릭 링크한다.**
+`wrf.exe` 실행 전에 §14.5.1의 runtime 기본 링크 7개가 준비되어 있어야 한다. `WRFV4.5.1/run/` 전체를 링크하지 않는다.
 
 ```bash
 cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF
@@ -1489,25 +1517,28 @@ real_log_archive=../LOG/real_$(date -u +%Y%m%dT%H%M%SZ)
 mkdir -p "$real_log_archive"
 cp -p rsl.error.* rsl.out.* "$real_log_archive"/
 
-# GHG runtime data: 실제 확인된 필요 파일만 링크
-ln -sfn /home/woogon/CMAQ_MODEL/WRFV4.5.1/run/CAMtr_volume_mixing_ratio     CAMtr_volume_mixing_ratio
-ls -l CAMtr_volume_mixing_ratio
+# runtime 기본 링크 확인
+ls -l LANDUSE.TBL VEGPARM.TBL SOILPARM.TBL GENPARM.TBL \
+      RRTM_DATA RRTM_DATA_DBL CAMtr_volume_mixing_ratio
 
 # OpenMPI 환경
 source /etc/profile.d/modules.sh
 module load mpi/openmpi-x86_64
 
-# wrf.exe 실행
+# 이전 rsl 로그를 새 실행과 구분하려면 필요 시 별도 보관 후 삭제
+rm -f rsl.out.* rsl.error.*
+
+# wrf.exe 실행: 별도 wrf.log는 만들지 않는다
 mpirun -np 4 /home/woogon/CMAQ_MODEL/WRFV4.5.1/main/wrf.exe
 ```
 
-wrf.log를 별도 생성하지 않는다. 로그는 CASE/WRF의 rsl.error.* / rsl.out.*를 사용한다. 실행 중 두 번째 터미널에서 확인한다.
+`wrf.log`를 별도 생성하지 않는다. 로그는 CASE/WRF의 `rsl.error.*` / `rsl.out.*`를 사용한다. 실행 중 두 번째 터미널에서 확인한다.
 
 ```bash
 tail -f /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF/rsl.error.0000
 ```
 
-tail 감시를 끝내는 Ctrl+C는 해당 감시 터미널에서만 누른다. 실제 모델 실행 터미널에서 누르면 계산을 중단할 수 있다. 커서 깜빡임이나 로그 숫자 증가만으로 정상 계산을 단정하지 않고 모델 시각을 확인한다.
+tail 감시를 끝내는 Ctrl+C는 해당 감시 터미널에서만 누른다. 실제 모델 실행 터미널에서 누르면 계산을 중단할 수 있다. 커서 깜빡임만으로 정상 계산을 단정하지 않고 모델 시각이 증가하는지 확인한다.
 
 ```bash
 grep "Timing for main" /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901_REPEAT/WRF/rsl.error.0000 | tail
@@ -1575,24 +1606,50 @@ grep -n -B2 "Is a directory" /home/woogon/CMAQ_MODEL/WPS-4.5/log.compile
 - A3 대응으로 처음에는 `configure.wrf`의 `DEP_LIB_PATH`를 `sed`로 직접 수정했다. 그러나 configure 내부의 netCDF4 테스트는 통과하지 못하고 configure를 다시 실행할 때마다 수정이 사라지므로, `HDF5_PATH` 방식으로 대체했다.
 - A5 대응으로 `libtirpc-devel`을 설치했으나 해결되지 않아 `landread.c` 교체로 처리했다. 설치한 패키지는 그대로 두었다.
 
-## 부록 B. WRF GHG 오류: CASE runtime data 누락
+## 부록 B. WRF runtime data 누락 오류
 
 ### 확인된 원인
 
-TEST_20260901에서 real.exe 성공 후 wrf.exe의 GHG 관련 오류는 CASE 실행 디렉터리에 WRF runtime data 파일이 없어서 발생했다. 실행파일을 절대경로로 호출해도 프로그램은 현재 CASE/WRF에서 런타임 자료를 찾는다.
+TEST_20260901 계열 CASE에서 `real.exe` 성공 후 `wrf.exe`를 CASE/WRF에서 절대경로로 실행했을 때 runtime data 누락 오류가 발생했다. 실행파일을 절대경로로 호출해도 WRF는 일부 물리과정 자료를 현재 작업 디렉터리에서 찾는다.
 
-현재 확인된 해결은 `/home/woogon/CMAQ_MODEL/WRFV4.5.1/run/CAMtr_volume_mixing_ratio` 한 파일을 CASE/WRF에 심볼릭 링크하는 것이다. WRF `run/` 폴더 전체를 링크하지 않으며, 이번 오류 해결을 위해 LANDUSE.TBL, VEGPARM.TBL, SOILPARM.TBL, GENPARM.TBL, RRTM_DATA, RRTM_DATA_DBL 등을 일괄 링크하지 않는다.
+실제 확인 순서는 다음과 같다.
+
+1. `CAMtr_volume_mixing_ratio`가 없을 때 GHG 관련 오류 발생
+2. 해당 파일을 링크한 뒤 `LANDUSE.TBL` open failure 발생
+
+따라서 재현 가능한 표준 실행에서는 `WRFV4.5.1/run/` 전체를 링크하지 않고, 현재 물리설정에서 사용하는 기본 runtime 파일 7개를 CASE/WRF에 심볼릭 링크한다.
+
+```text
+LANDUSE.TBL
+VEGPARM.TBL
+SOILPARM.TBL
+GENPARM.TBL
+RRTM_DATA
+RRTM_DATA_DBL
+CAMtr_volume_mixing_ratio
+```
 
 ### 해결 및 확인
 
-§14.6에서 `wrf.exe` 실행 직전에 `CAMtr_volume_mixing_ratio`를 링크하고 `ls -l`로 대상 경로를 확인한 뒤 `mpirun -np 4`를 실행한다. 진행과 종료는 `rsl.error.*` / `rsl.out.*`에서 확인한다.
+링크 생성은 §14.5.1을 따른다. 이후 §14.6의 `mpirun -np 4` 실행을 수행한다. 링크가 보이더라도 대상 파일이 실제로 존재하는지 확인하려면 필요 시 다음을 사용한다.
 
-`ghg_input`을 namelist에 추가하는 방법은 이 오류의 해결책이 아니다. 잘못 추가한 항목이 있으면 제거하고 검증된 namelist 설정을 유지한다. 해당 항목의 추가 명령이나 예제는 제공하지 않는다.
+```bash
+for f in LANDUSE.TBL VEGPARM.TBL SOILPARM.TBL GENPARM.TBL \
+         RRTM_DATA RRTM_DATA_DBL CAMtr_volume_mixing_ratio; do
+    test -s "$f" || echo "STOP: missing or broken link: $f"
+done
+```
 
-### 문서 출처와 범위
+`STOP` 메시지가 있으면 `wrf.exe`를 실행하지 않는다. 진행과 종료는 `rsl.error.*` / `rsl.out.*`에서 확인한다.
 
-이 문서는 2026-10-08 사용자 제공 원인·해결 기록을 설치/실행 가이드와 일치하도록 통합한 기록이다. 사용자가 언급한 업로드 파일 `WRF_GHG_Error_Fix.md` 원문은 현재 연결된 첨부·로컬 sources·GitHub에 없어 직접 대조하지 못했다. 원문을 확인한 것으로 간주하지 않는다.
+`ghg_input`을 `namelist.input`에 추가하는 방법은 이 오류의 해결책이 아니다. 잘못 추가한 항목이 있으면 제거하고 검증된 namelist 설정을 유지한다.
 
+### 운영 원칙
+
+- CASE 폴더에 WRF `run/` 전체를 복사하지 않는다.
+- CASE 폴더에 WRF `run/` 전체를 심볼릭 링크하지 않는다.
+- 현재 물리설정에 필요한 기본 runtime 파일만 링크한다.
+- 물리옵션을 바꾸면 추가 runtime 자료가 필요한지 다시 확인한다.
 
 ## 15. 검토 근거 및 관련 문서
 
