@@ -11,7 +11,7 @@
 3. [소스 다운로드부터 HDF5·netCDF·I/O API 설치](docs/libraries/Common_Libraries_Installation_Guide.md#library-start)
 4. [WRF/WPS 설치·전체 namelist 생성·개별 프로그램 실행](docs/wrf/WRF_WPS_Installation_Guide.md#case-run)
 
-새 시스템 프로젝트 폴더 생성은 Master Plan §4.3을 따른다. 현재 성공 기록, 재구축용 보완 명령, 향후 계획을 각 문서에서 구분한다. 사용자 제공 `SCRIPTS/download_fnl.sh` 원문·생성·호출·기간별 파일 검사 명령은 [WRF/WPS §14.3.4](docs/wrf/WRF_WPS_Installation_Guide.md#fnl-download)에 통합했다. 업로드 GHG 문서 원문은 아직 미확보이며, 오류 원인과 해결은 확인된 내용을 기록했다.
+새 시스템 프로젝트 폴더 생성은 Master Plan §4.3을 따른다. 현재 성공 기록, 재구축용 보완 명령, 향후 계획을 각 문서에서 구분한다. 사용자 제공 `SCRIPTS/download_fnl.sh` 원문·생성·호출·기간별 파일 검사 명령은 [WRF/WPS §14.3.4](docs/wrf/WRF_WPS_Installation_Guide.md#fnl-download)에 통합했다. WPS는 CASE별 `WPS/namelist.wps`를 기준으로 설치본 실행파일을 절대경로로 호출하며, `GEOGRID.TBL`/`METGRID.TBL`은 `namelist.wps`의 절대경로 옵션으로 직접 참조한다. WRF의 GHG 오류 해결은 `wrf.exe` 실행 직전 `CAMtr_volume_mixing_ratio` 한 파일만 CASE/WRF에 심볼릭 링크하는 방식으로 정리했다.
 
 ## Documentation
 
@@ -87,6 +87,8 @@ Rocky Linux 문서는 Phase 1의 OS 설치와 기본 확인을, Compiler/MPI 문
 ```
 
 `src/`에는 원본 소스·압축파일 및 라이브러리 빌드용 소스를 보관한다. 실제 컴파일된 모델 본체는 프로젝트 루트의 버전별 폴더에 둔다. 라이브러리 설치 결과는 `libs/`에 두며, I/O API는 이 아래에서 직접 빌드한 기존 구성을 유지한다. 지형·기상자료와 사례별 실행폴더는 모델 설치폴더와 분리한다. 실제 경로와 케이스 변경 기준은 [WRF/WPS 설치·실행 가이드](docs/wrf/WRF_WPS_Installation_Guide.md)을 기준으로 한다.
+
+CASE 실행 시 `namelist.wps`는 `/home/woogon/CMAQ_MODEL/CASES/<REGION>/<CASE>/WPS/`에, `namelist.input`은 같은 CASE의 `WRF/`에 둔다. WPS 설치 디렉터리에 CASE용 namelist를 두지 않는다. `GEOGRID.TBL`과 `METGRID.TBL`은 CASE에 별도 링크하지 않고 `namelist.wps`의 `opt_geogrid_tbl_path` / `opt_metgrid_tbl_path`로 설치본을 직접 참조한다.
 
 ### 설치 시 확인한 사항
 
