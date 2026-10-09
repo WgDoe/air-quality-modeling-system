@@ -904,7 +904,7 @@ IOAPI_INCL_DIR = /home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/ioapi/fixed_src
 IOAPI_LIB_DIR  = /home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/Linux2_x86_64gfort10
 ```
 
-이로써 Phase 2(Compiler 및 공통 library) 구축을 완료했다. 후속 Phase 3은 실제 FNL 사례의 WPS·real.exe와 WRF 실행 및 wrfout 생성에 성공했다(2026-10-08 사용자 확인). 현재 WRF는 오류 없이 실행 중이며, 모의 종료 후 최종 시각을 확인하고 MCIP 구축·입력 변환으로 이어간다. 절차는 [WRF/WPS 설치·실행 가이드](../wrf/WRF_WPS_Installation_Guide.md) §14를 따른다.
+이로써 Phase 2(Compiler 및 공통 library) 구축을 완료했다. 후속 Phase 3은 `TEST_20260901_REPEAT`의 WPS·real.exe·WRF 정상 종료 및 d01~d04 최종시각 확인으로 완료 기록되었다([WRF/WPS 가이드 §14.6.1](../wrf/WRF_WPS_Installation_Guide.md)). Phase 4는 원본 `TEST_20260901`의 MCIP 변환 완료 기록이다([MCIP 가이드](../mcip/MCIP_Installation_Guide.md)). 후속 완료 상태는 제공 기록 기준이며 이번 문서 검토에서 모델을 재실행한 결과가 아니다.
 
 ## 10. 검토 근거 및 관련 문서
 

@@ -29,6 +29,8 @@ Rocky Linux 기반 CMAQ 통합 대기질 모델링 시스템의 Phase 3(WRF/WPS)
 
 현재 상태(2026-10-09 실행 검증 기준): **Phase 3 WRF/WPS 완료.** 반복 검증 CASE `TEST_20260901_REPEAT`에서 geogrid→ungrib→metgrid, `real.exe`, WRF dmpar 4코어 계산이 모두 정상 완료되었다. `rsl.error.0000`에서 `d01 2026-09-02_00:00:00 wrf: SUCCESS COMPLETE WRF`를 확인했고 d01~d04가 모두 요청 종료시각 `2026-09-02_00:00:00`까지 도달했다. 설치는 아래 절차, 자료 준비·namelist·실행·출력 확인은 이 문서 §14를 따른다.
 
+완료 상태는 기존 사용자 제공 종료 메시지와 시간 확인 기록에 근거한다. 이번 문서 검토에서는 서버 원본 로그·출력을 직접 열거나 WRF를 재실행하지 않았다. 반복 사례 정상 종료는 비트 단위 결과 동일성이나 공식 benchmark 검증을 뜻하지 않는다.
+
 ## 2. 구축 환경
 
 - OS: Rocky Linux 9.8 (Blue Onyx), x86_64, **시스템 언어 한국어**
@@ -48,14 +50,15 @@ Rocky Linux 기반 CMAQ 통합 대기질 모델링 시스템의 Phase 3(WRF/WPS)
 
 디렉터리 구조:
 
-[구축 기본계획](../planning/00_CMAQ_Project_Master_Plan.md) §4.2에 따라 모델 본체는 프로젝트 루트 아래 별도 폴더에 두고, 폴더명에 버전을 표시한다. `src/`에는 원본 압축파일과 라이브러리 소스만 보관한다.
+[구축 기본계획](../planning/00_CMAQ_Project_Master_Plan.md) §4.2에 따라 모델 본체는 프로젝트 루트 아래 별도 폴더에 두고, 폴더명에 버전을 표시한다. `src/`에는 원본 압축파일·라이브러리 소스 및 CMAQ 원본 저장소 `CMAQ_REPO`를 보관한다.
 
 ```text
 /home/woogon/CMAQ_MODEL/
 ├── libs/                    # 공통 라이브러리, netCDF-WRF, grib2
-├── src/                     # 원본 압축파일·라이브러리 빌드 소스
+├── src/                     # 원본 압축파일·라이브러리 소스·CMAQ_REPO
 ├── WRFV4.5.1/               # 컴파일된 WRF 본체
 ├── WPS-4.5/                 # 컴파일된 WPS 본체
+├── CMAQv5.5/                # MCIP 빌드·실행 프로젝트; CCTM 미컴파일
 ├── DATA/
 │   ├── WPS_GEOG/            # 정적 지형자료
 │   └── MET/FNL/YYYY/MM/     # ds083.2 1도 GRIB2, 6시간 간격
@@ -210,7 +213,7 @@ gfortran
 
 ### 7.1 필요성
 
-WRF는 `NETCDF` 환경변수 **하나의 폴더**에서 netCDF-C와 netCDF-Fortran의 `bin`, `include`, `lib`를 모두 찾는다. 공통 라이브러리 단계에서 두 라이브러리를 별도 폴더에 설치했으므로, 원본은 그대로 두고 심볼릭 링크(바로가기)로 묶은 폴더를 만든다. CMAQ는 C와 Fortran 경로를 따로 지정하므로 기존 구조를 그대로 사용한다(기본계획 §3.5).
+WRF는 `NETCDF` 환경변수 **하나의 폴더**에서 netCDF-C와 netCDF-Fortran의 `bin`, `include`, `lib`를 모두 찾는다. 공통 라이브러리 단계에서 두 라이브러리를 별도 폴더에 설치했으므로, 원본은 그대로 두고 심볼릭 링크(바로가기)로 묶은 폴더를 만든다. CMAQ도 C와 Fortran 경로를 따로 지정할 수 있다. 실제 MCIP 구축의 `config_cmaq.csh`는 양쪽 모두 이 통합 링크를 사용한다([MCIP 가이드 §6](../mcip/MCIP_Installation_Guide.md)).
 
 ### 7.2 통합 디렉터리 생성
 
@@ -565,7 +568,7 @@ libmpi.so.40      => /usr/lib64/openmpi/lib/libmpi.so.40
 
 netCDF와 HDF5가 시스템의 다른 라이브러리가 아닌 **프로젝트 `libs/`의 라이브러리**에 연결되어 있어야 한다.
 
-**상태: WRF 4.5.1 설치·컴파일 및 사례 실행 성공. TEST_20260901의 WPS·real.exe 성공, WRF dmpar 4코어 오류 없이 실행 중이며 wrfout 결과파일 생성 확인(사용자 확인) (컴파일 확인: 2026-10-03)**
+**상태: WRF 4.5.1 설치·컴파일·반복 사례 실행 검증 완료. `TEST_20260901_REPEAT` WPS·real.exe·WRF dmpar 4코어 정상 종료, `SUCCESS COMPLETE WRF` 및 d01~d04 종료시각 `2026-09-02_00:00:00` 확인 (컴파일 확인: 2026-10-03)**
 
 ---
 
@@ -690,7 +693,7 @@ ungrib.exe -> ungrib/src/ungrib.exe
 
 두 번째와 세 번째 명령은 아무것도 출력하지 않아야 한다.
 
-**상태: WPS 4.5 설치·컴파일 및 사례 실행 성공. TEST_20260901의 WPS·real.exe 성공, WRF dmpar 4코어 오류 없이 실행 중이며 wrfout 결과파일 생성 확인(사용자 확인) (컴파일 확인: 2026-10-03)**
+**상태: WPS 4.5 설치·컴파일·반복 사례 실행 검증 완료. `TEST_20260901_REPEAT` WPS·real.exe·WRF dmpar 4코어 정상 종료, `SUCCESS COMPLETE WRF` 및 d01~d04 종료시각 `2026-09-02_00:00:00` 확인 (컴파일 확인: 2026-10-03)**
 
 ---
 
@@ -743,10 +746,10 @@ export LD_LIBRARY_PATH=$CMAQ_LIBS/grib2/lib:$LD_LIBRARY_PATH
 | libpng | 1.2.50 | `libs/grib2` | - | 설치 완료 |
 | JasPer | 1.900.1 | `libs/grib2` | - | 설치 완료 |
 | netCDF 통합 링크 | 4.9.3 / 4.6.2 | `libs/netCDF-WRF` | - | 구성 완료 |
-| WRF | 4.5.1 | `WRFV4.5.1` | `wrf.exe`, `real.exe`, `ndown.exe`, `tc.exe` | 설치·컴파일 및 사례 실행 성공. TEST_20260901의 WPS·real.exe 성공, WRF dmpar 4코어 오류 없이 실행 중이며 wrfout 결과파일 생성 확인(사용자 확인) |
-| WPS | 4.5 | `WPS-4.5` | `geogrid.exe`, `ungrib.exe`, `metgrid.exe` | 설치·컴파일 및 사례 실행 성공. TEST_20260901의 WPS·real.exe 성공, WRF dmpar 4코어 오류 없이 실행 중이며 wrfout 결과파일 생성 확인(사용자 확인) |
+| WRF | 4.5.1 | `WRFV4.5.1` | `wrf.exe`, `real.exe`, `ndown.exe`, `tc.exe` | 설치·컴파일·반복 사례 실행 검증 완료. `TEST_20260901_REPEAT` WPS·real.exe·WRF dmpar 4코어 정상 종료, `SUCCESS COMPLETE WRF` 및 d01~d04 종료시각 `2026-09-02_00:00:00` 확인 |
+| WPS | 4.5 | `WPS-4.5` | `geogrid.exe`, `ungrib.exe`, `metgrid.exe` | 설치·컴파일·반복 사례 실행 검증 완료. `TEST_20260901_REPEAT` WPS·real.exe·WRF dmpar 4코어 정상 종료, `SUCCESS COMPLETE WRF` 및 d01~d04 종료시각 `2026-09-02_00:00:00` 확인 |
 
-Phase 3의 설치·사례 실행과 결과파일 생성은 성공으로 기록한다(2026-10-08 사용자 확인). WRF는 현재 오류 없이 실행 중이다. 이 성공은 실행·출력 생성 기준이며, 전체 기간 정상 종료는 모의 종료 후 `SUCCESS COMPLETE WRF`와 마지막 Times를 확인해 별도 기록한다. 다음 구축 단계는 MCIP 설치·입력 변환이다.
+Phase 3의 반복 검증은 완료로 기록한다(§14.6.1). Phase 4 MCIP는 원본 CASE `TEST_20260901`의 d01~d04 변환 완료 기록이며 [MCIP 가이드](../mcip/MCIP_Installation_Guide.md) §10.6을 따른다. CCTM·SMOKE는 미완료이다.
 
 <a id="case-run"></a>
 
@@ -756,7 +759,7 @@ Phase 3의 설치·사례 실행과 결과파일 생성은 성공으로 기록�
 
 이 장의 명령은 **Linux Bash 터미널**에서 위에서 아래로 실행한다. 설치를 다시 하는 절차가 아니라 이미 구축한 WRF/WPS로 다음 CASE를 실행하는 절차다.
 
-현재 `TEST_20260901`은 실행 중인 성공 사례이므로 그 입력·출력을 덮어쓰지 않는다. 다음 명령 예시는 새 폴더 `TEST_20260901_REPEAT`에 제공된 성공 입력파일의 전체 내용으로 재실행하는 방식이다. 다른 사례명으로 실행하려면 아래 모든 `TEST_20260901_REPEAT` 경로를 원하는 이름으로 함께 바꾼다. 실행파일은 계속 설치 폴더의 **절대경로**로 직접 호출한다.
+`TEST_20260901`은 MCIP 정상 변환에 사용한 성공 사례이므로 입력·출력을 보존한다. 아래 명령은 완료된 반복 검증에서 사용한 `TEST_20260901_REPEAT` 경로를 기록한 것이다. 재실행 시에는 새 CASE 이름을 정해 모든 경로를 함께 변경하고 기존 REPEAT 입력·출력을 보존한다. 다른 사례명으로 실행하려면 아래 모든 `TEST_20260901_REPEAT` 경로를 원하는 이름으로 함께 바꾼다. 실행파일은 계속 설치 폴더의 **절대경로**로 직접 호출한다.
 
 | 순서 | 작업 | 명령 위치 |
 |---|---|---|
@@ -779,7 +782,7 @@ Phase 3의 설치·사례 실행과 결과파일 생성은 성공으로 기록�
 
 현재 CASE의 결과 위치는 `/home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/WRF/wrfout_d0*`이다. 사용자 확인을 기준으로 기록했으며 이 작업에서 서버 파일이나 계산을 직접 검사·재실행하지 않았다.
 
-WPS와 real.exe는 성공했다. WRF도 현재까지 오류 없이 실행되고 wrfout 결과파일이 생성되는 것으로 사용자 확인을 받아 **WRF 실행·결과파일 생성 성공**으로 기록한다(2026-10-08). 전체 모의 종료 메시지와 최종 출력 시각은 종료 후 확인한다. MCIP/CMAQ 실행 완료를 뜻하지 않는다.
+WRF 반복 검증 CASE `TEST_20260901_REPEAT`는 WPS·real.exe·WRF 정상 종료와 d01~d04 최종시각 확인까지 완료로 기록되었다(§14.6.1). 원본 `TEST_20260901`의 MCIP 정상 변환은 별도 [MCIP 가이드](../mcip/MCIP_Installation_Guide.md)에 기록한다. CMAQ CCTM은 미완료이다.
 
 ### 14.2. 그대로 유지할 설정과 사례별 변경값
 
@@ -1670,6 +1673,7 @@ done
 - [WRF online compilation tutorial](https://www2.mmm.ucar.edu/wrf/OnLineTutorial/compilation_tutorial.php)
 - WRF 4.5.1 `configure` 스크립트(컴파일러 64-bit 테스트, `HDF5_PATH` 처리, rpc/netCDF4 테스트) 및 `Makefile`의 `nc4_test`/`rpc_test` 대상
 - WPS 4.5 `configure`, `arch/Config.pl`(선택 목록 출력), `geogrid/src/Makefile`(`$(MPI_LIB)` 사용)
+- [MCIP 구축·원본 CASE 변환 기록](../mcip/MCIP_Installation_Guide.md)
 - [구축 기본계획 및 Phase 현황](../planning/00_CMAQ_Project_Master_Plan.md)
 - [공통 라이브러리 구축 기록](../libraries/Common_Libraries_Installation_Guide.md)
 - [GNU Compiler 및 OpenMPI 설치 가이드](../compiler/GNU_Compiler_OpenMPI_Installation_Guide.md)

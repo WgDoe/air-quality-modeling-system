@@ -10,6 +10,7 @@
 2. [GNU Compiler·SSH·MPI 테스트 파일 생성과 실행](docs/compiler/GNU_Compiler_OpenMPI_Installation_Guide.md)
 3. [소스 다운로드부터 HDF5·netCDF·I/O API 설치](docs/libraries/Common_Libraries_Installation_Guide.md#library-start)
 4. [WRF/WPS 설치·전체 namelist 생성·개별 프로그램 실행](docs/wrf/WRF_WPS_Installation_Guide.md#case-run)
+5. [CMAQ 5.5 소스·config_cmaq.csh·MCIP 컴파일, 격자 결정과 MCIP 사례 실행](docs/mcip/MCIP_Installation_Guide.md#case-run)
 
 새 시스템 프로젝트 폴더 생성은 Master Plan §4.3을 따른다. 현재 성공 기록, 재구축용 보완 명령, 향후 계획을 각 문서에서 구분한다. 사용자 제공 `SCRIPTS/download_fnl.sh` 원문·생성·호출·기간별 파일 검사 명령은 [WRF/WPS §14.3.4](docs/wrf/WRF_WPS_Installation_Guide.md#fnl-download)에 통합했다. WPS는 CASE별 `WPS/namelist.wps`를 기준으로 설치본 실행파일을 절대경로로 호출하며, `GEOGRID.TBL`/`METGRID.TBL`은 `namelist.wps`의 절대경로 옵션으로 직접 참조한다. WRF runtime 자료는 `WRFV4.5.1/run/` 전체를 링크하지 않고, 현재 물리설정에 필요한 기본 7개(`LANDUSE.TBL`, `VEGPARM.TBL`, `SOILPARM.TBL`, `GENPARM.TBL`, `RRTM_DATA`, `RRTM_DATA_DBL`, `CAMtr_volume_mixing_ratio`)만 CASE/WRF에 심볼릭 링크하는 방식으로 정리했다.
 
@@ -35,6 +36,10 @@
 
 - [WRF/WPS 설치 가이드](docs/wrf/WRF_WPS_Installation_Guide.md)
 
+### MCIP
+
+- [MCIP 구축 가이드](docs/mcip/MCIP_Installation_Guide.md)
+
 ### Master Plan과 현재 문서의 대응
 
 Master Plan §22의 구축 단계는 그대로 적용한다. §23의 산출물명은 계획 당시 명칭이며, 현재 저장소에서는 아래 경로를 사용한다.
@@ -45,8 +50,11 @@ Master Plan §22의 구축 단계는 그대로 적용한다. §23의 산출물�
 | Phase 2. Compiler 및 공통 library | `02_GNU_Compiler_MPI_Setup.md` | [GNU Compiler / OpenMPI](docs/compiler/GNU_Compiler_OpenMPI_Installation_Guide.md) |
 | Phase 2. Compiler 및 공통 library | `03_NetCDF_HDF5_IOAPI_Setup.md` | [공통 라이브러리](docs/libraries/Common_Libraries_Installation_Guide.md) |
 | Phase 3. WRF/WPS | `04_WRF_WPS_Install.md` | [WRF/WPS 설치](docs/wrf/WRF_WPS_Installation_Guide.md) |
+| Phase 4. MCIP | `06_MCIP_Install_Run.md` | [MCIP 구축](docs/mcip/MCIP_Installation_Guide.md) |
 
-Rocky Linux 문서는 Phase 1의 OS 설치와 기본 확인을, Compiler/MPI 문서는 Phase 1의 SFTP 설정 및 Phase 2의 compiler/MPI 구축을 다룬다. 공통 라이브러리 문서는 I/O API 3.2-20200828의 빌드, M3TOOLS 생성, 모듈 링크·실행 테스트 및 환경변수 등록까지 다룬다. 실제 설치 기록을 기준으로 **Phase 2(Compiler 및 공통 library)는 완료**되었다. **Phase 3 WRF/WPS(WRF 4.5.1 / WPS 4.5)는 완료**되었다. 반복 검증 CASE `TEST_20260901_REPEAT`에서 WPS(geogrid→ungrib→metgrid), `real.exe`, WRF dmpar 4코어 실행이 모두 정상 완료되었고, `rsl.error.0000`에서 `SUCCESS COMPLETE WRF` 및 d01~d04가 요청 종료시각 `2026-09-02_00:00:00`까지 도달한 것을 확인했다. 다음 단계는 MCIP(Phase 4) 설치·입력 변환이다.
+Rocky Linux 문서는 Phase 1의 OS 설치와 기본 확인을, Compiler/MPI 문서는 Phase 1의 SFTP 설정 및 Phase 2의 compiler/MPI 구축을 다룬다. 공통 라이브러리 문서는 I/O API 3.2-20200828의 빌드, M3TOOLS 생성, 모듈 링크·실행 테스트 및 환경변수 등록까지 다룬다. 실제 설치 기록을 기준으로 **Phase 2(Compiler 및 공통 library)는 완료**되었다. **Phase 3 WRF/WPS(WRF 4.5.1 / WPS 4.5)는 완료**되었다. 반복 검증 CASE `TEST_20260901_REPEAT`에서 WPS(geogrid→ungrib→metgrid), `real.exe`, WRF dmpar 4코어 실행이 모두 정상 완료되었고, `rsl.error.0000`에서 `SUCCESS COMPLETE WRF` 및 d01~d04가 요청 종료시각 `2026-09-02_00:00:00`까지 도달한 것을 확인했다. **Phase 4 MCIP는 완료**되었다. CASE `TEST_20260901`의 d01~d04를 MCIP 5.5로 변환해 모두 `NORMAL TERMINATION`으로 종료했고, 생성된 GRIDDESC(27KM/09KM/03KM/01KM)가 이전 운영체계 격자와 일치함을 확인했다. 다음 단계는 SMOKE(Phase 5)와 CMAQ 컴파일·benchmark(Phase 6)이다.
+
+완료 상태는 사용자 제공 실행 기록과 기존 문서에 기재된 종료 메시지·시간·격자 확인 결과를 근거로 한다. 이번 문서 검토에서는 Linux 서버의 원본 로그·netCDF 파일을 직접 열거나 모델을 재실행하지 않았다. CMAQ CCTM 실행, 입력 결측값·물리량 QA 및 기존 15층 배출량·IC/BC와 새 34층 기상의 정합성은 아직 검증되지 않았다.
 
 설치 가이드는 기존 Linux 및 Compiler/MPI 문서처럼 번호 없는 설명형 파일명을 사용한다. 공통 라이브러리 문서의 기존 `01_common_libraries_installation.md`는 `Common_Libraries_Installation_Guide.md`로 변경했다. 기본계획의 `00_`와 향후 산출물 번호는 계획 문서 체계로 유지한다.
 
@@ -58,8 +66,8 @@ Rocky Linux 문서는 Phase 1의 OS 설치와 기본 확인을, Compiler/MPI 문
 
 | 구성요소 | 버전 | 상태 |
 |---|---|---|
-| CMAQ | 5.5 (`CMAQv5.5.0.3_11Jul2025`) | 확정. 현재 GitHub Releases에서 pre-release로 표시되는 5.5 계열 최신 bugfix 태그, 설치 예정(Phase 6) |
-| MCIP | CMAQ 5.5.0.3 포함 버전 | 확정, 설치 예정(Phase 4) |
+| CMAQ | 5.5 (`CMAQv5.5.0.3_11Jul2025`) | 기존 기준 태그 유지. 5.5.0.4 공개로 Phase 6 전 재검토 필요. CCTM 컴파일·benchmark 미완료 |
+| MCIP | 5.5 (CMAQ 저장소 `PREP/mcip`) | **Phase 4 완료.** `TEST_20260901` d01~d04 정상 변환, 이전 운영체계 GRIDDESC와 격자 일치. 제공 기록의 설치 커밋은 `9bd3734`이며 `PREP/mcip` 소스는 5.5.0.3·5.5.0.4 태그와 동일함을 확인. CCTM 전 태그 전환 필요([MCIP 가이드 §3, §5.2](docs/mcip/MCIP_Installation_Guide.md)) |
 | WRF / WPS | 4.5.1 / 4.5 | **Phase 3 완료.** `TEST_20260901_REPEAT`에서 WPS, `real.exe`, WRF dmpar 4코어 정상 완료. `SUCCESS COMPLETE WRF` 및 d01~d04 종료시각 `2026-09-02_00:00:00` 확인 |
 | I/O API | 3.2-20200828 | 설치 완료 |
 
@@ -68,9 +76,10 @@ Rocky Linux 문서는 Phase 1의 OS 설치와 기본 확인을, Compiler/MPI 문
 ```text
 /home/woogon/CMAQ_MODEL/
 ├── libs/                    # 공통 라이브러리, netCDF-WRF, grib2
-├── src/                     # 원본 압축파일·라이브러리 빌드 소스
+├── src/                     # 원본 압축파일·라이브러리 소스·CMAQ_REPO
 ├── WRFV4.5.1/               # 컴파일된 WRF 본체
 ├── WPS-4.5/                 # 컴파일된 WPS 본체
+├── CMAQv5.5/                # CMAQ 프로젝트 폴더(bldit_project.csh로 생성), MCIP 포함
 ├── DATA/
 │   ├── WPS_GEOG/            # 정적 지형자료
 │   └── MET/FNL/YYYY/MM/     # ds083.2 1도 GRIB2, 6시간 간격
@@ -107,6 +116,7 @@ docs/
   compiler/
   libraries/
   wrf/        # 설치·실행·GHG 오류를 하나의 문서에 통합
+  mcip/       # CMAQ 소스·config_cmaq.csh·MCIP 컴파일·격자 결정·사례 실행
 ```
 
 `scripts/`, `config/`, `examples/`, `tests/`는 향후 저장소 구성 계획이다. 서버의 `SCRIPTS/download_fnl.sh`와 GitHub에 등록된 파일을 구분한다.

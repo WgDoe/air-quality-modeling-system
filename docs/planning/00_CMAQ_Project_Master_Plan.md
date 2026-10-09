@@ -1,7 +1,7 @@
 # CMAQ 통합 대기질 모델링 시스템 구축 기본계획 및 요구사항
 
 작성일: 2026-09-23  
-수정일: 2026-10-03 (CMAQ 5.5 기준 모델 버전 확정, §3.5)  
+수정일: 2026-10-09 (WRF 재현 검증·MCIP 완료 기록, 태그 재검토 및 경로 정합성 반영)
 문서 성격: 프로젝트 기본계획 / 요구사항 정의 / 공식 참고자료 인덱스  
 적용 대상: Linux Desktop 기반 CMAQ 독립 운영환경 구축
 
@@ -165,17 +165,17 @@ Lightning NOx
 
 ## 3.3 Benchmark 우선
 
-실제 국내·동아시아 사례를 적용하기 전에 공식 benchmark 또는 tutorial case를 반드시 수행한다.
+CMAQ 실제 국내·동아시아 base run에 앞서 공식 benchmark를 수행한다. WRF/MCIP 입력 준비 사례와 CMAQ benchmark의 완료 여부는 별도로 기록한다.
 
-권장 순서:
+권장 검증 순서(의존성에 따라 조정 가능):
 
 ```text
 Library test
-→ WRF test
 → WPS test
-→ CMAQ benchmark
+→ WRF test
 → MCIP test
 → SMOKE example
+→ CMAQ benchmark
 → ISAM benchmark
 → 실제 동아시아 domain
 ```
@@ -223,8 +223,8 @@ MCIP/CMAQ가 처리 가능한 WRF/WPS 버전 결정
 
 | 구성요소 | 확정 버전 | 비고 |
 |---|---|---|
-| CMAQ | 5.5 (태그 `CMAQv5.5.0.3_11Jul2025`) | 기준 모델. 현재 공개된 5.5 계열 최신 bugfix 태그이며 GitHub Releases에서는 pre-release로 표시됨. 문서·benchmark 자료는 v5.5 기준 |
-| MCIP | CMAQ 5.5.0.3 포함 버전 | `PREP/mcip` |
+| CMAQ | 5.5 (태그 `CMAQv5.5.0.3_11Jul2025`) | 기존 기준 태그 유지. 5.5.0.4 공개로 Phase 6 전 재검토 필요(§3.5.4). CCTM·benchmark 미완료. 문서·benchmark 자료는 v5.5 기준 |
+| MCIP | 5.5 (`MCIP V5.5 FROZEN 09/19/2024`) | **Phase 4 완료.** 설치 기록은 `main` 커밋 `9bd3734`; 해당 `PREP/mcip` 소스는 5.5.0.3·5.5.0.4 태그와 동일. 실행파일·결과의 동일성을 뜻하지 않음 |
 | ICON/BCON 등 전처리 | CMAQ 5.5.0.3 포함 버전 | `PREP/` |
 | WRF | 4.5.1 (태그 `v4.5.1`) | WRF-CMAQv5.5 결합 호환범위(4.4~4.5.1)의 상한. **설치·컴파일·반복 사례 실행 검증 완료.** `TEST_20260901_REPEAT`에서 WRF dmpar 4코어가 `SUCCESS COMPLETE WRF`로 종료되고 d01~d04가 `2026-09-02_00:00:00`까지 도달함 |
 | WPS | 4.5 (태그 `v4.5`) | WRF 4.5.x와 짝을 이루는 버전. **설치·컴파일·반복 사례 실행 검증 완료.** `TEST_20260901_REPEAT`에서 geogrid→ungrib→metgrid 정상 완료 |
@@ -242,7 +242,7 @@ WRF 4.5.1을 선택한 이유:
 
 ### 3.5.3 CMAQ 5.5 설치 시 연계 사항
 
-- CMAQ 5.5의 `config_cmaq.csh`는 `NETCDF_LIB_DIR`/`NETCDF_INCL_DIR`(netCDF-C)와 `NETCDFF_LIB_DIR`/`NETCDFF_INCL_DIR`(netCDF-Fortran)를 따로 지정하므로, 현재처럼 C와 Fortran을 별도 디렉터리에 설치한 구조를 그대로 사용한다.
+- CMAQ 5.5의 `config_cmaq.csh`는 `NETCDF_LIB_DIR`/`NETCDF_INCL_DIR`(netCDF-C)와 `NETCDFF_LIB_DIR`/`NETCDFF_INCL_DIR`(netCDF-Fortran)를 따로 지정할 수 있다. 실제 MCIP 구축 시 CMAQ 프로젝트의 C/Fortran 변수는 모두 `libs/netCDF-WRF/lib` 및 `libs/netCDF-WRF/include`를 사용했다. 원본 라이브러리는 별도 설치 경로에 유지하고 통합 폴더에서 심볼릭 링크로 참조한다([MCIP 가이드 §6](../mcip/MCIP_Installation_Guide.md)).
 - I/O API 경로는 다음과 같이 지정한다.
 
 ```text
@@ -256,6 +256,8 @@ IOAPI_LIB_DIR  = /home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/Linux2_x86_64gf
 git clone -b CMAQv5.5.0.3_11Jul2025 https://github.com/USEPA/CMAQ.git CMAQ_REPO
 ```
 
+이번 MCIP 구축의 소스 다운로드 기록은 `main` 커밋 `9bd3734176479c2e49139fea98e1d5e8a16170e3`이다. 위 clone은 재구축 예시이며 실제 수행 기록과 구분한다. 태그 소스·프로젝트 준비는 [MCIP 가이드 §5.2](../mcip/MCIP_Installation_Guide.md)에 따라 별도 소스·프로젝트 경로에서 수행한다.
+
 ### 3.5.4 재검토 조건
 
 다음의 경우 버전 기준을 재검토하고 이 절을 갱신한다.
@@ -265,6 +267,8 @@ git clone -b CMAQv5.5.0.3_11Jul2025 https://github.com/USEPA/CMAQ.git CMAQ_REPO
 - CMAQ 5.5 계열에 연구 결과에 영향을 주는 버그수정 태그가 추가된 경우
 
 ---
+
+2026-10-09 검토: [5.5.0.4 릴리스](https://github.com/USEPA/CMAQ/releases/tag/CMAQv5.5.0.4_08Oct2026)는 2026-10-08 21:09 UTC(한국시간 10-09 06:09)에 공개되었으며 `pre-release`이다. HONIT AERO_DATA 오타, STAGE 수은 양방향 flux, CASTNET QA 처리 수정이 포함된다. 기존 5.5.0.3 기준은 유지하되 Phase 6 전 화학기작·침적 설정 및 benchmark 영향을 검토해 채택 여부를 기록한다. 최신 태그라는 이유만으로 검증 완료나 채택으로 처리하지 않는다.
 
 # 4. 하드웨어 및 운영체제 요구사항
 
@@ -283,9 +287,10 @@ git clone -b CMAQv5.5.0.3_11Jul2025 https://github.com/USEPA/CMAQ.git CMAQ_REPO
 ```text
 /home/woogon/CMAQ_MODEL/
 ├── libs/                    # 공통 라이브러리, netCDF-WRF, grib2
-├── src/                     # 원본 압축파일·라이브러리 빌드 소스
+├── src/                     # 원본 압축파일·라이브러리 소스·CMAQ_REPO
 ├── WRFV4.5.1/               # 컴파일된 WRF 본체
 ├── WPS-4.5/                 # 컴파일된 WPS 본체
+├── CMAQv5.5/                # MCIP 빌드·실행 프로젝트; CCTM 미컴파일
 ├── DATA/
 │   ├── WPS_GEOG/            # 정적 지형자료
 │   └── MET/FNL/YYYY/MM/     # ds083.2 1도 GRIB2, 6시간 간격
@@ -325,8 +330,9 @@ df -h /home/woogon/CMAQ_MODEL
 | Compiler 설치·SSH·MPI 소스 생성 및 실행 | [Compiler/MPI 가이드](../compiler/GNU_Compiler_OpenMPI_Installation_Guide.md) §3~10 |
 | HDF5/netCDF 원본 다운로드·빌드·I/O API | [공통 라이브러리](../libraries/Common_Libraries_Installation_Guide.md) §2.1~9 |
 | WRF/WPS 빌드와 전체 namelist·개별 실행 | [WRF/WPS 가이드](../wrf/WRF_WPS_Installation_Guide.md) §4~14 |
+| CMAQ 소스·설정·MCIP 빌드·격자·사례 실행 | [MCIP 가이드](../mcip/MCIP_Installation_Guide.md) §5~10 |
 
-이미 설치된 프로그램은 재컴파일하지 않고 CASE만 새로 만든다. MCIP·배출량·CMAQ 등 아직 수행되지 않은 단계는 계획이다. 실제로 성공한 명령이 확보되는 즉시 해당 기존 문서 체계에 기록한다. FNL 다운로드 스크립트 원문·파일 생성·시작/종료 UTC 인자·기간별 검사 명령은 [WRF/WPS §14.3.4](../wrf/WRF_WPS_Installation_Guide.md#fnl-download)에 통합했다.
+이미 설치된 프로그램은 재컴파일하지 않고 CASE만 새로 만든다. MCIP는 제공 기록 기준 완료이며, SMOKE·CCTM·ISAM·자동화는 예정 단계이다. 실제로 성공한 명령이 확보되는 즉시 해당 기존 문서 체계에 기록한다. FNL 다운로드 스크립트 원문·파일 생성·시작/종료 UTC 인자·기간별 검사 명령은 [WRF/WPS §14.3.4](../wrf/WRF_WPS_Installation_Guide.md#fnl-download)에 통합했다.
 
 # 5. Linux 기본 환경
 
@@ -523,12 +529,12 @@ wrfout_d02_*
 ## 8.6 버전 및 빌드 확인사항
 
 - 버전: WRF 4.5.1, WPS 4.5 (§3.5 CMAQ 5.5 기준)
-- WRF용 `NETCDF`는 별도 설치된 C/Fortran 라이브러리를 묶은 `libs/netCDF-WRF` 통합 링크 디렉터리로 구성 완료했다. CMAQ는 §3.5.3의 C/Fortran 별도 경로를 사용한다.
+- WRF용 `NETCDF`는 별도 설치된 C/Fortran 라이브러리를 묶은 `libs/netCDF-WRF` 통합 링크 디렉터리로 구성 완료했다. 이번 CMAQ 프로젝트 설정도 §3.5.3의 통합 링크 경로를 사용한다.
 - WPS GRIB2 라이브러리 libpng 1.2.50, JasPer 1.900.1은 `libs/grib2`에 설치 완료했다. 현재 FNL GRIB2 입력을 사용한 ungrib·metgrid 성공이 확인되었다.
 - 빌드 스크립트용 `tcsh`(csh)를 설치하고 `perl`, `m4`를 확인했다.
 - CMAQ 연계를 고려하여 PX LSM, ACM2 PBL 등 CMAQ 권장 물리옵션 조합을 우선 검토한다.
 
-현재 상태: **WRF 4.5.1 / WPS 4.5 설치·컴파일 및 사례 실행 성공. TEST_20260901의 WPS·real.exe 성공, WRF dmpar 4코어 오류 없이 실행 중이며 wrfout 결과파일 생성 확인(사용자 확인)**. WRF는 GNU dmpar, basic nesting으로, WPS는 GNU serial, GRIB2 지원으로 빌드했다. 현재 FNL 사례 실행은 [사례 실행 가이드](../wrf/WRF_WPS_Installation_Guide.md)를 따른다. WRF 실행·출력 생성은 성공으로 기록한다. 다음 단계는 MCIP 구축·입력 변환 준비이며, 현재 모의 종료 후 최종 시각을 확인해 출력을 전달한다.
+현재 상태: **Phase 3 WRF/WPS 재현 검증 완료.** `TEST_20260901_REPEAT`에서 WPS→real.exe→WRF dmpar 4코어가 정상 종료했고 `SUCCESS COMPLETE WRF` 및 d01~d04 종료시각 `2026-09-02_00:00:00`을 확인했다. 이는 기존 [WRF/WPS 가이드 §14.6.1](../wrf/WRF_WPS_Installation_Guide.md)에 기록된 검증이며 공식 benchmark 완료를 뜻하지 않는다. Phase 4 MCIP 완료 입력은 별도 CASE `TEST_20260901`이다.
 
 설치 시 확인한 중요 사항(상세 기록: [WRF/WPS 설치 가이드](../wrf/WRF_WPS_Installation_Guide.md)):
 
@@ -559,12 +565,14 @@ wrfout
 ## 9.2 확인 항목
 
 - WRF와 CMAQ horizontal grid 일치
-- vertical layer collapsing
+- 연직층 수: MCIP 5.x는 layer collapsing 기능이 없어 이번 CASE는 WRF 34층 사용
 - land-use mapping
 - time zone
 - 시작/종료시간
-- MCIP 버전: CMAQ 5.5.0.3 포함 버전(`PREP/mcip`) 사용
-- CMAQ 버전 compatibility: CMAQ 5.5와 동일 태그에서 빌드하여 일치시킴
+- MCIP 버전: 5.5, 설치 소스 기록은 `main` 커밋 `9bd3734`의 `PREP/mcip`
+- CMAQ 입력 호환성: MCIP 정상 변환 및 수평 격자 일치 확인. CCTM 읽기·실행은 Phase 6에서 검증
+
+현재 **Phase 4 완료** 기록은 [MCIP 구축 가이드](../mcip/MCIP_Installation_Guide.md) §10.6을 따른다. `TEST_20260901`의 d01~d04가 모두 `NORMAL TERMINATION`, 34층·48시간 출력 및 이전 GRIDDESC 일치로 기록되었다. 수평 격자 일치는 기존 15층 배출량·IC/BC를 그대로 사용할 수 있다는 뜻이 아니다.
 
 ---
 
@@ -907,7 +915,7 @@ case별 변경항목:
 ./run_case.sh   --start 2023-07-01   --end 2023-07-10   --domain BUSAN_D03   --met FNL   --emis CAPSS_REAS_MEGAN   --cmaq 5.5   --isam yes
 ```
 
-단계별 성공 여부를 log로 기록하도록 한다. 아래 `OK`는 향후 성공 로그의 형식 예시이며 현재 실행 상태가 아니다. 현재 WPS·real.exe와 WRF 실행·결과파일 생성은 성공으로 기록했다. WRF는 오류 없이 실행 중이며 종료 메시지와 최종 출력 시각은 모의 종료 후 확인한다.
+단계별 성공 여부를 log로 기록하도록 한다. 아래 `OK`는 향후 성공 로그의 형식 예시이며 현재 실행 상태가 아니다. WRF 재현 검증과 MCIP 정상 변환은 제공 기록 기준 완료이며 SMOKE·CMAQ·ISAM은 미완료이다.
 
 ```text
 01_WPS      OK
@@ -988,7 +996,7 @@ ncdump -h filename.nc
 
 # 22. 단계별 구축 계획
 
-## 현재 진행상황 (설치 확인: 2026-10-03, 실행 기록 반영: 2026-10-08)
+## 현재 진행상황 (설치 확인: 2026-10-03, 실행 기록 반영: 2026-10-09)
 
 실제 설치 명령과 확인 결과는 [공통 라이브러리 구축 기록](../libraries/Common_Libraries_Installation_Guide.md) 및 [WRF/WPS 설치 가이드](../wrf/WRF_WPS_Installation_Guide.md)을 기준으로 한다.
 
@@ -997,8 +1005,12 @@ ncdump -h filename.nc
 - I/O API 라이브러리·모듈·실행파일: `/home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/Linux2_x86_64gfort10`.
 - I/O API include: `/home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/ioapi/fixed_src`.
 - **모델 버전 확정 (2026-10-03)**: CMAQ 5.5(`CMAQv5.5.0.3_11Jul2025`)를 기준으로 MCIP(CMAQ 포함), WRF 4.5.1, WPS 4.5로 결정. 상세 기준은 §3.5.
-- **Phase 3 설치·사례 실행 성공**: WRF 4.5.1 / WPS 4.5 설치·컴파일 및 사례 실행 성공. TEST_20260901의 WPS·real.exe 성공, WRF dmpar 4코어 오류 없이 실행 중이며 wrfout 결과파일 생성 확인(사용자 확인). 모델 본체 경로는 §4.2, 상세 빌드·오류 해결은 WRF/WPS 설치 가이드를 참조한다.
-- **다음 작업**: MCIP(Phase 4) 설치·컴파일 및 입력 변환 준비. 현재 WRF 모의 종료 후 `SUCCESS COMPLETE WRF`와 d01~d04 최종 출력 시각을 확인하여 MCIP에 전달한다. MCIP·CMAQ 결과는 아직 완료로 기록하지 않는다.
+- **Phase 3 WRF/WPS 재현 검증 완료**: `TEST_20260901_REPEAT`에서 WPS·real.exe·WRF dmpar 4코어 정상 종료. `SUCCESS COMPLETE WRF` 및 d01~d04 종료시각 `2026-09-02_00:00:00` 확인. 원본 CASE `TEST_20260901`의 MCIP 변환 기록과 구분한다.
+- **Phase 4 MCIP 완료 (2026-10-09)**: CMAQ 5.5 저장소(`src/CMAQ_REPO`)와 프로젝트 폴더(`CMAQv5.5`) 생성, `config_cmaq.csh` gcc 경로 설정, MCIP gfortran 컴파일 완료. `TEST_20260901` d01~d04를 이전 운영체계 격자(EASTASIA 27KM/09KM/03KM/01KM)로 변환해 GRIDDESC 일치, 34층, 48시간 출력 확인. 상세는 [MCIP 구축 가이드](../mcip/MCIP_Installation_Guide.md).
+- **확인 필요**: CMAQ 저장소를 `main` 브랜치로 내려받았다. `PREP/mcip`는 확정 태그와 동일하나 CCTM은 다르므로 Phase 6 전에 별도 태그 소스·프로젝트를 준비한다(§3.5.3). 2026-10-08 UTC(한국시간 10-09) 공개된 `CMAQv5.5.0.4_08Oct2026`은 §3.5.4 재검토 대상이다.
+- **다음 작업**: SMOKE(Phase 5) 및 CMAQ CCTM·ICON·BCON 컴파일과 benchmark(Phase 6). CMAQ 결과는 아직 완료로 기록하지 않는다.
+
+완료 상태는 사용자 제공 실행 기록과 기존 문서에 기재된 종료 메시지·시간·격자 확인 결과를 근거로 한다. 이번 문서 검토에서는 Linux 서버의 원본 로그·netCDF 파일을 직접 열거나 모델을 재실행하지 않았다. CMAQ CCTM 실행, 입력 결측값·물리량 QA 및 기존 15층 배출량·IC/BC와 새 34층 기상의 정합성은 아직 검증되지 않았다.
 
 아래 Phase 목록은 전체 구축 계획이며, 이후 단계의 완료 기록이 아니다.
 
@@ -1037,23 +1049,28 @@ ncdump -h filename.nc
 | 항목 | 현재 상태 |
 |---|---|
 | netCDF 통합 링크, libpng 1.2.50, JasPer 1.900.1 | 구성·설치 완료 |
-| WRF 4.5.1 | 설치·컴파일 및 사례 실행 성공. TEST_20260901의 WPS·real.exe 성공, WRF dmpar 4코어 오류 없이 실행 중이며 wrfout 결과파일 생성 확인(사용자 확인) |
-| WPS 4.5 | 설치·컴파일 및 사례 실행 성공. TEST_20260901의 WPS·real.exe 성공, WRF dmpar 4코어 오류 없이 실행 중이며 wrfout 결과파일 생성 확인(사용자 확인) |
+| WRF 4.5.1 | 설치·컴파일·반복 사례 검증 완료. `TEST_20260901_REPEAT` WPS·real.exe·WRF 정상 종료 및 d01~d04 종료시각 확인 |
+| WPS 4.5 | 설치·컴파일·반복 사례 검증 완료. `TEST_20260901_REPEAT` WPS·real.exe·WRF 정상 종료 및 d01~d04 종료시각 확인 |
 | WPS_GEOG 및 FNL ds083.2 자료 준비 | 현재 사례 실행에 사용 |
-| `geogrid → ungrib → metgrid → real.exe → wrf.exe` 전체 실행 검증 | 실행 및 wrfout 생성 성공(사용자 확인); 현재 WRF 오류 없이 실행 중 |
-| official test / 동아시아 domain test | 미완료 |
+| `geogrid → ungrib → metgrid → real.exe → wrf.exe` 전체 실행 검증 | `TEST_20260901_REPEAT` 정상 종료, `SUCCESS COMPLETE WRF` 및 d01~d04 최종시각 확인 |
+| official test | 미완료 |
+| 현재 동아시아·부산 4중 격자 사례 | 반복 사례 WRF 및 원본 사례 MCIP 완료(제공 기록 기준); CMAQ base run 미완료 |
 
-현재 사례는 FNL GRIB2 → FNL:* → met_em → real.exe → WRF 실행과 wrfout 생성까지 성공했다. 이 성공 기록은 현재까지 오류 없는 실행·출력 생성을 뜻하며 전체 모의 기간의 정상 종료는 종료 메시지와 최종 Times를 확인한 뒤 별도 기록한다.
+반복 검증 CASE는 FNL GRIB2 → FNL:* → met_em → real.exe → WRF 정상 종료까지 완료로 기록되었다. official test는 미완료이며 현재 동아시아·부산 4중 격자 사례 검증과 구분한다.
 
 ## Phase 4. MCIP
 
-현재 다음 구축 단계이다. 폴더가 있다는 것과 설치·실행 완료는 구분한다. WRF 모의 종료 후 d01~d04 출력·시간 범위를 확인하고 변환을 수행한다.
+| 항목 | 현재 상태 |
+|---|---|
+| compile | 완료. `CMAQv5.5/PREP/mcip/src/mcip.exe` (gfortran) |
+| WRF output 변환 | 완료. `TEST_20260901` d01~d04, 2026-08-31 01 UTC ~ 09-02 00 UTC, 34층 |
+| 수평 격자 검증 | 완료. 이전 운영체계 GRIDDESC(EASTASIA 27KM/09KM/03KM/01KM)와 원점·셀 수 일치 |
 
-- compile
-- WRF output 변환
-- CMAQ grid 검증
+이전 운영체계의 연직층 묶기(`CTMLAYS`, 15층)는 MCIP 5.x에서 삭제된 기능이므로 WRF 34층을 그대로 사용한다. 실행 절차는 [MCIP 구축 가이드](../mcip/MCIP_Installation_Guide.md) §10을 따른다.
 
 ## Phase 5. SMOKE
+
+미완료. 아래는 예정 작업이다.
 
 - install
 - example case
@@ -1063,6 +1080,8 @@ ncdump -h filename.nc
 
 ## Phase 6. CMAQ
 
+미완료. 소스·프로젝트 폴더 생성 및 MCIP 컴파일은 CCTM·ICON·BCON 컴파일 완료를 뜻하지 않는다.
+
 - 버전: CMAQ 5.5 (`CMAQv5.5.0.3_11Jul2025`)
 - compile
 - official benchmark
@@ -1070,12 +1089,16 @@ ncdump -h filename.nc
 
 ## Phase 7. ISAM
 
+미완료. 아래는 예정 작업이다.
+
 - benchmark
 - 국가별 tagging
 - 배출부문별 tagging
 - real case
 
 ## Phase 8. 자동화 및 후처리
+
+미완료. 아래는 예정 작업이다.
 
 - case manager
 - batch scripts
@@ -1096,6 +1119,7 @@ ncdump -h filename.nc
 | `03_NetCDF_HDF5_IOAPI_Setup.md` | [공통 라이브러리 구축 기록](../libraries/Common_Libraries_Installation_Guide.md) |
 | `04_WRF_WPS_Install.md` | [WRF/WPS 설치 가이드](../wrf/WRF_WPS_Installation_Guide.md) |
 | `05_WRF_Case_Run.md` | 별도 파일 대신 WRF/WPS 설치 가이드 §14에 통합 |
+| `06_MCIP_Install_Run.md` | [MCIP 구축 가이드](../mcip/MCIP_Installation_Guide.md) |
 
 계획 당시 전체 산출물 목록:
 
