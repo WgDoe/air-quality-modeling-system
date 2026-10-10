@@ -11,6 +11,7 @@
 3. [소스 다운로드부터 HDF5·netCDF·I/O API 설치](docs/libraries/Common_Libraries_Installation_Guide.md#library-start)
 4. [WRF/WPS 설치·전체 namelist 생성·개별 프로그램 실행](docs/wrf/WRF_WPS_Installation_Guide.md#case-run)
 5. [CMAQ 5.5 소스·config_cmaq.csh·MCIP 컴파일, 격자 결정과 MCIP 사례 실행](docs/mcip/MCIP_Installation_Guide.md#case-run)
+6. [SMOKE 5.3 소스·Makeinclude 수정·컴파일·공식 예제 실행 계획](docs/smoke/SMOKE_Installation_Guide.md)
 
 새 시스템 프로젝트 폴더 생성은 Master Plan §4.3을 따른다. 현재 성공 기록, 재구축용 보완 명령, 향후 계획을 각 문서에서 구분한다. 사용자 제공 `SCRIPTS/download_fnl.sh` 원문·생성·호출·기간별 파일 검사 명령은 [WRF/WPS §14.3.4](docs/wrf/WRF_WPS_Installation_Guide.md#fnl-download)에 통합했다. WPS는 CASE별 `WPS/namelist.wps`를 기준으로 설치본 실행파일을 절대경로로 호출하며, `GEOGRID.TBL`/`METGRID.TBL`은 `namelist.wps`의 절대경로 옵션으로 직접 참조한다. WRF runtime 자료는 `WRFV4.5.1/run/` 전체를 링크하지 않고, 현재 물리설정에 필요한 기본 7개(`LANDUSE.TBL`, `VEGPARM.TBL`, `SOILPARM.TBL`, `GENPARM.TBL`, `RRTM_DATA`, `RRTM_DATA_DBL`, `CAMtr_volume_mixing_ratio`)만 CASE/WRF에 심볼릭 링크하는 방식으로 정리했다.
 
@@ -40,6 +41,10 @@
 
 - [MCIP 구축 가이드](docs/mcip/MCIP_Installation_Guide.md)
 
+### SMOKE
+
+- [SMOKE 5.3 설치·컴파일 및 공식 예제 실행 가이드](docs/smoke/SMOKE_Installation_Guide.md)
+
 ### Master Plan과 현재 문서의 대응
 
 Master Plan §22의 구축 단계는 그대로 적용한다. §23의 산출물명은 계획 당시 명칭이며, 현재 저장소에서는 아래 경로를 사용한다.
@@ -51,8 +56,9 @@ Master Plan §22의 구축 단계는 그대로 적용한다. §23의 산출물�
 | Phase 2. Compiler 및 공통 library | `03_NetCDF_HDF5_IOAPI_Setup.md` | [공통 라이브러리](docs/libraries/Common_Libraries_Installation_Guide.md) |
 | Phase 3. WRF/WPS | `04_WRF_WPS_Install.md` | [WRF/WPS 설치](docs/wrf/WRF_WPS_Installation_Guide.md) |
 | Phase 4. MCIP | `06_MCIP_Install_Run.md` | [MCIP 구축](docs/mcip/MCIP_Installation_Guide.md) |
+| Phase 5. SMOKE | `07_SMOKE_Install.md` | [SMOKE 5.3 구축](docs/smoke/SMOKE_Installation_Guide.md) |
 
-Rocky Linux 문서는 Phase 1의 OS 설치와 기본 확인을, Compiler/MPI 문서는 Phase 1의 SFTP 설정 및 Phase 2의 compiler/MPI 구축을 다룬다. 공통 라이브러리 문서는 I/O API 3.2-20200828의 빌드, M3TOOLS 생성, 모듈 링크·실행 테스트 및 환경변수 등록까지 다룬다. 실제 설치 기록을 기준으로 **Phase 2(Compiler 및 공통 library)는 완료**되었다. **Phase 3 WRF/WPS(WRF 4.5.1 / WPS 4.5)는 완료**되었다. 반복 검증 CASE `TEST_20260901_REPEAT`에서 WPS(geogrid→ungrib→metgrid), `real.exe`, WRF dmpar 4코어 실행이 모두 정상 완료되었고, `rsl.error.0000`에서 `SUCCESS COMPLETE WRF` 및 d01~d04가 요청 종료시각 `2026-09-02_00:00:00`까지 도달한 것을 확인했다. **Phase 4 MCIP는 완료**되었다. CASE `TEST_20260901`의 d01~d04를 MCIP 5.5로 변환해 모두 `NORMAL TERMINATION`으로 종료했고, 생성된 GRIDDESC(27KM/09KM/03KM/01KM)가 이전 운영체계 격자와 일치함을 확인했다. 다음 단계는 SMOKE(Phase 5)와 CMAQ 컴파일·benchmark(Phase 6)이다.
+Rocky Linux 문서는 Phase 1의 OS 설치와 기본 확인을, Compiler/MPI 문서는 Phase 1의 SFTP 설정 및 Phase 2의 compiler/MPI 구축을 다룬다. 공통 라이브러리 문서는 I/O API 3.2-20200828의 빌드, M3TOOLS 생성, 모듈 링크·실행 테스트 및 환경변수 등록까지 다룬다. 실제 설치 기록을 기준으로 **Phase 2(Compiler 및 공통 library)는 완료**되었다. **Phase 3 WRF/WPS(WRF 4.5.1 / WPS 4.5)는 완료**되었다. 반복 검증 CASE `TEST_20260901_REPEAT`에서 WPS(geogrid→ungrib→metgrid), `real.exe`, WRF dmpar 4코어 실행이 모두 정상 완료되었고, `rsl.error.0000`에서 `SUCCESS COMPLETE WRF` 및 d01~d04가 요청 종료시각 `2026-09-02_00:00:00`까지 도달한 것을 확인했다. **Phase 4 MCIP는 완료**되었다. CASE `TEST_20260901`의 d01~d04를 MCIP 5.5로 변환해 모두 `NORMAL TERMINATION`으로 종료했고, 생성된 GRIDDESC(27KM/09KM/03KM/01KM)가 이전 운영체계 격자와 일치함을 확인했다. **Phase 5 SMOKE 5.3 설치·컴파일은 완료(2026-10-10)**되었다. GFortran 11.5.0으로 실행파일 36개·내부 라이브러리 3개를 만들고 `ldd`로 라이브러리 연결을 확인했다. SMOKE 공식 ExampleCase-v3 실행 및 CAPSS·REAS·자연배출 처리는 아직 미수행이다. 다음 단계는 SMOKE 공식 예제 검증과 CMAQ 컴파일·benchmark(Phase 6)이다.
 
 완료 상태는 사용자 제공 실행 기록과 기존 문서에 기재된 종료 메시지·시간·격자 확인 결과를 근거로 한다. 이번 문서 검토에서는 Linux 서버의 원본 로그·netCDF 파일을 직접 열거나 모델을 재실행하지 않았다. CMAQ CCTM 실행, 입력 결측값·물리량 QA 및 기존 15층 배출량·IC/BC와 새 34층 기상의 정합성은 아직 검증되지 않았다.
 
@@ -70,6 +76,7 @@ Rocky Linux 문서는 Phase 1의 OS 설치와 기본 확인을, Compiler/MPI 문
 | MCIP | 5.5 (CMAQ 저장소 `PREP/mcip`) | **Phase 4 완료.** `TEST_20260901` d01~d04 정상 변환, 이전 운영체계 GRIDDESC와 격자 일치. 제공 기록의 설치 커밋은 `9bd3734`이며 `PREP/mcip` 소스는 5.5.0.3·5.5.0.4 태그와 동일함을 확인. CCTM 전 태그 전환 필요([MCIP 가이드 §3, §5.2](docs/mcip/MCIP_Installation_Guide.md)) |
 | WRF / WPS | 4.5.1 / 4.5 | **Phase 3 완료.** `TEST_20260901_REPEAT`에서 WPS, `real.exe`, WRF dmpar 4코어 정상 완료. `SUCCESS COMPLETE WRF` 및 d01~d04 종료시각 `2026-09-02_00:00:00` 확인 |
 | I/O API | 3.2-20200828 | 설치 완료 |
+| SMOKE | 5.3 (`SMOKEv5.3_June2026`) | **설치·컴파일 완료**(36개 실행파일, 3개 내부 라이브러리, `ldd` 확인), 공식 ExampleCase-v3 실행 검증 대기 |
 
 ### 구축 디렉터리와 자료·사례 사용 경로 (2026-10-08 문서 정리)
 
@@ -117,6 +124,7 @@ docs/
   libraries/
   wrf/        # 설치·실행·GHG 오류를 하나의 문서에 통합
   mcip/       # CMAQ 소스·config_cmaq.csh·MCIP 컴파일·격자 결정·사례 실행
+  smoke/      # SMOKE 5.3 설치·컴파일·오류 이력·공식 예제 예정 절차
 ```
 
 `scripts/`, `config/`, `examples/`, `tests/`는 향후 저장소 구성 계획이다. 서버의 `SCRIPTS/download_fnl.sh`와 GitHub에 등록된 파일을 구분한다.

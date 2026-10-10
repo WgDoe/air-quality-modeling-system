@@ -1,7 +1,7 @@
 # CMAQ 통합 대기질 모델링 시스템 구축 기본계획 및 요구사항
 
 작성일: 2026-09-23  
-수정일: 2026-10-09 (WRF 재현 검증·MCIP 완료 기록, 태그 재검토 및 경로 정합성 반영)
+수정일: 2026-10-10 (기존 WRF/MCIP 완료 기록 유지, SMOKE 5.3 컴파일 완료·공식 예제 검증 대기 반영)
 문서 성격: 프로젝트 기본계획 / 요구사항 정의 / 공식 참고자료 인덱스  
 적용 대상: Linux Desktop 기반 CMAQ 독립 운영환경 구축
 
@@ -232,7 +232,7 @@ MCIP/CMAQ가 처리 가능한 WRF/WPS 버전 결정
 | netCDF-C / netCDF-Fortran | 4.9.3 / 4.6.2 | 설치 완료. CMAQ 5.5는 C/Fortran 경로를 별도 변수로 지정 가능 |
 | HDF5 | 1.14.6 | 설치 완료 |
 | Compiler / MPI | GNU 11.5.0 / OpenMPI | 설치 완료 |
-| SMOKE | 미정 | Phase 5 착수 시 CMAQ 5.5 호환 버전으로 결정 |
+| SMOKE | 5.3 (태그 `SMOKEv5.3_June2026`, 커밋 `f29374bbffe7425973376c3091da634d1a718a62`) | **Phase 5 설치·컴파일 완료(2026-10-10)**. GNU GFortran 11.5.0, 실행파일 36개·내부 라이브러리 3개, `ldd` 확인. 공식 ExampleCase-v3 실행 및 CMAQ 화학 메커니즘 종분배 정합성 검증은 미완료. [SMOKE 가이드](../smoke/SMOKE_Installation_Guide.md) |
 
 WRF 4.5.1을 선택한 이유:
 
@@ -332,7 +332,7 @@ df -h /home/woogon/CMAQ_MODEL
 | WRF/WPS 빌드와 전체 namelist·개별 실행 | [WRF/WPS 가이드](../wrf/WRF_WPS_Installation_Guide.md) §4~14 |
 | CMAQ 소스·설정·MCIP 빌드·격자·사례 실행 | [MCIP 가이드](../mcip/MCIP_Installation_Guide.md) §5~10 |
 
-이미 설치된 프로그램은 재컴파일하지 않고 CASE만 새로 만든다. MCIP는 제공 기록 기준 완료이며, SMOKE·CCTM·ISAM·자동화는 예정 단계이다. 실제로 성공한 명령이 확보되는 즉시 해당 기존 문서 체계에 기록한다. FNL 다운로드 스크립트 원문·파일 생성·시작/종료 UTC 인자·기간별 검사 명령은 [WRF/WPS §14.3.4](../wrf/WRF_WPS_Installation_Guide.md#fnl-download)에 통합했다.
+이미 설치된 프로그램은 재컴파일하지 않고 CASE만 새로 만든다. MCIP는 제공 기록 기준 완료이며 SMOKE는 설치·컴파일까지 완료되었다. SMOKE 공식 예제 실행·CAPSS/REAS/자연배출량 처리, CCTM·ISAM·자동화는 예정 단계이다. 실제로 성공한 명령이 확보되는 즉시 해당 기존 문서 체계에 기록한다. FNL 다운로드 스크립트 원문·파일 생성·시작/종료 UTC 인자·기간별 검사 명령은 [WRF/WPS §14.3.4](../wrf/WRF_WPS_Installation_Guide.md#fnl-download)에 통합했다.
 
 # 5. Linux 기본 환경
 
@@ -596,12 +596,13 @@ Emission Inventory
 
 ## 10.2 초기 구축
 
-1. SMOKE 공식 example case 성공
-2. 기존 국내 배출량 처리방식 분석
-3. 국내 CAPSS 처리
-4. REAS 처리
-5. 자연배출 처리
-6. 최종 merge 및 QA
+1. SMOKE 5.3 설치·컴파일 완료(2026-10-10, 실행파일 36개·내부 라이브러리 3개; [설치 가이드](../smoke/SMOKE_Installation_Guide.md))
+2. SMOKE 공식 ExampleCase-v3 성공(미수행)
+3. 기존 국내 배출량 처리방식 분석
+4. 국내 CAPSS 처리
+5. REAS 처리
+6. 자연배출 처리
+7. 최종 merge 및 QA
 
 ---
 
@@ -915,7 +916,7 @@ case별 변경항목:
 ./run_case.sh   --start 2023-07-01   --end 2023-07-10   --domain BUSAN_D03   --met FNL   --emis CAPSS_REAS_MEGAN   --cmaq 5.5   --isam yes
 ```
 
-단계별 성공 여부를 log로 기록하도록 한다. 아래 `OK`는 향후 성공 로그의 형식 예시이며 현재 실행 상태가 아니다. WRF 재현 검증과 MCIP 정상 변환은 제공 기록 기준 완료이며 SMOKE·CMAQ·ISAM은 미완료이다.
+단계별 성공 여부를 log로 기록하도록 한다. 아래 `OK`는 향후 성공 로그의 형식 예시이며 현재 실행 상태가 아니다. WRF 재현 검증·MCIP 정상 변환과 SMOKE 설치·컴파일은 제공 기록 기준 완료이며, SMOKE 예제 검증·실제 배출량 처리 및 CMAQ·ISAM은 미완료이다.
 
 ```text
 01_WPS      OK
@@ -996,7 +997,7 @@ ncdump -h filename.nc
 
 # 22. 단계별 구축 계획
 
-## 현재 진행상황 (설치 확인: 2026-10-03, 실행 기록 반영: 2026-10-09)
+## 현재 진행상황 (설치 확인: 2026-10-03, WRF/MCIP 기록: 2026-10-09, SMOKE 컴파일 기록: 2026-10-10)
 
 실제 설치 명령과 확인 결과는 [공통 라이브러리 구축 기록](../libraries/Common_Libraries_Installation_Guide.md) 및 [WRF/WPS 설치 가이드](../wrf/WRF_WPS_Installation_Guide.md)을 기준으로 한다.
 
@@ -1008,7 +1009,8 @@ ncdump -h filename.nc
 - **Phase 3 WRF/WPS 재현 검증 완료**: `TEST_20260901_REPEAT`에서 WPS·real.exe·WRF dmpar 4코어 정상 종료. `SUCCESS COMPLETE WRF` 및 d01~d04 종료시각 `2026-09-02_00:00:00` 확인. 원본 CASE `TEST_20260901`의 MCIP 변환 기록과 구분한다.
 - **Phase 4 MCIP 완료 (2026-10-09)**: CMAQ 5.5 저장소(`src/CMAQ_REPO`)와 프로젝트 폴더(`CMAQv5.5`) 생성, `config_cmaq.csh` gcc 경로 설정, MCIP gfortran 컴파일 완료. `TEST_20260901` d01~d04를 이전 운영체계 격자(EASTASIA 27KM/09KM/03KM/01KM)로 변환해 GRIDDESC 일치, 34층, 48시간 출력 확인. 상세는 [MCIP 구축 가이드](../mcip/MCIP_Installation_Guide.md).
 - **확인 필요**: CMAQ 저장소를 `main` 브랜치로 내려받았다. `PREP/mcip`는 확정 태그와 동일하나 CCTM은 다르므로 Phase 6 전에 별도 태그 소스·프로젝트를 준비한다(§3.5.3). 2026-10-08 UTC(한국시간 10-09) 공개된 `CMAQv5.5.0.4_08Oct2026`은 §3.5.4 재검토 대상이다.
-- **다음 작업**: SMOKE(Phase 5) 및 CMAQ CCTM·ICON·BCON 컴파일과 benchmark(Phase 6). CMAQ 결과는 아직 완료로 기록하지 않는다.
+- **Phase 5 SMOKE 설치·컴파일 완료 (2026-10-10)**: `SMOKEv5.3_June2026` 태그에서 GFortran 11.5.0으로 실행파일 36개 및 내부 정적 라이브러리 3개 생성, `ldd`로 동적 라이브러리 해결 확인. `SMK_HOME=/home/woogon/CMAQ_MODEL/SMOKEv5.3`, `BIN=Linux2_x86_64gfort10`. 실제 배출량 계산은 검증 전이며 공식 SMOKE-ExampleCase-v3, CAPSS·REAS·자연배출량 처리는 미수행. 상세 및 오류 이력은 [SMOKE 구축 가이드](../smoke/SMOKE_Installation_Guide.md) 참조.
+- **다음 작업**: SMOKE 공식 ExampleCase-v3 실행 검증(Phase 5), 이후 CAPSS/REAS/자연배출 처리; CMAQ CCTM·ICON·BCON 컴파일과 benchmark(Phase 6). CMAQ 결과는 아직 완료로 기록하지 않는다.
 
 완료 상태는 사용자 제공 실행 기록과 기존 문서에 기재된 종료 메시지·시간·격자 확인 결과를 근거로 한다. 이번 문서 검토에서는 Linux 서버의 원본 로그·netCDF 파일을 직접 열거나 모델을 재실행하지 않았다. CMAQ CCTM 실행, 입력 결측값·물리량 QA 및 기존 15층 배출량·IC/BC와 새 34층 기상의 정합성은 아직 검증되지 않았다.
 
@@ -1070,13 +1072,14 @@ ncdump -h filename.nc
 
 ## Phase 5. SMOKE
 
-미완료. 아래는 예정 작업이다.
+**설치·컴파일 완료(2026-10-10), 실행 검증 및 배출량 처리는 미완료.** 상세는 [SMOKE 구축 가이드](../smoke/SMOKE_Installation_Guide.md)를 따른다.
 
-- install
-- example case
-- CAPSS test
-- REAS test
-- natural emissions test
+- [x] SMOKE 5.3 소스 태그 확정·설치, 실행파일 36개 및 내부 라이브러리 3개 컴파일, `ldd` 확인
+- [ ] 공식 SMOKE-ExampleCase-v3 실행·결과 검증
+- [ ] CAPSS test
+- [ ] REAS test
+- [ ] natural emissions test
+- [ ] 부문별 최종 merge·QA 및 CMAQ 화학 메커니즘 종분배 확인
 
 ## Phase 6. CMAQ
 
@@ -1135,7 +1138,7 @@ ncdump -h filename.nc
 
 06_MCIP_Install_Run.md
 
-07_SMOKE_Install.md
+07_SMOKE_Install.md  → 실제 저장소: docs/smoke/SMOKE_Installation_Guide.md
 08_CAPSS_Processing.md
 09_REAS_Processing.md
 10_Biogenic_Emissions.md
@@ -1344,7 +1347,7 @@ REAS는 버전별 자료기간, species, grid, format이 다를 수 있으므로
 
 1. Linux 시스템에서 WRF/WPS를 정상 compile 및 실행할 수 있다.
 2. WRF 결과를 MCIP로 정상 변환할 수 있다.
-3. SMOKE example case를 실행할 수 있다.
+3. SMOKE 5.3 컴파일(2026-10-10)은 완료되었으며, 공식 example case의 정상 실행은 미검증으로 구분한다. 기본 구축 성공 판정 시 공식 example case 실행 결과를 확인한다.
 4. CMAQ official benchmark를 reference 수준으로 재현할 수 있다.
 5. 실제 동아시아/부산 domain의 WRF-CMAQ base case를 실행할 수 있다.
 6. CAPSS 국내 배출량을 CMAQ input으로 사용할 수 있다.

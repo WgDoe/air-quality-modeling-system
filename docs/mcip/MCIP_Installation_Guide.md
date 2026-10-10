@@ -383,7 +383,7 @@ ldd mcip.exe | grep "not found"
 | CMAQ 프로젝트 폴더 | 5.5 | `CMAQv5.5` | - | 생성·`config_cmaq.csh` gcc 설정 완료 |
 | MCIP | 5.5 | `CMAQv5.5/PREP/mcip/src` | `mcip.exe` | 컴파일 완료, TEST_20260901 d01~d04 정상 실행·격자 검증 완료 |
 
-Phase 4 MCIP의 설치·실행과 CMAQ 격자 검증은 완료로 기록한다(2026-10-09). 다음 구축 단계는 Phase 5(SMOKE)와 Phase 6(CMAQ 컴파일·benchmark)이다.
+Phase 4 MCIP의 설치·실행과 CMAQ 격자 검증은 완료로 기록한다(2026-10-09). 이후 Phase 5 SMOKE 5.3의 **설치·컴파일은 2026-10-10 완료**되었으며, 공식 ExampleCase-v3 실행 검증과 CAPSS·REAS·자연배출량 처리는 미완료다([SMOKE 가이드](../smoke/SMOKE_Installation_Guide.md)). Phase 6 CMAQ CCTM·ICON·BCON 컴파일 및 benchmark도 미완료다.
 
 <a id="case-run"></a>
 
