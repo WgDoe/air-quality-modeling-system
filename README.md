@@ -58,9 +58,23 @@ Master Plan §22의 구축 단계는 그대로 적용한다. §23의 산출물�
 | Phase 4. MCIP | `06_MCIP_Install_Run.md` | [MCIP 구축](docs/mcip/MCIP_Installation_Guide.md) |
 | Phase 5. SMOKE | `07_SMOKE_Install.md` | [SMOKE 5.3 구축](docs/smoke/SMOKE_Installation_Guide.md) |
 
-Rocky Linux 문서는 Phase 1의 OS 설치와 기본 확인을, Compiler/MPI 문서는 Phase 1의 SFTP 설정 및 Phase 2의 compiler/MPI 구축을 다룬다. 공통 라이브러리 문서는 I/O API 3.2-20200828의 빌드, M3TOOLS 생성, 모듈 링크·실행 테스트 및 환경변수 등록까지 다룬다. 실제 설치 기록을 기준으로 **Phase 2(Compiler 및 공통 library)는 완료**되었다. **Phase 3 WRF/WPS(WRF 4.5.1 / WPS 4.5)는 완료**되었다. 반복 검증 CASE `TEST_20260901_REPEAT`에서 WPS(geogrid→ungrib→metgrid), `real.exe`, WRF dmpar 4코어 실행이 모두 정상 완료되었고, `rsl.error.0000`에서 `SUCCESS COMPLETE WRF` 및 d01~d04가 요청 종료시각 `2026-09-02_00:00:00`까지 도달한 것을 확인했다. **Phase 4 MCIP는 완료**되었다. CASE `TEST_20260901`의 d01~d04를 MCIP 5.5로 변환해 모두 `NORMAL TERMINATION`으로 종료했고, 생성된 GRIDDESC(27KM/09KM/03KM/01KM)가 이전 운영체계 격자와 일치함을 확인했다. **Phase 5 SMOKE 5.3 설치·컴파일은 완료(2026-10-10)**되었다. GFortran 11.5.0으로 실행파일 36개·내부 라이브러리 3개를 만들고 `ldd`로 라이브러리 연결을 확인했다. SMOKE 공식 ExampleCase-v3 실행 및 CAPSS·REAS·자연배출 처리는 아직 미수행이다. 다음 단계는 SMOKE 공식 예제 검증과 CMAQ 컴파일·benchmark(Phase 6)이다.
+### 구축 진행 현황 (2026-10-10 기준)
 
-완료 상태는 사용자 제공 실행 기록과 기존 문서에 기재된 종료 메시지·시간·격자 확인 결과를 근거로 한다. 이번 문서 검토에서는 Linux 서버의 원본 로그·netCDF 파일을 직접 열거나 모델을 재실행하지 않았다. CMAQ CCTM 실행, 입력 결측값·물리량 QA 및 기존 15층 배출량·IC/BC와 새 34층 기상의 정합성은 아직 검증되지 않았다.
+| Phase | 구성요소 | 검증된 진행 상태 | 다음 확인 사항 |
+|---|---|---|---|
+| Phase 1 | Rocky Linux 및 기본 환경 | OS 설치, SFTP 등 기본 환경 설정 완료 | 필요 시 운영환경 유지관리 |
+| Phase 2 | GNU Compiler / OpenMPI / 공통 라이브러리 | GCC/GFortran 11.5.0, OpenMPI, HDF5, netCDF, I/O API 설치·테스트 완료 | 개별 모델과의 호환성 지속 확인 |
+| Phase 3 | WRF 4.5.1 / WPS 4.5 | 반복 사례 `TEST_20260901_REPEAT`에서 WPS, `real.exe`, WRF dmpar 4코어 실행 완료 | 실제 대기질 사례의 입력·출력 QA |
+| Phase 4 | MCIP 5.5 | `TEST_20260901` d01~d04 변환 및 격자 일치 확인 완료 | CCTM 기상 입력 및 수직층 정합성 검증 |
+| Phase 5 | SMOKE 5.3 | GFortran 11.5.0으로 실행파일 36개·내부 라이브러리 3개 컴파일, `ldd` 확인 완료 | 공식 ExampleCase-v3 실행 후 CAPSS·REAS·자연배출 처리 |
+| Phase 6 | CMAQ CCTM | 컴파일·benchmark 미완료 | 기준 태그 확정, 컴파일 및 benchmark |
+| Phase 7 | CMAQ-ISAM | 미수행 | benchmark 및 배출원 기여도 분석 |
+
+WRF 반복 검증에서는 `rsl.error.0000`의 `SUCCESS COMPLETE WRF` 메시지와 d01~d04의 요청 종료시각(`2026-09-02_00:00:00`) 도달을 확인했다. MCIP는 네 영역 모두 `NORMAL TERMINATION`으로 종료되었고, GRIDDESC(27KM/09KM/03KM/01KM)가 기존 운영체계 격자와 일치했다.
+
+**SMOKE는 설치·컴파일 완료 단계이지 배출량 계산 검증 완료 단계가 아니다.** 공식 ExampleCase-v3 실행 결과가 확인될 때 Phase 5의 다음 항목을 완료로 기록한다. 세부 명령, 오류 해결 이력 및 실행 준비 사항은 [SMOKE 구축 가이드](docs/smoke/SMOKE_Installation_Guide.md)에 보관한다.
+
+**검증 범위:** 완료 표시는 사용자 제공 실행 화면·로그와 기존 문서에 기록된 종료 메시지·시간·격자 확인 결과에 근거한다. 이번 GitHub 문서 수정 과정에서 Linux 서버의 원본 로그·netCDF 파일을 직접 열거나 모델을 재실행하지 않았다. CMAQ CCTM 실행, 입력 결측값·물리량 QA, 기존 15층 배출량·IC/BC와 새로운 34층 기상의 정합성은 아직 검증되지 않았다.
 
 설치 가이드는 기존 Linux 및 Compiler/MPI 문서처럼 번호 없는 설명형 파일명을 사용한다. 공통 라이브러리 문서의 기존 `01_common_libraries_installation.md`는 `Common_Libraries_Installation_Guide.md`로 변경했다. 기본계획의 `00_`와 향후 산출물 번호는 계획 문서 체계로 유지한다.
 
