@@ -596,13 +596,17 @@ Emission Inventory
 
 ## 10.2 초기 구축
 
-1. SMOKE 5.3 설치·컴파일 완료(2026-10-10, 실행파일 36개·내부 라이브러리 3개; [설치 가이드](../smoke/SMOKE_Installation_Guide.md))
+1. SMOKE 5.3 최초 설치·컴파일 완료(2026-10-10), 포인터 초기화 수정 후 재구축·공식 예제 검증 완료(2026-10-19). 실행파일 36개·내부 라이브러리 3개; [설치 가이드](../smoke/SMOKE_Installation_Guide.md)
 2. SMOKE 공식 ExampleCase-v3 실행·결과 검증 완료(2026-10-19, 사용자 제공 문서 기준)
 3. 기존 국내 배출량 처리방식 분석
 4. 국내 CAPSS 처리
 5. REAS 처리
 6. 자연배출 처리
-7. 최종 merge 및 QA
+7. 부산 사례의 최종 merge·QA 및 CMAQ 입력 정합성 검증(미완료)
+
+재구축 시 컴파일 전에 `Makeinclude`의 GNU 옵션·netCDF 경로·rpath와 `procar2pt.f` 지역 포인터 15개 초기화를 적용한다. 예제 실행 전 `directory_definitions.csh`의 설치·실행파일·I/O API 경로를 수정하고, 최종 병합 전 `sectorlist_2022he_cb6_22m_withbeis_withrwc`의 교육 서버 경로를 실제 경로로 변경한다. 절차는 [설치 가이드 §6·§10.3](../smoke/SMOKE_Installation_Guide.md), 소스 수정 근거는 [포인터 초기화 기록](../smoke/SMOKE_procar2pt_Fix.md)을 따른다.
+
+수정본 4개는 실제 첨부되지 않았으므로 원 작성자의 사용본 확보·diff·해시 대조가 남아 있다. 공식 예제 완료 기록과 재배포 가능한 수정 파일 확보 상태를 구분한다. 예제 `afdust_adj`는 EPA 제공 Intel 보조 실행파일을 사용했으며, 부산 적용 전 GNU 빌드 또는 대체 방법을 확인한다. 기존 설치본·입력·로그·결과는 백업하며, 오류 검색 0건만으로 성공 판정하지 않고 종료 상태·단계별 정상 종료·산출물 날짜·격자·화학종·단위·수치 QA를 함께 확인한다.
 
 ---
 
@@ -1076,7 +1080,8 @@ ncdump -h filename.nc
 
 - [x] SMOKE 5.3 소스 태그 확정·설치, 실행파일 36개 및 내부 라이브러리 3개 컴파일, `ldd` 확인
 - [x] 공식 SMOKE-ExampleCase-v3 실행·결과 검증(2026-10-19, 사용자 제공 문서 기준)
-- [ ] 실제 수정본 4개 확보 및 diff·해시 대조 (`Makeinclude`, `procar2pt.f`, `directory_definitions.csh`, `sectorlist`)
+- [ ] 실제 수정본 4개 확보 및 diff·해시 대조 (`Makeinclude`, `procar2pt.f`, `directory_definitions.csh`, `sectorlist_2022he_cb6_22m_withbeis_withrwc`)
+- [ ] `afdust_adj` 보조 실행파일의 GNU 빌드·대체 방법 확인 및 결과 비교(예제는 EPA Intel 빌드 사용)
 - [ ] CAPSS test
 - [ ] REAS test
 - [ ] natural emissions test

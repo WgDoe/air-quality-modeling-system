@@ -75,6 +75,17 @@ WRF 반복 검증에서는 `rsl.error.0000`의 `SUCCESS COMPLETE WRF` 메시지�
 
 **SMOKE 공식 예제 검증 완료(2026-10-19).** 면오염원·점오염원·도로이동·BEIS4 및 최종 병합 완료 기록은 사용자 제공 문서에 근거한다. 부산 사례와 CMAQ 연계 검증은 미완료다. [설치·예제 가이드](docs/smoke/SMOKE_Installation_Guide.md), [procar2pt 수정 기록](docs/smoke/SMOKE_procar2pt_Fix.md)을 참고한다. 수정본 4개는 실제 첨부되지 않아 확보가 필요하다.
 
+재설치할 때 필요한 수정과 적용 순서는 다음과 같다. 아래 파일명은 확보 대상이며 저장소에 등록된 수정 파일의 다운로드 링크가 아니다.
+
+| 적용 단계 | 파일 | 변경 내용 |
+|---|---|---|
+| 컴파일 전 | `Makeinclude` | GNU Fortran 옵션, netCDF 라이브러리 경로·rpath 지정 |
+| 컴파일 전 | `procar2pt.f` | 지역 포인터 15개 초기화 |
+| 예제 실행 전 | `directory_definitions.csh` | 예제·SMOKE 실행파일·I/O API 경로 지정 |
+| 최종 병합 전 | `sectorlist_2022he_cb6_22m_withbeis_withrwc` | 교육 서버 경로를 실제 예제 경로로 변경 |
+
+실제 사용본 확보 후 원본 대비 diff·해시를 대조한다([설치 가이드 §2](docs/smoke/SMOKE_Installation_Guide.md#2-구축-환경)). 예제의 `afdust_adj` 보조 실행파일은 EPA 제공 Intel 빌드를 사용했으므로 전체 GNU 빌드 검증 완료를 의미하지 않는다. 다음 작업은 수정본 확보, 해당 보조 프로그램의 GNU 빌드·대체 방법 확인, 부산 배출량 처리와 CMAQ 입력 정합성 검증이다.
+
 **검증 범위:** 완료 표시는 사용자 제공 실행 화면·로그와 기존 문서에 기록된 종료 메시지·시간·격자 확인 결과에 근거한다. 이번 GitHub 문서 수정 과정에서 Linux 서버의 원본 로그·netCDF 파일을 직접 열거나 모델을 재실행하지 않았다. CMAQ CCTM 실행, 입력 결측값·물리량 QA, 기존 15층 배출량·IC/BC와 새로운 34층 기상의 정합성은 아직 검증되지 않았다.
 
 설치 가이드는 기존 Linux 및 Compiler/MPI 문서처럼 번호 없는 설명형 파일명을 사용한다. 공통 라이브러리 문서의 기존 `01_common_libraries_installation.md`는 `Common_Libraries_Installation_Guide.md`로 변경했다. 기본계획의 `00_`와 향후 산출물 번호는 계획 문서 체계로 유지한다.
