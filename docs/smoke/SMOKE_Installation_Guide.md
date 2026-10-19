@@ -73,7 +73,7 @@ Rocky Linux 기반 CMAQ 통합 대기질 모델링 시스템의 Phase 5(SMOKE) �
 
 수정 파일 보관:
 
-설정·소스 수정은 Windows에서 수정본을 만들어 SFTP로 덮어쓰는 방식으로 한다. **수정본 4개는 이번 대화에 실제 첨부되지 않았으며 저장소에도 없다. 확보가 필요하다.** 아래 표는 필요한 파일 목록이며 다운로드 링크가 아니다. 원 작성자에게 실제 사용본을 받아 원본 대비 diff·경로·해시를 확인한 뒤 별도로 등록해야 한다. §6.2와 §10.3의 변경 설명으로 직접 수정할 수 있지만, 실제 사용본과 동일한 파일이라고 간주하지 않는다. SFTP 덮어쓰기 단계는 파일 확보·검토 후 진행한다.
+설정·소스 수정은 Windows에서 수정본을 만들어 SFTP로 덮어쓰는 방식으로 한다. 재현을 위해 이번에 제공된 수정본 4개를 이 저장소의 [`docs/smoke/files/`](files/)에 보관한다. 소스·빌드 파일은 SMOKE 태그 원본과, 예제 설정은 §10.3의 경로 변경 설명과 대조한다. 원본·수정본 md5를 §6.3·§10.3에 적었다.
 
 | 수정본 | 덮어쓸 위치 | 사용 장 |
 |---|---|---|
@@ -115,16 +115,20 @@ Rocky Linux 기반 CMAQ 통합 대기질 모델링 시스템의 Phase 5(SMOKE) �
 
 **2) 화면 출력은 로그 파일로 남긴다.** 컴파일 로그는 결과 폴더(`Linux2_x86_64gfort10`)에, 예제 실행 로그는 `2022he_cb6_22m/run_logs/`에 둔다.
 
-**3) SFTP로 올린 파일은 md5로 확인한다.** 원본·수정본 md5는 제공 문서의 기록값이다. 실제 수정본 4개를 확보하기 전에는 해당 해시를 대조 완료로 처리하지 않는다. Windows에서 내려받을 때 파일 이름 뒤에 `_1`이나 `.txt`가 붙지 않았는지 확인한다. Windows 줄바꿈이 섞였으면 아래로 정리한다.
+**3) SFTP로 올린 파일은 md5로 확인한다.** 이 문서의 수정본은 [`docs/smoke/files/`](files/)에 보관했고, 원본·수정본 md5를 해당 단계에 적어 두었다. Windows에서 내려받을 때 파일 이름 뒤에 `_1`이나 `.txt`가 붙지 않았는지 확인한다. Windows 줄바꿈이 섞였으면 아래로 정리한다.
 
 ```bash
+(
 sed -i 's/\r$//' 파일이름
+)
 ```
 
 **4) 종료 상태·단계별 로그·산출물 내용을 함께 확인한다. 오류 검색은 보조 점검이다.**
 
 ```bash
+(
 grep -c -E "Segmentation fault|SIGSEGV|ERROR: detected|ERROR: Running" <로그파일>
+)
 ```
 
 결과 `0`은 해당 패턴이 없다는 뜻이며 성공을 보장하지 않는다. `grep` 종료값 1은 패턴 없음, 2 이상은 파일 누락·읽기 오류 등 검사 실패이므로 구분한다. 다음을 모두 확인한 뒤 다음 단계로 진행한다.
@@ -134,6 +138,8 @@ grep -c -E "Segmentation fault|SIGSEGV|ERROR: detected|ERROR: Running" <로그�
 - §10의 부문별 예상 날짜·파일 수·파일 크기와 대표일 매핑을 확인한다. 파일 개수만으로 성공 처리하지 않는다.
 - `ncdump -h <결과파일>` 등으로 실제 파일의 가독성, 격자·차원·화학종·단위와 `TFLAG`의 기간·시간 간격을 확인한다. 결측·NaN·비정상 음수 및 배출량 합계·부문별 기여를 QA 보고서와 비교한다.
 - 최종 31일 결과의 날짜 누락·중복과 inline/격자 배출량 중복 입력 여부를 확인한다. 도로이동 비교는 파일 구성 확인이며 수치 일치 검증을 뜻하지 않는다.
+
+아래 Bash 블록은 `( … )` 서브셸에서 실행해 실패 시 해당 블록만 중단하며 터미널·SSH 접속은 유지한다. 블록 안의 `cd`는 부모 터미널의 위치를 바꾸지 않는다. 독립 확인 명령은 해당 절의 설치·예제 경로를 기준으로 실행한다. 실패 메시지가 나오면 다음 블록으로 진행하지 않는다.
 
 Bash에서 `tee`를 쓸 때는 `set -o pipefail`을 먼저 설정하고 파이프라인 직후 종료값을 확인한다. 실패하면 후속 계산을 멈춘다. 예제 부문 루프는 비정상 종료 시 중단하도록 아래에 보완했다. 종료값이 0이어도 위 산출물 QA는 별도로 수행한다.
 
@@ -146,15 +152,17 @@ Bash에서 `tee`를 쓸 때는 `set -o pipefail`을 먼저 설정하고 파이�
 ### 5.1 소스 다운로드
 
 ```bash
+(
 cd /home/woogon/CMAQ_MODEL/src || exit 1
 git clone -b SMOKEv5.3_June2026 https://github.com/CEMPD/SMOKE.git SMOKE_REPO
 cd /home/woogon/CMAQ_MODEL/src/SMOKE_REPO || exit 1
 git describe --tags
 git log -1 --format='%H %cd'
 ls
+)
 ```
 
-기록된 결과 또는 기대값:
+정상 결과:
 
 ```text
 SMOKEv5.3_June2026
@@ -166,9 +174,10 @@ LICENSE.txt  README.md  assigns  scripts  src  utils
 
 ### 5.2 설치 폴더 생성과 소스 복사
 
-`SMOKEv5.3`이 `SMK_HOME`이 된다. 재설치 시 기존 설치본과 로그는 먼저 백업 경로로 옮겨 보존한다. 아래 명령은 지정된 프로젝트 루트에서 실행하며, 백업 경로가 이미 있으면 중단한다.
+`SMOKEv5.3`이 `SMK_HOME`이 된다. 재설치 시 기존 설치본과 로그는 지우지 않고 실행 시각이 붙은 백업 폴더(`SMOKEv5.3.backup.날짜시각`)로 옮겨 보존한다.
 
 ```bash
+(
 cd /home/woogon/CMAQ_MODEL || exit 1
 if [ -e SMOKEv5.3 ] || [ -L SMOKEv5.3 ]; then
   backup="SMOKEv5.3.backup.$(date +%Y%m%dT%H%M%S)"
@@ -177,15 +186,20 @@ if [ -e SMOKEv5.3 ] || [ -L SMOKEv5.3 ]; then
 fi
 mkdir -p SMOKEv5.3/subsys
 cp -r src/SMOKE_REPO SMOKEv5.3/subsys/smoke
+)
 ```
+
+> **참고: 백업 폴더 정리** 새 설치본으로 컴파일·검증(§7.3)이 끝나면 `ls -d /home/woogon/CMAQ_MODEL/SMOKEv5.3.backup.*`로 백업 폴더를 확인하고, 더 필요 없으면 직접 지운다. 백업은 자동으로 지워지지 않는다.
 
 ### 5.3 I/O API 링크
 
 I/O API는 새로 설치하지 않고 기존 설치본을 `subsys/ioapi`로 링크한다. 컴파일 결과는 `subsys/smoke/Linux2_x86_64gfort10/`에 만들어지므로 `libs/` 폴더는 변경되지 않는다.
 
 ```bash
+(
 cd /home/woogon/CMAQ_MODEL/SMOKEv5.3/subsys || exit 1
 ln -s /home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828 ioapi
+)
 ```
 
 > **참고:** 링크 명령은 반드시 `SMOKEv5.3/subsys` 폴더에서 실행한다. 다른 폴더에서 실행하면 `subsys/ioapi`가 만들어지지 않는다(부록 A1).
@@ -193,14 +207,16 @@ ln -s /home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828 ioapi
 ### 5.4 구조 확인
 
 ```bash
+(
 cd /home/woogon/CMAQ_MODEL/SMOKEv5.3/subsys || exit 1
 ls -l
 ls ioapi/ioapi/Makeinclude.Linux2_x86_64gfort10
 ls ioapi/Linux2_x86_64gfort10/libioapi.a
 ls ioapi/ioapi/fixed_src | head -3
+)
 ```
 
-기록된 결과 또는 기대값:
+정상 결과:
 
 ```text
 lrwxrwxrwx. 1 woogon woogon ... ioapi -> /home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828
@@ -228,10 +244,12 @@ FDESC3.EXT
 ### 6.1 netCDF 경로 확인
 
 ```bash
+(
 ls -l /home/woogon/CMAQ_MODEL/libs/netCDF-WRF/lib | grep -E "libnetcdf\.so |libnetcdff\.so "
+)
 ```
 
-기록된 결과 또는 기대값: `libnetcdf.so`가 `libs/netCDF-C-4.9.3/lib/`를, `libnetcdff.so`가 `libs/netCDF-Fortran-4.6.2/lib/`를 가리키는 링크로 보인다.
+정상 결과: `libnetcdf.so`가 `libs/netCDF-C-4.9.3/lib/`를, `libnetcdff.so`가 `libs/netCDF-Fortran-4.6.2/lib/`를 가리키는 링크로 보인다.
 
 > **참고: netCDF 경로** WRF·MCIP와 같은 통합 링크 폴더 `libs/netCDF-WRF/lib`를 사용한다. I/O API도 같은 netCDF로 빌드되었으므로 SMOKE도 같은 라이브러리를 써야 충돌이 없다.
 
@@ -240,9 +258,11 @@ ls -l /home/woogon/CMAQ_MODEL/libs/netCDF-WRF/lib | grep -E "libnetcdf\.so |libn
 **1) 원본 백업**
 
 ```bash
+(
 cd /home/woogon/CMAQ_MODEL/SMOKEv5.3/subsys/smoke/src || exit 1
 cp -n Makeinclude Makeinclude.orig
 cp -n smkinven/procar2pt.f smkinven/procar2pt.f.orig
+)
 ```
 
 **2) SFTP로 수정본 2개 덮어쓰기**
@@ -293,12 +313,14 @@ C           when OLDCMACT etc. are used for sources without MACT data.
 ### 6.3 수정 확인
 
 ```bash
+(
 cd /home/woogon/CMAQ_MODEL/SMOKEv5.3/subsys/smoke/src || exit 1
 md5sum Makeinclude.orig Makeinclude
 md5sum smkinven/procar2pt.f.orig smkinven/procar2pt.f
+)
 ```
 
-기록된 결과 또는 기대값:
+정상 결과:
 
 | 파일 | md5 |
 |---|---|
@@ -315,27 +337,33 @@ md5sum smkinven/procar2pt.f.orig smkinven/procar2pt.f
 
 ### 7.1 환경변수 지정
 
-`Makefile`과 `Makeinclude`는 `SMK_HOME`과 `BIN`으로 I/O API 위치, 컴파일 옵션 파일, 결과 폴더를 정한다. 터미널을 닫으면 사라지므로 컴파일은 같은 터미널에서 이어서 진행한다.
+`Makefile`과 `Makeinclude`는 `SMK_HOME`과 `BIN`으로 I/O API 위치, 컴파일 옵션 파일, 결과 폴더를 정한다. 아래 환경 확인은 서브셸 안에서 이루어지므로, 실제 컴파일·결과 확인 블록에도 같은 환경변수를 각각 지정한다.
 
 ```bash
+(
 export SMK_HOME=/home/woogon/CMAQ_MODEL/SMOKEv5.3
 export BIN=Linux2_x86_64gfort10
 echo $SMK_HOME
 echo $BIN
+)
 ```
 
-기록된 결과 또는 기대값: `/home/woogon/CMAQ_MODEL/SMOKEv5.3`, `Linux2_x86_64gfort10`
+정상 결과: `/home/woogon/CMAQ_MODEL/SMOKEv5.3`, `Linux2_x86_64gfort10`
 
 > **참고:** `BIN`은 I/O API 빌드 때 사용한 값과 같아야 한다. SMOKE는 `${IODIR}/Makeinclude.${BIN}`과 `${IOBASE}/${BIN}`을 찾는다.
 
 ### 7.2 compile
 
 ```bash
+(
+export SMK_HOME=/home/woogon/CMAQ_MODEL/SMOKEv5.3
+export BIN=Linux2_x86_64gfort10
 cd $SMK_HOME/subsys/smoke/src || exit 1
 make dir || exit 1
 set -o pipefail
 LC_ALL=C make 2>&1 | tee ../Linux2_x86_64gfort10/make_SMOKEv5.3.log
-build_rc=$?; [ "$build_rc" -eq 0 ] || { echo "빌드 실패: $build_rc"; exit "$build_rc"; }
+build_rc=$?; [ "$build_rc" -eq 0 ] || { echo "빌드 실패: $build_rc (다음 단계로 진행하지 말고 로그를 확인한다)"; exit 1; }
+)
 ```
 
 - `make dir`은 결과 폴더 `subsys/smoke/Linux2_x86_64gfort10`을 만든다.
@@ -345,14 +373,18 @@ build_rc=$?; [ "$build_rc" -eq 0 ] || { echo "빌드 실패: $build_rc"; exit "$
 ### 7.3 compile 결과 확인
 
 ```bash
+(
+export SMK_HOME=/home/woogon/CMAQ_MODEL/SMOKEv5.3
+export BIN=Linux2_x86_64gfort10
 cd $SMK_HOME/subsys/smoke/Linux2_x86_64gfort10 || exit 1
 ls -F | grep -c '\*$'
 grep -c -E "Error|cannot find|undefined reference" make_SMOKEv5.3.log
 ldd smkinven | grep -c "not found"
 grep -c "NULLIFY" ../src/smkinven/procar2pt.f
+)
 ```
 
-기록된 결과 또는 기대값:
+정상 결과:
 
 | 확인 | 결과 | 의미 |
 |---|---|---|
@@ -464,20 +496,23 @@ https://drive.google.com/file/d/1C8euCzvgv7CSlaL75hRH2U0NTOyYNeQ_/view?usp=shari
 리눅스 데스크톱 웹브라우저에서 내려받아 `src/`로 옮긴다. 용량이 커서 바이러스 검사 안내가 나오면 "무시하고 다운로드"를 선택한다.
 
 ```bash
+(
 mv ~/다운로드/smoke_example_case_v3_June2026.zip /home/woogon/CMAQ_MODEL/src/
 ls -lh /home/woogon/CMAQ_MODEL/src/smoke_example_case_v3_June2026.zip
 file /home/woogon/CMAQ_MODEL/src/smoke_example_case_v3_June2026.zip
+)
 ```
 
-기록된 결과 또는 기대값: 4.3 GB, `Zip archive data`.
+정상 결과: 4.3 GB, `Zip archive data`.
 
 > **참고: 파일 이름과 형식** 실제 파일 이름은 `smoke_example_case_v3_June2026.zip`(밑줄)이다. 공식 설명서는 `tar -xvzf`로 풀도록 안내하지만 실제 형식은 zip이므로 `unzip`을 쓴다.
 
 ### 10.2. 압축 풀기
 
-재실행 시 기존 예제 입력·로그·결과를 백업하고 새로 푼다. 백업 공간을 포함한 여유 공간을 먼저 확인한다.
+재실행 시 기존 예제 입력·로그·결과는 지우지 않고 실행 시각이 붙은 백업 폴더(`smoke_example_case_v3.backup.날짜시각`)로 옮긴 뒤 새로 푼다. 예제는 풀면 13 GB이므로 `df -h`로 여유 공간을 먼저 확인한다.
 
 ```bash
+(
 mkdir -p /home/woogon/CMAQ_MODEL/CASES/SMOKE_TEST
 cd /home/woogon/CMAQ_MODEL/CASES/SMOKE_TEST || exit 1
 df -h .
@@ -489,13 +524,16 @@ fi
 cd /home/woogon/CMAQ_MODEL/src || exit 1
 unzip -q smoke_example_case_v3_June2026.zip -d /home/woogon/CMAQ_MODEL/CASES/SMOKE_TEST
 ls /home/woogon/CMAQ_MODEL/CASES/SMOKE_TEST/smoke_example_case_v3
+)
 ```
 
-기록된 결과 또는 기대값:
+정상 결과:
 
 ```text
 2022he_cb6_22m  clean_up.csh  ge_dat  ioapi  met_m3wndw  met_m3wndw_7day  smoke5.2
 ```
+
+> **참고: 백업 폴더 정리** 백업은 한 번에 13 GB씩 쌓인다. 새 실행이 끝나 결과를 확인하면 `ls -d /home/woogon/CMAQ_MODEL/CASES/SMOKE_TEST/smoke_example_case_v3.backup.*`로 확인하고, 더 필요 없는 백업은 직접 지운다.
 
 > **참고:** `clean_up.csh`는 결과 정리용 스크립트이므로 실행하지 않는다. `2022he_cb6_22m/RPD_RPHO_RPS_RPV.premerged.tar.gz`는 EPA가 미리 계산한 도로이동 결과(비교용)다. 압축 경로가 `premerged/...`라서 풀면 우리 결과 폴더를 덮어쓰므로 **풀지 않는다**.
 
@@ -504,9 +542,11 @@ ls /home/woogon/CMAQ_MODEL/CASES/SMOKE_TEST/smoke_example_case_v3
 **1) 원본 백업**
 
 ```bash
+(
 cd /home/woogon/CMAQ_MODEL/CASES/SMOKE_TEST/smoke_example_case_v3/2022he_cb6_22m/scripts || exit 1
 cp -n directory_definitions.csh directory_definitions.csh.orig
 cp -n sectorlist_2022he_cb6_22m_withbeis_withrwc sectorlist_2022he_cb6_22m_withbeis_withrwc.orig
+)
 ```
 
 **2) SFTP로 수정본 2개를 같은 `scripts/` 폴더에 덮어쓰기**
@@ -525,13 +565,16 @@ cp -n sectorlist_2022he_cb6_22m_withbeis_withrwc sectorlist_2022he_cb6_22m_withb
 **3) 확인**
 
 ```bash
+(
+cd /home/woogon/CMAQ_MODEL/CASES/SMOKE_TEST/smoke_example_case_v3/2022he_cb6_22m/scripts || exit 1
 md5sum directory_definitions.csh.orig directory_definitions.csh
 md5sum sectorlist_2022he_cb6_22m_withbeis_withrwc.orig sectorlist_2022he_cb6_22m_withbeis_withrwc
 grep -n "^setenv INSTALL_DIR\|^setenv SMOKE_LOCATION\|^setenv IOAPI_LOCATION" directory_definitions.csh
 grep -c "/home/cmas" sectorlist_2022he_cb6_22m_withbeis_withrwc
+)
 ```
 
-기록된 결과 또는 기대값:
+정상 결과:
 
 | 파일 | md5 |
 |---|---|
@@ -553,7 +596,9 @@ grep -c "/home/cmas" sectorlist_2022he_cb6_22m_withbeis_withrwc
 예제의 일부 보조 스크립트가 파이썬 모듈을 쓴다. `woogon` 계정으로 설치한다.
 
 ```bash
+(
 python3 -m pip --version
+)
 ```
 
 pip가 없다고 나오면 root로 전환해 설치한 뒤 `woogon`으로 돌아온다.
@@ -567,22 +612,26 @@ exit
 `future`·`numpy`·`scipy` 설치와 확인:
 
 ```bash
+(
 python3 -m pip install --user future numpy scipy
 python3 -c "import past, numpy, scipy; print('OK', numpy.__version__, scipy.__version__)"
+)
 ```
 
-기록된 결과 또는 기대값: `OK 2.0.2 1.13.1` (검증에 사용한 버전: future 1.0.0, numpy 2.0.2, scipy 1.13.1)
+정상 결과: `OK 2.0.2 1.13.1` (검증에 사용한 버전: future 1.0.0, numpy 2.0.2, scipy 1.13.1)
 
 `netCDF4` 설치와 확인:
 
 `netCDF4`는 파이썬에서 netCDF 파일을 읽고 쓰는 모듈이다. 예제 병합 스크립트가 하루치를 합칠 때마다 영역 전체 배출량 합계를 계산하는 점검 스크립트(`smoke5.2/scripts/emisqa/emisqa.py`)를 실행하는데, 이 스크립트가 병합 결과 파일을 읽는 데 쓴다.
 
 ```bash
+(
 python3 -m pip install --user netCDF4
 python3 -c "import netCDF4; print('OK', netCDF4.__version__, netCDF4.__netcdf4libversion__, netCDF4.__hdf5libversion__)"
+)
 ```
 
-기록된 결과 또는 기대값: `OK`와 모듈 버전, 모듈이 사용하는 netCDF-C·HDF5 라이브러리 버전이 출력된다.
+정상 결과: `OK`와 모듈 버전, 모듈이 사용하는 netCDF-C·HDF5 라이브러리 버전이 출력된다.
 
 > **참고: 공통 라이브러리와 충돌하지 않는다** `pip`로 설치하는 `netCDF4`는 netCDF-C·HDF5 라이브러리를 모듈 안에 함께 담아 설치된다(`~/.local/lib/python3.9/site-packages/netCDF4.libs/`). 그래서 마지막 명령에 표시되는 라이브러리 버전은 `libs/`에 설치한 netCDF-C 4.9.3·HDF5 1.14.6과 다를 수 있으며, 정상이다. SMOKE·I/O API·WRF·CMAQ는 계속 `libs/`의 라이브러리를 쓰고, 이 모듈은 파이썬 점검 스크립트에서만 쓴다. `LD_LIBRARY_PATH`나 `~/.bashrc`를 바꿀 필요도 없다.
 
@@ -591,7 +640,9 @@ python3 -c "import netCDF4; print('OK', netCDF4.__version__, netCDF4.__netcdf4li
 전체 확인과 버전 기록:
 
 ```bash
+(
 python3 -m pip list --user | grep -i -E "future|numpy|scipy|netcdf4"
+)
 ```
 
 출력된 네 모듈의 버전을 작업 기록에 남긴다. 두 번째 컴퓨터에서도 같은 버전이 설치되었는지 이 명령으로 비교한다.
@@ -608,14 +659,16 @@ python3 -m pip list --user | grep -i -E "future|numpy|scipy|netcdf4"
 **2) 실행 권한과 로그 폴더**
 
 ```bash
+(
 cd /home/woogon/CMAQ_MODEL/CASES/SMOKE_TEST/smoke_example_case_v3/2022he_cb6_22m/scripts || exit 1
 find . -name "*.csh" ! -perm -u+x | wc -l
 find . -name "*.csh" ! -perm -u+x -exec chmod u+x {} \;
 find . -name "*.csh" ! -perm -u+x | wc -l
 mkdir -p ../run_logs
+)
 ```
 
-기록된 결과 또는 기대값: 마지막 `find`가 `0`이다. 첫 `find`는 압축을 푼 상태에 따라 0~2로 나온다(검증 때는 `2`).
+정상 결과: 마지막 `find`가 `0`이다. 첫 `find`는 압축을 푼 상태에 따라 0~2로 나온다(검증 때는 `2`).
 
 > **참고:** 예제 압축본에는 `Annual_ptfire-rx_onetime_…csh` 등 실행 권한이 빠진 스크립트가 있다. 그대로 두면 해당 단계에서 `Permission denied`로 멈춘다.
 
@@ -624,6 +677,7 @@ mkdir -p ../run_logs
 `afdust`가 `afdust_adj`(기상 보정)보다 먼저 실행되어야 한다.
 
 ```bash
+(
 cd /home/woogon/CMAQ_MODEL/CASES/SMOKE_TEST/smoke_example_case_v3/2022he_cb6_22m/scripts/nonpoint || exit 1
 
 set -o pipefail
@@ -637,21 +691,26 @@ for s in Annual_rwc Annual_afdust Annual_afdust_adj Annual_nonpt Annual_np_oilga
   echo "===== END   $sec $(date '+%F %T')"
 done
 } 2>&1 | tee ../../run_logs/nonpoint_all_summary.log
-run_rc=$?; [ "$run_rc" -eq 0 ] || { echo "부문 실행 실패: $run_rc"; exit "$run_rc"; }
+run_rc=$?; [ "$run_rc" -eq 0 ] || { echo "부문 실행 실패: $run_rc (다음 단계로 진행하지 말고 로그를 확인한다)"; exit 1; }
+)
 ```
+
+> **참고: 실패 시 동작** 한 부문이 실패하면 남은 부문을 중단한다. 바깥 서브셸도 실패 상태로 끝나지만 부모 터미널·SSH 접속은 유지된다. 실패 메시지가 나오면 다음 단계로 가지 말고 해당 부문 로그를 확인한다. 점오염원·도로이동 반복문도 같다.
 
 판정:
 
 ```bash
-cd ../../run_logs || exit 1
+(
+cd /home/woogon/CMAQ_MODEL/CASES/SMOKE_TEST/smoke_example_case_v3/2022he_cb6_22m/run_logs || exit 1
 for s in rwc afdust afdust_adj nonpt np_oilgas np_solvents openburn rail fertilizer livestock nonroad; do
   n=$(grep -c -E "Segmentation fault|SIGSEGV|ERROR: detected|ERROR: Running" ${s}_run.log)
   printf "%-12s 오류 %s\n" "$s" "$n"
 done
 ls ../premerged
+)
 ```
 
-기록된 결과 또는 기대값:
+정상 결과:
 
 - 11개 부문 모두 `오류 0`
 - `premerged`에 13개 폴더: `afdust afdust_adj fertilizer livestock nonpt nonroad nonroad_diesel nonroad_gas np_oilgas np_solvents openburn rail rwc`
@@ -673,6 +732,7 @@ ls ../premerged
 | × | `Annual_ptegu_3d_…_12US2_…` 2개 | 다른 격자(12US2)용, 예제 처리 대상 아님 |
 
 ```bash
+(
 cd /home/woogon/CMAQ_MODEL/CASES/SMOKE_TEST/smoke_example_case_v3/2022he_cb6_22m/scripts/point || exit 1
 
 set -o pipefail
@@ -688,13 +748,15 @@ for s in airports_onetime cmv_c1c2_onetime cmv_c3_onetime pt_oilgas_onetime ptag
   echo "===== END   $s $(date '+%F %T')"
 done
 } 2>&1 | tee ../../run_logs/point_all_summary.log
-run_rc=$?; [ "$run_rc" -eq 0 ] || { echo "부문 실행 실패: $run_rc"; exit "$run_rc"; }
+run_rc=$?; [ "$run_rc" -eq 0 ] || { echo "부문 실행 실패: $run_rc (다음 단계로 진행하지 말고 로그를 확인한다)"; exit 1; }
+)
 ```
 
 판정:
 
 ```bash
-cd ../../run_logs || exit 1
+(
+cd /home/woogon/CMAQ_MODEL/CASES/SMOKE_TEST/smoke_example_case_v3/2022he_cb6_22m/run_logs || exit 1
 for f in pt_*_run.log; do
   n=$(grep -c -E "Segmentation fault|SIGSEGV|ERROR: detected|ERROR: Running" $f)
   printf "%-38s 오류 %s\n" "$f" "$n"
@@ -702,9 +764,10 @@ done
 ls pt_*_run.log | wc -l
 ls ../premerged
 find ../smoke_out -type f | wc -l
+)
 ```
 
-기록된 결과 또는 기대값:
+정상 결과:
 
 - 20개 로그 모두 `오류 0`, 로그 개수 `20` (onetime 9 + daily 11)
 - `premerged`에 점오염원 9개 폴더 추가: `airports cmv_c1c2_12 cmv_c3_12 pt_oilgas ptagfire ptegu ptfire-rx ptfire-wild ptnonipm`
@@ -725,6 +788,7 @@ find ../smoke_out -type f | wc -l
 | `merge_diesel`, `merge_gas` | 위 결과를 연료별로 병합 |
 
 ```bash
+(
 cd /home/woogon/CMAQ_MODEL/CASES/SMOKE_TEST/smoke_example_case_v3/2022he_cb6_22m/scripts/onroad || exit 1
 
 set -o pipefail
@@ -736,7 +800,8 @@ for s in RPD RPH RPHO RPP RPS RPV merge_diesel merge_gas; do
   echo "===== END   $s $(date '+%F %T')"
 done
 } 2>&1 | tee ../../run_logs/onroad_all_summary.log
-run_rc=$?; [ "$run_rc" -eq 0 ] || { echo "부문 실행 실패: $run_rc"; exit "$run_rc"; }
+run_rc=$?; [ "$run_rc" -eq 0 ] || { echo "부문 실행 실패: $run_rc (다음 단계로 진행하지 말고 로그를 확인한다)"; exit 1; }
+)
 ```
 
 예제에서 가장 오래 걸리는 단계다(검증 때 약 2~4시간, 대부분 `RPD`). 진행 상황은 다른 터미널에서 `cat .../run_logs/onroad_all_summary.log`로 본다.
@@ -744,16 +809,18 @@ run_rc=$?; [ "$run_rc" -eq 0 ] || { echo "부문 실행 실패: $run_rc"; exit "
 판정:
 
 ```bash
-cd ../../run_logs || exit 1
+(
+cd /home/woogon/CMAQ_MODEL/CASES/SMOKE_TEST/smoke_example_case_v3/2022he_cb6_22m/run_logs || exit 1
 for s in RPD RPH RPHO RPP RPS RPV merge_diesel merge_gas; do
   n=$(grep -c -E "Segmentation fault|SIGSEGV|ERROR: detected|ERROR: Running" onroad_${s}_run.log)
   printf "%-14s 오류 %s\n" "$s" "$n"
 done
 cd .. || exit 1
 for d in premerged/onroad*/*; do [ -d "$d" ] && printf "%-30s %s\n" "$d" "$(ls $d | wc -l)"; done
+)
 ```
 
-기록된 결과 또는 기대값: 8개 모두 `오류 0`, 폴더별 파일 수는 아래와 같다.
+정상 결과: 8개 모두 `오류 0`, 폴더별 파일 수는 아래와 같다.
 
 | 폴더 | 파일 수 | 설명 |
 |---|---|---|
@@ -776,14 +843,16 @@ for d in premerged/onroad*/*; do [ -d "$d" ] && printf "%-30s %s\n" "$d" "$(ls $
 예제 기본 설정은 EPA가 미리 계산한 정규화 배출량(`intermed/beis4/beis_norm_emis_12LISTOS_2022he_cb6_22m.ncf`)에 날짜별 기상을 적용하는 `tmpbeis4`만 실행한다. 스크립트 폴더 이름은 `biogenics`다.
 
 ```bash
+(
 cd /home/woogon/CMAQ_MODEL/CASES/SMOKE_TEST/smoke_example_case_v3/2022he_cb6_22m/scripts/biogenics || exit 1
 LC_ALL=C ./Annual_beis4_12US1_2022he_cb6_22m.csh > ../../run_logs/beis4_run.log 2>&1
-  run_rc=$?; [ "$run_rc" -eq 0 ] || { echo "실행 실패: $run_rc"; exit "$run_rc"; }
+run_rc=$?; [ "$run_rc" -eq 0 ] || { echo "실행 실패: $run_rc (다음 단계로 진행하지 말고 로그를 확인한다)"; exit 1; }
 grep -c -E "Segmentation fault|SIGSEGV|ERROR: detected|ERROR: Running" ../../run_logs/beis4_run.log
 ls ../../premerged/beis4 | wc -l
+)
 ```
 
-기록된 결과 또는 기대값: `0`, `62` (날짜별 mass·mole 파일 각 31개)
+정상 결과: `0`, `62` (날짜별 mass·mole 파일 각 31개)
 
 > **참고: `normbeis4` 검증(선택)** 부산 격자에서는 정규화 배출량을 직접 계산해야 하므로 `normbeis4`도 확인했다(2026-10-13). `scripts/run_settings.txt`의 `beis4, 12LISTOS, normbeis4, ALL, 0, 0, N`을 주석 처리하고 같은 줄을 `Y`로 추가한 뒤(원본 md5 `ee2536e15000c8d8dd0bde6c5ee3dd62` → 수정본 `f46f63148c3cb9fa157d6aefd5f4ff97`), EPA 정규화 파일을 `.EPA`로 보관하고 다시 실행했다. 새로 계산된 파일과 EPA 파일의 변수 77개를 비교한 최대 상대 차이는 **2.85×10⁻⁷**로, 단정밀도 반올림 수준이었다. 설정 줄 끝에는 주석을 붙이지 않는다. 쉼표로 칸을 나누는 파일이라 마지막 값이 잘못 읽힐 수 있다.
 
@@ -792,22 +861,26 @@ ls ../../premerged/beis4 | wc -l
 `mrggrid`가 병합 대상 8개 부문(beis4, airports, nonroad, np_solvents, onroad_gas, onroad_diesel, nonpt, rwc)을 날짜마다 하나의 CMAQ 입력 파일로 합친다. 굴뚝 배출원(`pt_oilgas`, `ptegu`, `ptnonipm` 등)은 병합하지 않고 `smoke_out`의 inline 파일로 CMAQ에 직접 들어간다.
 
 ```bash
+(
 cd /home/woogon/CMAQ_MODEL/CASES/SMOKE_TEST/smoke_example_case_v3/2022he_cb6_22m/scripts/merge || exit 1
 LC_ALL=C ./Sector_merge_12US1_2022he_cb6_22m_withbeis_withrwc.csh > ../../run_logs/merge_run.log 2>&1
-  run_rc=$?; [ "$run_rc" -eq 0 ] || { echo "실행 실패: $run_rc"; exit "$run_rc"; }
+run_rc=$?; [ "$run_rc" -eq 0 ] || { echo "실행 실패: $run_rc (다음 단계로 진행하지 말고 로그를 확인한다)"; exit 1; }
+)
 ```
 
 판정:
 
 ```bash
+(
 cd /home/woogon/CMAQ_MODEL/CASES/SMOKE_TEST/smoke_example_case_v3/2022he_cb6_22m || exit 1
 grep -c -E "Segmentation fault|SIGSEGV|ERROR|does not exist|ModuleNotFoundError" run_logs/merge_run.log
 M=smoke_out/2022he_cb6_22m/12LISTOS/cmaq_cb6ae7/merged_withbeis_withrwc
 ls $M | grep -c "^emis_mole_all"
 ls $M | head -3
+)
 ```
 
-기록된 결과 또는 기대값:
+정상 결과:
 
 - 오류 문구 `0`
 - 최종 병합 파일 `31`개: `emis_mole_all_20220101_12LISTOS_withbeis_withrwc_2022he_cb6_22m.ncf` ~ `…20220131…`
@@ -850,6 +923,7 @@ ls $M | head -3
 진단에 사용한 명령:
 
 ```bash
+(
 # A3: 비정상 종료 찾기와 실제로 실행된 프로그램 확인
 grep -l -E "Segmentation fault|SIGSEGV|ERROR: detected|ERROR: Running" run_logs/*_run.log
 ls intermed/nonpt/logs | sed 's/_.*//' | sort | uniq -c
@@ -859,6 +933,7 @@ LC_ALL=C make FOPTFLAGS="-O0 -g -fbacktrace -fcheck=bounds -fallow-argument-mism
 
 # A5, A6: 파이썬 모듈 확인
 python3 -c "import past, numpy, scipy, netCDF4"
+)
 ```
 
 구축 경위:
@@ -870,7 +945,7 @@ python3 -c "import past, numpy, scipy, netCDF4"
 
 ## 11. 검토 근거 및 관련 문서
 
-공식 소스 확인: 태그 `SMOKEv5.3_June2026`의 커밋과 `src/Makeinclude`, `src/Makefile`(실행파일 목록·`make dir` 규칙), `assigns/ASSIGNS.*`(`SMK_HOME/subsys` 구조), `src/smkinven/procar2pt.f`를 공식 저장소에서 직접 확인했다. 예제는 SMOKE-ExampleCase-v3 저장소의 부문별 설명서를 참고했다. 첨부 문서에는 수정본 4개의 md5 재현 확인 기록이 있으나 실제 수정 파일은 제공되지 않아 이번 검토에서 대조하지 못했다. 표의 md5는 제공 문서의 기록값이며 검증된 배포 파일 해시가 아니다. 서버의 컴파일·실행 결과와 수치 비교는 사용자 제공 문서에 근거한다.
+공식 소스 확인: 태그 `SMOKEv5.3_June2026`의 커밋과 `src/Makeinclude`, `src/Makefile`(실행파일 목록·`make dir` 규칙), `assigns/ASSIGNS.*`(`SMK_HOME/subsys` 구조), `src/smkinven/procar2pt.f`를 공식 저장소에서 직접 확인했다. 예제는 SMOKE-ExampleCase-v3 저장소의 부문별 설명서를 참고했다. 이번에 제공된 `docs/smoke/files/`의 수정본 4개는 문서의 수정본 md5와 일치함을 확인했다. `Makeinclude`와 `procar2pt.f`는 보관 중인 공식 태그 소스와 diff를 대조했고, 예제 설정 파일은 설치·실행 경로 변경 내용을 확인했다. 서버 설치 파일과의 직접 대조나 재실행은 수행하지 않았다. 서버의 컴파일·실행 결과와 수치 비교는 사용자 제공 문서에 근거한다.
 
 - [procar2pt.f 수정 기록](SMOKE_procar2pt_Fix.md)
 - [SMOKE GitHub 저장소](https://github.com/CEMPD/SMOKE)

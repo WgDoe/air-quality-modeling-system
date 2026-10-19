@@ -56,6 +56,8 @@ ERROR: Running smk_run for one-time steps
 - 스택 한도를 늘려도(`ulimit -s unlimited`) 같은 오류가 났다. 단순한 메모리 한도 문제가 아니다.
 - 같은 예제의 다른 면오염원 10개 부문, 점오염원, 도로이동, 생물성 부문은 모두 정상이었다.
 
+명령 블록은 `( … )` 서브셸에서 실행하므로 오류 시 블록만 중단하고 터미널·SSH 접속은 유지한다. 블록 안의 디렉터리·환경변수 변경은 부모 터미널에 남지 않는다. 독립 확인 명령은 해당 절의 경로에서 실행한다.
+
 ## 3. 원인 진단
 
 ### 3.1 진단 방법: 디버그 빌드
@@ -63,6 +65,7 @@ ERROR: Running smk_run for one-time steps
 배포용 실행파일은 최적화(`-O3` 등)되어 있어 오류 위치를 `???`로만 표시한다. 설치본은 그대로 두고, 별도 폴더에 디버그 옵션으로 다시 컴파일해서 같은 계산을 실행했다.
 
 ```bash
+(
 cd /home/woogon/CMAQ_MODEL || exit 1
 [ ! -e SMOKEv5.3_debug ] && [ ! -L SMOKEv5.3_debug ] || { echo "기존 디버그 폴더를 보존하고 별도 경로를 선택하세요"; exit 1; }
 cp -a SMOKEv5.3 SMOKEv5.3_debug || exit 1
@@ -73,7 +76,8 @@ cd $SMK_HOME/subsys/smoke/src || exit 1
 make clean || exit 1
 set -o pipefail
 LC_ALL=C make FOPTFLAGS="-O0 -g -fbacktrace -fcheck=bounds -fallow-argument-mismatch -m64" 2>&1 | tee ../Linux2_x86_64gfort10/make_debug.log
-build_rc=$?; [ "$build_rc" -eq 0 ] || { echo "빌드 실패: $build_rc"; exit "$build_rc"; }
+build_rc=$?; [ "$build_rc" -eq 0 ] || { echo "빌드 실패: $build_rc (다음 단계로 진행하지 말고 로그를 확인한다)"; exit 1; }
+)
 ```
 
 | 옵션 | 역할 |
@@ -159,34 +163,41 @@ C...........   Local pointers
 
 ## 5. 적용 절차
 
-설치본 `SMOKEv5.3`에 적용한다. **실제 수정본은 첨부되지 않아 확보가 필요하다.** §4.1 diff로 직접 수정하거나 원 작성자의 사용본을 확보해 검토한 뒤 적용한다. 아래 md5는 제공 문서 기록값이다.
+설치본 `SMOKEv5.3`에 적용한다. 수정본은 [`docs/smoke/files/procar2pt.f`](files/procar2pt.f)에 보관했다. SFTP로 올리거나, §4.1 diff대로 직접 수정한다.
 
 **1) 원본 백업**
 
 ```bash
+(
 cd /home/woogon/CMAQ_MODEL/SMOKEv5.3/subsys/smoke/src/smkinven || exit 1
 cp -n procar2pt.f procar2pt.f.orig
+)
 ```
 
 **2) 수정본을 같은 폴더에 덮어쓰고 확인**
 
 ```bash
+(
+cd /home/woogon/CMAQ_MODEL/SMOKEv5.3/subsys/smoke/src/smkinven || exit 1
 md5sum procar2pt.f.orig procar2pt.f
+)
 ```
 
-기대값: §4.2의 기록값이다. 실제 사용본 확보 전에는 동일성을 확인한 것으로 처리하지 않는다.
+정상 결과: §4.2의 원본·수정본 md5와 각각 같다.
 
 **3) 다시 컴파일**
 
 ```bash
+(
 export SMK_HOME=/home/woogon/CMAQ_MODEL/SMOKEv5.3
 export BIN=Linux2_x86_64gfort10
 cd $SMK_HOME/subsys/smoke/src || exit 1
 set -o pipefail
 LC_ALL=C make 2>&1 | tee ../Linux2_x86_64gfort10/make_SMOKEv5.3_fix_procar2pt.log
-build_rc=$?; [ "$build_rc" -eq 0 ] || { echo "빌드 실패: $build_rc"; exit "$build_rc"; }
+build_rc=$?; [ "$build_rc" -eq 0 ] || { echo "빌드 실패: $build_rc (다음 단계로 진행하지 말고 로그를 확인한다)"; exit 1; }
 grep -c "Error:" ../Linux2_x86_64gfort10/make_SMOKEv5.3_fix_procar2pt.log
 ls -l --time-style=long-iso ../Linux2_x86_64gfort10/smkinven
+)
 ```
 
 - `make`는 바뀐 파일만 다시 컴파일하고 관련 실행파일을 다시 링크하므로 금방 끝난다.
@@ -199,12 +210,14 @@ ls -l --time-style=long-iso ../Linux2_x86_64gfort10/smkinven
 예제 `nonpt` 부문을 수정된 SMOKE로 다시 실행했다(2026-10-18).
 
 ```bash
+(
 cd /home/woogon/CMAQ_MODEL/CASES/SMOKE_TEST/smoke_example_case_v3/2022he_cb6_22m/scripts/nonpoint || exit 1
 LC_ALL=C ./Annual_nonpt_12US1_2022he_cb6_22m.csh > ../../run_logs/nonpt_run2.log 2>&1
-  run_rc=$?; [ "$run_rc" -eq 0 ] || { echo "실행 실패: $run_rc"; exit "$run_rc"; }
+run_rc=$?; [ "$run_rc" -eq 0 ] || { echo "실행 실패: $run_rc (다음 단계로 진행하지 말고 로그를 확인한다)"; exit 1; }
 grep -c "Segmentation fault" ../../run_logs/nonpt_run2.log
 ls ../../intermed/nonpt/logs | sed 's/_.*//' | sort | uniq -c
 ls ../../premerged/nonpt | wc -l
+)
 ```
 
 | 확인 | 수정 전 | 수정 후 |
