@@ -11,7 +11,7 @@
 3. [소스 다운로드부터 HDF5·netCDF·I/O API 설치](docs/libraries/Common_Libraries_Installation_Guide.md#library-start)
 4. [WRF/WPS 설치·전체 namelist 생성·개별 프로그램 실행](docs/wrf/WRF_WPS_Installation_Guide.md#case-run)
 5. [CMAQ 5.5 소스·config_cmaq.csh·MCIP 컴파일, 격자 결정과 MCIP 사례 실행](docs/mcip/MCIP_Installation_Guide.md#case-run)
-6. [SMOKE 5.3 소스·Makeinclude 수정·컴파일·공식 예제 실행 계획](docs/smoke/SMOKE_Installation_Guide.md)
+6. [SMOKE 5.3 소스·포인터 수정·컴파일·공식 예제 검증](docs/smoke/SMOKE_Installation_Guide.md)
 
 새 시스템 프로젝트 폴더 생성은 Master Plan §4.3을 따른다. 현재 성공 기록, 재구축용 보완 명령, 향후 계획을 각 문서에서 구분한다. 사용자 제공 `SCRIPTS/download_fnl.sh` 원문·생성·호출·기간별 파일 검사 명령은 [WRF/WPS §14.3.4](docs/wrf/WRF_WPS_Installation_Guide.md#fnl-download)에 통합했다. WPS는 CASE별 `WPS/namelist.wps`를 기준으로 설치본 실행파일을 절대경로로 호출하며, `GEOGRID.TBL`/`METGRID.TBL`은 `namelist.wps`의 절대경로 옵션으로 직접 참조한다. WRF runtime 자료는 `WRFV4.5.1/run/` 전체를 링크하지 않고, 현재 물리설정에 필요한 기본 7개(`LANDUSE.TBL`, `VEGPARM.TBL`, `SOILPARM.TBL`, `GENPARM.TBL`, `RRTM_DATA`, `RRTM_DATA_DBL`, `CAMtr_volume_mixing_ratio`)만 CASE/WRF에 심볼릭 링크하는 방식으로 정리했다.
 
@@ -44,6 +44,7 @@
 ### SMOKE
 
 - [SMOKE 5.3 설치·컴파일 및 공식 예제 실행 가이드](docs/smoke/SMOKE_Installation_Guide.md)
+- [procar2pt.f 포인터 초기화 수정 기록](docs/smoke/SMOKE_procar2pt_Fix.md)
 
 ### Master Plan과 현재 문서의 대응
 
@@ -58,7 +59,7 @@ Master Plan §22의 구축 단계는 그대로 적용한다. §23의 산출물�
 | Phase 4. MCIP | `06_MCIP_Install_Run.md` | [MCIP 구축](docs/mcip/MCIP_Installation_Guide.md) |
 | Phase 5. SMOKE | `07_SMOKE_Install.md` | [SMOKE 5.3 구축](docs/smoke/SMOKE_Installation_Guide.md) |
 
-### 구축 진행 현황 (2026-10-10 기준)
+### 구축 진행 현황 (2026-10-19 기준)
 
 | Phase | 구성요소 | 검증된 진행 상태 | 다음 확인 사항 |
 |---|---|---|---|
@@ -66,13 +67,13 @@ Master Plan §22의 구축 단계는 그대로 적용한다. §23의 산출물�
 | Phase 2 | GNU Compiler / OpenMPI / 공통 라이브러리 | GCC/GFortran 11.5.0, OpenMPI, HDF5, netCDF, I/O API 설치·테스트 완료 | 개별 모델과의 호환성 지속 확인 |
 | Phase 3 | WRF 4.5.1 / WPS 4.5 | 반복 사례 `TEST_20260901_REPEAT`에서 WPS, `real.exe`, WRF dmpar 4코어 실행 완료 | 실제 대기질 사례의 입력·출력 QA |
 | Phase 4 | MCIP 5.5 | `TEST_20260901` d01~d04 변환 및 격자 일치 확인 완료 | CCTM 기상 입력 및 수직층 정합성 검증 |
-| Phase 5 | SMOKE 5.3 | GFortran 11.5.0으로 실행파일 36개·내부 라이브러리 3개 컴파일, `ldd` 확인 완료 | 공식 ExampleCase-v3 실행 후 CAPSS·REAS·자연배출 처리 |
+| Phase 5 | SMOKE 5.3 | 공식 예제 검증 완료(2026-10-19), 최종 병합 31개・굴뚝/inline 1,032개 | 부산 CAPSS·REAS·자연배출, CMAQ 연계 검증 |
 | Phase 6 | CMAQ CCTM | 컴파일·benchmark 미완료 | 기준 태그 확정, 컴파일 및 benchmark |
 | Phase 7 | CMAQ-ISAM | 미수행 | benchmark 및 배출원 기여도 분석 |
 
 WRF 반복 검증에서는 `rsl.error.0000`의 `SUCCESS COMPLETE WRF` 메시지와 d01~d04의 요청 종료시각(`2026-09-02_00:00:00`) 도달을 확인했다. MCIP는 네 영역 모두 `NORMAL TERMINATION`으로 종료되었고, GRIDDESC(27KM/09KM/03KM/01KM)가 기존 운영체계 격자와 일치했다.
 
-**SMOKE는 설치·컴파일 완료 단계이지 배출량 계산 검증 완료 단계가 아니다.** 공식 ExampleCase-v3 실행 결과가 확인될 때 Phase 5의 다음 항목을 완료로 기록한다. 세부 명령, 오류 해결 이력 및 실행 준비 사항은 [SMOKE 구축 가이드](docs/smoke/SMOKE_Installation_Guide.md)에 보관한다.
+**SMOKE 공식 예제 검증 완료(2026-10-19).** 면오염원·점오염원·도로이동·BEIS4 및 최종 병합 완료 기록은 사용자 제공 문서에 근거한다. 부산 사례와 CMAQ 연계 검증은 미완료다. [설치·예제 가이드](docs/smoke/SMOKE_Installation_Guide.md), [procar2pt 수정 기록](docs/smoke/SMOKE_procar2pt_Fix.md)을 참고한다. 수정본 4개는 실제 첨부되지 않아 확보가 필요하다.
 
 **검증 범위:** 완료 표시는 사용자 제공 실행 화면·로그와 기존 문서에 기록된 종료 메시지·시간·격자 확인 결과에 근거한다. 이번 GitHub 문서 수정 과정에서 Linux 서버의 원본 로그·netCDF 파일을 직접 열거나 모델을 재실행하지 않았다. CMAQ CCTM 실행, 입력 결측값·물리량 QA, 기존 15층 배출량·IC/BC와 새로운 34층 기상의 정합성은 아직 검증되지 않았다.
 
@@ -90,7 +91,7 @@ WRF 반복 검증에서는 `rsl.error.0000`의 `SUCCESS COMPLETE WRF` 메시지�
 | MCIP | 5.5 (CMAQ 저장소 `PREP/mcip`) | **Phase 4 완료.** `TEST_20260901` d01~d04 정상 변환, 이전 운영체계 GRIDDESC와 격자 일치. 제공 기록의 설치 커밋은 `9bd3734`이며 `PREP/mcip` 소스는 5.5.0.3·5.5.0.4 태그와 동일함을 확인. CCTM 전 태그 전환 필요([MCIP 가이드 §3, §5.2](docs/mcip/MCIP_Installation_Guide.md)) |
 | WRF / WPS | 4.5.1 / 4.5 | **Phase 3 완료.** `TEST_20260901_REPEAT`에서 WPS, `real.exe`, WRF dmpar 4코어 정상 완료. `SUCCESS COMPLETE WRF` 및 d01~d04 종료시각 `2026-09-02_00:00:00` 확인 |
 | I/O API | 3.2-20200828 | 설치 완료 |
-| SMOKE | 5.3 (`SMOKEv5.3_June2026`) | **설치·컴파일 완료**(36개 실행파일, 3개 내부 라이브러리, `ldd` 확인), 공식 ExampleCase-v3 실행 검증 대기 |
+| SMOKE | 5.3 (`SMOKEv5.3_June2026`) | 설치·컴파일 및 공식 SMOKE-ExampleCase-v3 검증 완료(2026-10-19, 사용자 제공 문서 기준). 최종 병합 31개·굴뚝/inline 파일 1,032개 생성 기록. 부산 CAPSS·REAS·자연배출 및 CMAQ 연계 검증은 미완료 |
 
 ### 구축 디렉터리와 자료·사례 사용 경로 (2026-10-08 문서 정리)
 
@@ -138,7 +139,7 @@ docs/
   libraries/
   wrf/        # 설치·실행·GHG 오류를 하나의 문서에 통합
   mcip/       # CMAQ 소스·config_cmaq.csh·MCIP 컴파일·격자 결정·사례 실행
-  smoke/      # SMOKE 5.3 설치·컴파일·오류 이력·공식 예제 예정 절차
+  smoke/      # SMOKE 5.3 설치·컴파일·소스 수정·공식 예제 검증 기록
 ```
 
 `scripts/`, `config/`, `examples/`, `tests/`는 향후 저장소 구성 계획이다. 서버의 `SCRIPTS/download_fnl.sh`와 GitHub에 등록된 파일을 구분한다.

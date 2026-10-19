@@ -749,7 +749,7 @@ export LD_LIBRARY_PATH=$CMAQ_LIBS/grib2/lib:$LD_LIBRARY_PATH
 | WRF | 4.5.1 | `WRFV4.5.1` | `wrf.exe`, `real.exe`, `ndown.exe`, `tc.exe` | 설치·컴파일·반복 사례 실행 검증 완료. `TEST_20260901_REPEAT` WPS·real.exe·WRF dmpar 4코어 정상 종료, `SUCCESS COMPLETE WRF` 및 d01~d04 종료시각 `2026-09-02_00:00:00` 확인 |
 | WPS | 4.5 | `WPS-4.5` | `geogrid.exe`, `ungrib.exe`, `metgrid.exe` | 설치·컴파일·반복 사례 실행 검증 완료. `TEST_20260901_REPEAT` WPS·real.exe·WRF dmpar 4코어 정상 종료, `SUCCESS COMPLETE WRF` 및 d01~d04 종료시각 `2026-09-02_00:00:00` 확인 |
 
-Phase 3의 반복 검증은 완료로 기록한다(§14.6.1). Phase 4 MCIP는 원본 CASE `TEST_20260901`의 d01~d04 변환 완료 기록이며 [MCIP 가이드](../mcip/MCIP_Installation_Guide.md) §10.6을 따른다. CCTM·SMOKE는 미완료이다.
+Phase 3의 반복 검증은 완료로 기록한다(§14.6.1). Phase 4 MCIP는 원본 CASE `TEST_20260901`의 d01~d04 변환 완료 기록이며 [MCIP 가이드](../mcip/MCIP_Installation_Guide.md) §10.6을 따른다. SMOKE 설치·컴파일 및 공식 예제 검증은 완료(2026-10-19, 사용자 제공 문서 기준)이다([SMOKE 가이드](../smoke/SMOKE_Installation_Guide.md)). 부산 배출량 처리·CCTM 실행과 연계 검증은 미완료이다.
 
 <a id="case-run"></a>
 
