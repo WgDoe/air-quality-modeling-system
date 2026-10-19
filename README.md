@@ -45,6 +45,7 @@
 
 - [SMOKE 5.3 설치·컴파일 및 공식 예제 실행 가이드](docs/smoke/SMOKE_Installation_Guide.md)
 - [procar2pt.f 포인터 초기화 수정 기록](docs/smoke/SMOKE_procar2pt_Fix.md)
+- [기존 SMOKE 2.7 배출량 산정체계 분석 (신규 5.3 전환 참고)](docs/smoke/Legacy_SMOKE27_Emission_Processing.md)
 
 ### Master Plan과 현재 문서의 대응
 
