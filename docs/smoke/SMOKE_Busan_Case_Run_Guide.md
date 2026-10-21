@@ -12,8 +12,8 @@
 |---|---|---|
 | 0 | 예제 실행체계·입력 형식 확인(읽기) | 완료 |
 | 1 | 부산 `EMIS/` 폴더 생성, MCIP 연결 | 완료 |
-| 2 | 예제 스크립트 복사·`directory_definitions.csh` 작성 | 공통 설정 확인 완료; 2-A 복사 결과 화면 확인 대기 |
-| 3 | 공통 입력 5종(격자·지역·공휴일·날짜·INVTABLE) | 4종 설치 완료; INVTABLE 설치 확인 대기 |
+| 2 | 예제 스크립트 복사·`directory_definitions.csh` 작성 | 완료 (2-A 복사·공통 설정 확인, 2026-10-21) |
+| 3 | 공통 입력 5종(격자·지역·공휴일·날짜·INVTABLE) | 완료 (5종 설치 확인, 2026-10-21) |
 | 4 | 국내 면 FF10·surrogate·시간·종분배·실행 스크립트 | 예정 |
 | 5 | 국내 면 09KM 2026-09-01 첫 실행 → 4개 도메인 | 예정 |
 | 6 | 국내 점 | 예정 |
@@ -152,7 +152,9 @@ ls "$B/smoke5.2/scripts"
 )
 ```
 
-예상 표시: `Linux_x86_64 assigns scripts` 및 `emf run smk_dates`. **2-A 복사 결과 화면 확인 대기**.
+예상 표시: `Linux_x86_64 assigns scripts` 및 `emf run smk_dates`.
+
+2026-10-21 결과: `EMIS/smoke5.2/scripts`에 `afdust_adj annual_report combine emf emisqa log_analyzer platform regrid run smk_dates` 등이 확인되어 복사 완료(`ls … | head` 기준 앞 10개).
 
 ### 6.1 부산 `directory_definitions.csh`
 
@@ -217,7 +219,7 @@ csh -c "source $f; ls \$SMOKE_LOCATION | head -5"
 | `costcy_busan_2017capss_20261021.txt` | `ge_dat/` | 기존 국내/아시아/BIO 지역 코드 261개, GMT |
 | `holidays_korea_2012_2026_20261021.txt` | `ge_dat/temporal/` | 기존 2012~2020 + 신규 2026; 공식 달력 검증 필요 |
 | `smk_merge_dates_202601~202612.txt` | `smoke5.2/scripts/smk_dates/2026/` | 8열 예제 형식; 대표일 규칙 추정 |
-| `invtable_busan_2017capss_20261021.txt` | `ge_dat/` | 예제 INVTABLE에서 8줄 원문 복사; 설치 확인 대기 |
+| `invtable_busan_2017capss_20261021.txt` | `ge_dat/` | 예제 INVTABLE에서 8줄 원문 복사; 설치 확인(2026-10-21) |
 
 ### 7.1 격자
 
@@ -260,7 +262,7 @@ csh -c "source $f; ls \$SMOKE_LOCATION | head -5"
 
 ### 7.5 사용자 제공 공통 자료 설치 절차
 
-**주의:** 다음 명령은 사용자 문서의 설치 방법이다. `busan_step3_common.zip` 및 `invtable_busan_2017capss_20261021.txt`가 홈 폴더에 실제 존재해야 한다. 이 GitHub Markdown 등록만으로 ZIP·파이썬 생성기·입력파일이 업로드되는 것은 아니다.
+**주의:** 다음 명령은 실제 부산 사례 설치에 사용한 절차를 기록한 것이다. 재실행하려면 `busan_step3_common.zip` 및 `invtable_busan_2017capss_20261021.txt`가 홈 폴더에 있어야 한다. 개별 공통 입력파일·생성기는 이 저장소의 [`files/busan/`](files/busan/)에서도 확인할 수 있지만 ZIP 자체는 별도로 준비해야 한다.
 
 ```bash
 (
@@ -276,9 +278,9 @@ cp ~/invtable_busan_2017capss_20261021.txt \
 grep -v '^#' /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS/ge_dat/invtable_busan_2017capss_20261021.txt
 ```
 
-2026-10-21 확인: 코드표 11,879B, GRIDDESC 453B, 공휴일 7,589B, 날짜 파일 12개 설치. **INVTABLE 설치 결과 확인 대기.**
+2026-10-21 확인: 코드표 11,879B, GRIDDESC 453B, 공휴일 7,589B, 날짜 파일 12개 설치. INVTABLE은 `grep -v '^#'` 결과 `CO NOX VOC NH3 SO2 PM10 PM2_5 PMC` 8줄(모두 `Y 1.0 N tons/yr`)이 확인되었다. 화면에서 줄 사이가 빈 줄처럼 보이는 것은 예제 원문 줄 끝의 공백(약 170열)이 터미널 폭에서 줄바꿈된 것이며 파일 내용 문제는 아니다.
 
-사용자 문서의 `make_busan_common_inputs.py` 재생성 도구는 기존 `9_*_TimeZone.txt` 및 `holidays_korea.txt`, MCIP GRIDDESC, 예제 INVTABLE 원본이 필요하다. 생성기 파일이 별도로 제공되지 않았으므로 이 페이지에 실행 명령만 남긴다:
+재생성 도구 [`files/busan/make_busan_common_inputs.py`](files/busan/make_busan_common_inputs.py)는 기존 `9_*_TimeZone.txt` 및 `holidays_korea.txt`, MCIP GRIDDESC, 예제 INVTABLE 원본이 필요하다. 2026-10-21 작성본과 같은 결과를 내는 것을 확인했다(작성 환경에서 비교). 실행 명령:
 
 ```bash
 python3 make_busan_common_inputs.py \
@@ -303,14 +305,18 @@ python3 make_busan_common_inputs.py \
 
 ## 9. 자료 보관·추가 확보 목록
 
-사용자 제공 원문 §10에는 아래 파일들이 `docs/smoke/files/busan/`에 보관될 예정이라고 명시되어 있으나 **이번 업로드에는 Markdown 가이드만 포함**되어 있다. 실제 파일 업로드 전까지 이 경로가 유효한 링크라고 표시하지 않는다.
+공통 입력 파일과 생성기는 `docs/smoke/files/busan/`에 보관했다(2026-10-21 커밋 `08d264a`, 18개 파일, 작성본과 내용 일치 확인). 이번 GitHub 확인에서 주요 입력파일·생성기 경로의 존재도 재확인했다.
 
-- `directory_definitions.csh`
-- `griddesc_busan_4domains.txt`
-- `costcy_busan_2017capss_20261021.txt`
-- `holidays_korea_2012_2026_20261021.txt`
-- `smk_dates/2026/` (월별 12개)
-- `invtable_busan_2017capss_20261021.txt`
-- `make_busan_common_inputs.py`
+| 파일 | 용도 |
+|---|---|
+| [`directory_definitions.csh`](files/busan/directory_definitions.csh) | 부산 공통 설정 (§6.1) |
+| [`griddesc_busan_4domains.txt`](files/busan/griddesc_busan_4domains.txt) | 4개 도메인 격자 (§7.1) |
+| [`costcy_busan_2017capss_20261021.txt`](files/busan/costcy_busan_2017capss_20261021.txt) | 지역 코드표 (§7.2) |
+| [`holidays_korea_2012_2026_20261021.txt`](files/busan/holidays_korea_2012_2026_20261021.txt) | 공휴일 (§7.3) |
+| [`smk_dates/2026/`](files/busan/smk_dates/2026/) | 2026년 날짜 파일 12개 (§7.3) |
+| [`invtable_busan_2017capss_20261021.txt`](files/busan/invtable_busan_2017capss_20261021.txt) | 오염물질 정의 (§7.4) |
+| [`make_busan_common_inputs.py`](files/busan/make_busan_common_inputs.py) | 공통 입력 생성기 (§7.5) |
+
+추가 확보가 필요한 자료(단계 4): 기존 운영 서버의 국내 대리자료 폴더 `2017_CAPSS_<도메인>_2020` 4개. 용량이 커서 저장소에는 보관하지 않고 Linux 사례 폴더 `EMIS/ge_dat/gridding/surrogates/`로 직접 복사한다.
 
 **검증 구분:** 본 문서는 사용자 제공 실행 기록에 근거한다. GitHub 등록 중 서버 원본 파일/로그를 직접 열거나 신규 SMOKE 부산 사례를 재실행하지 않았다. 향후 완료된 단계와 확인 대기 항목은 실행 증빙을 확보하여 갱신한다.
