@@ -1,0 +1,159 @@
+# Korea holidays for SMOKE (all treated as Sunday)
+# 2012-2020: copied from legacy holidays_korea.txt (2020 version; its 2021-2030 lines had month errors and were dropped)
+# 2026: newly written 2026-10-21 - verify against official calendar before production use
+# 2021-2025: not included (not needed for TEST_20260901)
+000000 01 01 2012 Sunday !New Year's Day
+000000 01 22 2012 Sunday !Seollal Holiday Day 1
+000000 01 23 2012 Sunday !Seollal Holiday Day 2
+000000 01 24 2012 Sunday !Seollal Holiday Day 3
+000000 03 01 2012 Sunday !Independence Movement Day
+000000 05 05 2012 Sunday !Children's Day
+000000 05 28 2012 Sunday !Buddha's Birthday
+000000 06 06 2012 Sunday !Memorial Day
+000000 08 15 2012 Sunday !Liberation Day
+000000 09 29 2012 Sunday !Mid-Autumn Festival Day 1
+000000 09 30 2012 Sunday !Mid-Autumn Festival Day 2
+000000 10 01 2012 Sunday !Mid-Autumn Festival Day 3
+000000 10 03 2012 Sunday !National Foundation Day
+000000 12 25 2012 Sunday !Christmas Day
+000000 01 01 2013 Sunday !New Year's Day
+000000 02 09 2013 Sunday !Seollal Holiday Day 1
+000000 02 10 2013 Sunday !Seollal Holiday Day 2
+000000 02 11 2013 Sunday !Seollal Holiday Day 3
+000000 03 01 2013 Sunday !Independence Movement Day
+000000 05 05 2013 Sunday !Children's Day
+000000 05 17 2013 Sunday !Buddha's Birthday
+000000 06 06 2013 Sunday !Memorial Day
+000000 08 15 2013 Sunday !Liberation Day
+000000 09 18 2013 Sunday !Mid-Autumn Festival Day 1
+000000 09 19 2013 Sunday !Mid-Autumn Festival Day 2
+000000 09 20 2013 Sunday !Mid-Autumn Festival Day 3
+000000 10 03 2013 Sunday !National Foundation Day
+000000 10 09 2013 Sunday !Hangeul Proclamation Day
+000000 12 25 2013 Sunday !Christmas Day
+000000 01 01 2014 Sunday !New Year's Day
+000000 01 30 2014 Sunday !Seollal Holiday Day 1
+000000 01 31 2014 Sunday !Seollal Holiday Day 2
+000000 02 01 2014 Sunday !Seollal Holiday Day 3
+000000 03 01 2014 Sunday !Independence Movement Day
+000000 05 05 2014 Sunday !Children's Day
+000000 05 06 2014 Sunday !Buddha's Birthday
+000000 06 06 2014 Sunday !Memorial Day
+000000 08 15 2014 Sunday !Liberation Day
+000000 09 07 2014 Sunday !Mid-Autumn Festival Day 1
+000000 09 08 2014 Sunday !Mid-Autumn Festival Day 2
+000000 09 09 2014 Sunday !Mid-Autumn Festival Day 3
+000000 09 10 2014 Sunday !Mid-Autumn Festival Day 4
+000000 10 03 2014 Sunday !National Foundation Day
+000000 10 09 2014 Sunday !Hangeul Proclamation Day
+000000 12 25 2014 Sunday !Christmas Day
+000000 01 01 2015 Sunday !New Year's Day
+000000 02 18 2015 Sunday !Seollal Holiday Day 1
+000000 02 19 2015 Sunday !Seollal Holiday Day 2
+000000 02 20 2015 Sunday !Seollal Holiday Day 3
+000000 03 01 2015 Sunday !Independence Movement Day
+000000 05 05 2015 Sunday !Children's Day
+000000 05 25 2015 Sunday !Buddha's Birthday
+000000 06 06 2015 Sunday !Memorial Day
+000000 08 14 2015 Sunday !Liberation Day
+000000 08 15 2015 Sunday !Liberation Day
+000000 09 26 2015 Sunday !Mid-Autumn Festival Day 1
+000000 09 27 2015 Sunday !Mid-Autumn Festival Day 2
+000000 09 28 2015 Sunday !Mid-Autumn Festival Day 3
+000000 09 29 2015 Sunday !Mid-Autumn Festival Day 4
+000000 10 03 2015 Sunday !National Foundation Day
+000000 10 09 2015 Sunday !Hangeul Proclamation Day
+000000 12 25 2015 Sunday !Christmas Day
+000000 01 01 2016 Sunday !New Year's Day
+000000 02 07 2016 Sunday !Seollal Holiday Day 1
+000000 02 08 2016 Sunday !Seollal Holiday Day 2
+000000 02 09 2016 Sunday !Seollal Holiday Day 3
+000000 02 10 2016 Sunday !Seollal Substitute Holiday
+000000 03 01 2016 Sunday !Independence Movement Day
+000000 05 05 2016 Sunday !Children's Day
+000000 05 14 2016 Sunday !Buddha's Birthday
+000000 06 06 2016 Sunday !Memorial Day
+000000 08 15 2016 Sunday !Liberation Day
+000000 09 14 2016 Sunday !Mid-Autumn Festival Day 1
+000000 09 15 2016 Sunday !Mid-Autumn Festival Day 2
+000000 09 16 2016 Sunday !Mid-Autumn Festival Day 3
+000000 10 03 2016 Sunday !National Foundation Day
+000000 10 09 2016 Sunday !Hangeul Proclamation Day
+000000 12 25 2016 Sunday !Christmas Day
+000000 01 01 2017 Sunday !New Year's Day
+000000 01 27 2017 Sunday !Seollal Holiday Day 1
+000000 01 28 2017 Sunday !Seollal Holiday Day 2
+000000 01 30 2017 Sunday !Seollal Holiday Day 3
+000000 03 01 2017 Sunday !Independence Movement Day
+000000 05 05 2017 Sunday !Children's Day
+000000 06 06 2017 Sunday !Memorial Day
+000000 08 15 2017 Sunday !Liberation Day
+000000 10 03 2017 Sunday !Mid-Autumn Festival Day 1
+000000 10 03 2017 Sunday !National Foundation Day
+000000 10 04 2017 Sunday !Mid-Autumn Festival Day 2
+000000 10 05 2017 Sunday !Mid-Autumn Festival Day 3
+000000 10 09 2017 Sunday !Hangeul Proclamation Day
+000000 12 25 2017 Sunday !Christmas Day
+000000 01 01 2018 Sunday !New Year's Day
+000000 02 15 2018 Sunday !Seollal Holiday Day 1
+000000 02 16 2018 Sunday !Seollal Holiday Day 2
+000000 02 17 2018 Sunday !Seollal Holiday Day 3
+000000 03 01 2018 Sunday !Independence Movement Day
+000000 04 13 2018 Sunday !National Assembly Election Day
+000000 05 05 2018 Sunday !Children's Day
+000000 06 06 2018 Sunday !Memorial Day
+000000 08 15 2018 Sunday !Liberation Day
+000000 09 23 2018 Sunday !Mid-Autumn Festival Day 1
+000000 09 24 2018 Sunday !Mid-Autumn Festival Day 2
+000000 09 25 2018 Sunday !Mid-Autumn Festival Day 3
+000000 10 03 2018 Sunday !National Foundation Day
+000000 10 09 2018 Sunday !Hangeul Proclamation Day
+000000 12 25 2018 Sunday !Christmas Day
+000000 01 01 2019 Sunday !New Year's Day
+000000 02 04 2019 Sunday !Seollal Holiday Day 1
+000000 02 05 2019 Sunday !Seollal Holiday Day 2
+000000 02 06 2019 Sunday !Seollal Holiday Day 3
+000000 03 01 2019 Sunday !Independence Movement Day
+000000 05 05 2019 Sunday !Children's Day
+000000 06 06 2019 Sunday !Memorial Day
+000000 08 15 2019 Sunday !Liberation Day
+000000 09 12 2019 Sunday !Mid-Autumn Festival Day 1
+000000 09 13 2019 Sunday !Mid-Autumn Festival Day 2
+000000 09 14 2019 Sunday !Mid-Autumn Festival Day 3
+000000 10 03 2019 Sunday !National Foundation Day
+000000 10 09 2019 Sunday !Hangeul Proclamation Day
+000000 12 25 2019 Sunday !Christmas Day
+000000 01 01 2020 Sunday !New Year's Day
+000000 01 24 2020 Sunday !Seollal Holiday Day 1
+000000 01 25 2020 Sunday !Seollal Holiday Day 2
+000000 01 27 2020 Sunday !Seollal Holiday Day 3
+000000 03 01 2020 Sunday !Independence Movement Day
+000000 05 05 2020 Sunday !Children's Day
+000000 06 06 2020 Sunday !Memorial Day
+000000 08 15 2020 Sunday !Liberation Day
+000000 09 30 2020 Sunday !Mid-Autumn Festival Day 1
+000000 10 01 2020 Sunday !Mid-Autumn Festival Day 2
+000000 10 02 2020 Sunday !Mid-Autumn Festival Day 3
+000000 10 03 2020 Sunday !National Foundation Day
+000000 10 09 2020 Sunday !Hangeul Proclamation Day
+000000 12 25 2020 Sunday !Christmas Day
+000000 01 01 2026 Sunday !New Year's Day
+000000 02 16 2026 Sunday !Seollal Holiday
+000000 02 17 2026 Sunday !Seollal
+000000 02 18 2026 Sunday !Seollal Holiday
+000000 03 01 2026 Sunday !Independence Movement Day
+000000 03 02 2026 Sunday !Substitute Holiday (Independence Movement Day)
+000000 05 05 2026 Sunday !Children's Day
+000000 05 24 2026 Sunday !Buddha's Birthday
+000000 05 25 2026 Sunday !Substitute Holiday (Buddha's Birthday)
+000000 06 03 2026 Sunday !Local Election Day
+000000 06 06 2026 Sunday !Memorial Day
+000000 08 15 2026 Sunday !Liberation Day
+000000 08 17 2026 Sunday !Substitute Holiday (Liberation Day)
+000000 09 24 2026 Sunday !Chuseok Holiday
+000000 09 25 2026 Sunday !Chuseok
+000000 09 26 2026 Sunday !Chuseok Holiday
+000000 10 03 2026 Sunday !National Foundation Day
+000000 10 05 2026 Sunday !Substitute Holiday (National Foundation Day)
+000000 10 09 2026 Sunday !Hangeul Proclamation Day
+000000 12 25 2026 Sunday !Christmas Day

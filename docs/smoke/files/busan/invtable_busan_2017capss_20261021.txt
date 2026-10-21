@@ -1,0 +1,13 @@
+# INVTABLE for Busan SMOKE case 2017capss_cb6 (CAPSS 2017 / East Asia inventories)
+# Lines copied unchanged from example ge_dat/invtable_2022platform_integrate_15sep2025_nf_v3.txt
+# (file lines 533 CO, 657 NOX, 702 VOC, 653 NH3, 687 SO2, 663 PM10, 665 PM2_5, 667 PMC)
+# Busan inventories have no HAPs: NONHAPVOC/NONHAPTOG, VOC_INV, mode-specific (EXH/EVP...) lines removed
+# PMC is computed in Smkinven (SMKINVEN_FORMULA PMC=PM10-PM2_5); VOC -> TOG via GSCNV in speciation
+CO              CO                       Y    1.0      N     tons/yr          Carbon Monoxide                                                                 
+NOX             NOX                      Y    1.0      N     tons/yr          Nitrogen oxides                                                                 
+VOC             VOC                      Y    1.0      N     tons/yr          Volatile organic compounds                                                      
+NH3             NH3                      Y    1.0      N     tons/yr          Ammonia                                                                         
+SO2             SO2                      Y    1.0      N     tons/yr          Sulfur Dioxide                                                                  
+PM10            PM10                     Y    1.0      N     tons/yr          Particulate matter, 10 microns and less                                         
+PM2_5           PM2_5                    Y    1.0      N     tons/yr          Particulate matter, 2.5 microns and less                                        
+PMC             PMC                      Y    1.0      N     tons/yr          Particulate matter, coarse                                                      
