@@ -54,7 +54,7 @@ echo "   done"
 say "6. check files referenced by sector scripts"
 for s in $C/scripts/point/*.csh $C/scripts/nonpoint/*.csh; do
   for g in 27KM 09KM 03KM 01KM; do
-    grep -E '^setenv [A-Z_0-9]+ +"\${(GE_DAT|CASEINPUTS|INSTALL_DIR)\}' $s | awk '{print $2, $3}' | tr -d '"' |
+    grep -E '^setenv [A-Z_0-9]+ +"\$\{(GE_DAT|CASEINPUTS|INSTALL_DIR)\}' $s | awk '{print $2, $3}' | tr -d '"' |
     while read v p; do
       f=$(echo "$p" | sed -e "s|\${GE_DAT}|$B/ge_dat|" -e "s|\${CASEINPUTS}|$C/inputs|" -e "s|\${INSTALL_DIR}|$B|" -e "s|\${GRID}|$g|g")
       [ -e "$f" ] || echo "   MISSING  $(basename $s)  $g  $v  $f"
