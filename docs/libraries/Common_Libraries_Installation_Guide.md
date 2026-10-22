@@ -906,7 +906,7 @@ IOAPI_LIB_DIR  = /home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/Linux2_x86_64gf
 
 이로써 Phase 2(Compiler 및 공통 library) 구축을 완료했다. 후속 Phase 3은 `TEST_20260901_REPEAT`의 WPS·real.exe·WRF 정상 종료 및 d01~d04 최종시각 확인으로 완료 기록되었다([WRF/WPS 가이드 §14.6.1](../wrf/WRF_WPS_Installation_Guide.md)). Phase 4는 원본 `TEST_20260901`의 MCIP 변환 완료 기록이다([MCIP 가이드](../mcip/MCIP_Installation_Guide.md)). 후속 완료 상태는 제공 기록 기준이며 이번 문서 검토에서 모델을 재실행한 결과가 아니다.
 
-후속 SMOKE 5.3은 이 문서의 I/O API `Linux2_x86_64gfort10`과 `netCDF-WRF/lib`를 재사용한다. SMOKE의 `Makeinclude`에서 GNU 옵션·netCDF 경로·rpath를 지정하며, 이 수정 때문에 성공한 공통 라이브러리를 재설치하지 않는다. `procar2pt.f` 포인터 초기화는 SMOKE 소스 수정이다. 수정본 4개는 [SMOKE 수정 파일](../smoke/files/)에 보관했으며, 적용 절차는 [SMOKE 가이드 §2·§6](../smoke/SMOKE_Installation_Guide.md)을 따른다. 공식 예제는 2026-10-19 완료 기록이 있으나 `afdust_adj` 보조 실행파일은 EPA Intel 빌드를 사용했다. 해당 보조 프로그램의 GNU 빌드·대체 확인 및 부산 사례·CMAQ 연계 검증은 남아 있다.
+후속 SMOKE 5.3은 이 문서의 I/O API `Linux2_x86_64gfort10`과 `netCDF-WRF/lib`를 재사용한다. SMOKE의 `Makeinclude`에서 GNU 옵션·netCDF 경로·rpath를 지정하며, 이 수정 때문에 성공한 공통 라이브러리를 재설치하지 않는다. `procar2pt.f` 포인터 초기화는 SMOKE 소스 수정이다. 수정본 4개는 [SMOKE 수정 파일](../smoke/files/)에 보관했으며, 적용 절차는 [SMOKE 가이드 §2·§6](../smoke/01_SMOKE_Installation_Guide.md)을 따른다. 공식 예제는 2026-10-19 완료 기록이 있으나 `afdust_adj` 보조 실행파일은 EPA Intel 빌드를 사용했다. 해당 보조 프로그램의 GNU 빌드·대체 확인 및 부산 사례·CMAQ 연계 검증은 남아 있다.
 
 ## 10. 검토 근거 및 관련 문서
 
