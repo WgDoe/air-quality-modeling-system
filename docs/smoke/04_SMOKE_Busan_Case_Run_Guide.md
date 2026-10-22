@@ -282,7 +282,7 @@ GRID=09KM ./Annual_kor_sea_2023capss_cb6.csh 2>&1 | tee ../logs/kor_sea_09KM.log
 | 8.2 국내 점 daily 09KM | 미실행 |
 | 8.3~8.5 국내 면·이동·바다 09KM | 미실행 |
 | 8.6 27·03·01KM | 미실행 |
-| 국외(HTAP v3.1)·생물성·병합 | 미착수 ([03 `5](03_SMOKE_Emission_Improvement_Plan.md)) |
+| 국외(HTAP v3.1)·생물성·병합 | 미착수 ([03 개선 계획 §5](03_SMOKE_Emission_Improvement_Plan.md)) |
 
 ## 부록 A. 실행 중 발생한 문제 기록
 
@@ -296,8 +296,8 @@ GRID=09KM ./Annual_kor_sea_2023capss_cb6.csh 2>&1 | tee ../logs/kor_sea_09KM.log
 ## 10. 검토 근거 및 관련 문서
 
 - 생성 결과는 작성 환경에서 생성기를 실행해 확인했다. 8.1 결과는 **사용자가 제공한 Linux 실행·보고 기록**으로 확인했다. 이 GitHub 수정 과정에서 실제 실행 로그 파일을 직접 재확인하지 않았다.
-- [03 배출량 개선 계획](03_SMOKE_Emission_Improvement_Plan.md) `4 — 단위, SCC10·연료 번호, 참조 보완, 굴뚝 보완, 대리자료 규칙
-- [01 SMOKE 설치 가이드](01_SMOKE_Installation_Guide.md) `10 — 공식 예제 실행 구조
+- [03 배출량 개선 계획](03_SMOKE_Emission_Improvement_Plan.md) §4 — 단위, SCC10·연료 번호, 참조 보완, 굴뚝 보완, 대리자료 규칙
+- [01 SMOKE 설치 가이드](01_SMOKE_Installation_Guide.md) §10 — 공식 예제 실행 구조
 - [02 기존 체계 분석](02_Legacy_SMOKE27_Emission_Processing.md) — `reference/` 파일의 출처
 
 ## 부록 B. 공통 입력 검증 기준 (이전 작업에서 계승)
