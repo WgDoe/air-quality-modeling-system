@@ -383,7 +383,7 @@ ldd mcip.exe | grep "not found"
 | CMAQ 프로젝트 폴더 | 5.5 | `CMAQv5.5` | - | 생성·`config_cmaq.csh` gcc 설정 완료 |
 | MCIP | 5.5 | `CMAQv5.5/PREP/mcip/src` | `mcip.exe` | 컴파일 완료, TEST_20260901 d01~d04 정상 실행·격자 검증 완료 |
 
-Phase 4 MCIP의 설치·실행과 CMAQ 격자 검증은 완료로 기록한다(2026-10-09). 이후 Phase 5 SMOKE 5.3은 **설치·컴파일 및 공식 ExampleCase-v3 검증 완료(2026-10-19, 사용자 제공 문서 기준)**이며, 부산 CAPSS·REAS·자연배출량 처리와 CMAQ 연계 검증은 미완료다([SMOKE 가이드](../smoke/SMOKE_Installation_Guide.md)). Phase 6 CMAQ CCTM·ICON·BCON 컴파일 및 benchmark도 미완료다.
+Phase 4 MCIP의 설치·실행과 CMAQ 격자 검증은 완료로 기록한다(2026-10-09). 이후 Phase 5 SMOKE 5.3은 **설치·컴파일 및 공식 ExampleCase-v3 검증 완료(2026-10-19, 사용자 제공 문서 기준)**이며, 부산 CAPSS·REAS·자연배출량 처리와 CMAQ 연계 검증은 미완료다([SMOKE 가이드](../smoke/01_SMOKE_Installation_Guide.md)). Phase 6 CMAQ CCTM·ICON·BCON 컴파일 및 benchmark도 미완료다.
 
 부산 사례에서 SMOKE에 연결할 때는 예제의 `12LISTOS` 기상자료를 재사용하지 않고 해당 CASE의 MCIP 결과·GRIDDESC를 사용한다. 격자명·투영·원점·셀 크기·셀 수, 기상 기간·시간 간격 및 점오염원 처리에 필요한 연직층을 함께 대조한다. 미국 공식 예제 검증 완료가 부산 MCIP–SMOKE–CMAQ 연결 검증 완료를 뜻하지 않는다. 설치 수정본 4개는 [SMOKE 수정 파일](../smoke/files/)에 보관했으며, 예제 보조 실행파일의 GNU 빌드·대체 확인 사항은 [기본계획 §10.2](../planning/00_CMAQ_Project_Master_Plan.md#102-초기-구축)를 따른다.
 
