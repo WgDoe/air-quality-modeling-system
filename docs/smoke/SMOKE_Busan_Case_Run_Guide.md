@@ -366,14 +366,14 @@ bash ~/busan_setup/install_busan_2023capss.sh 2>&1 | tee ~/busan_install.log
 | CMAQ 5.5 메커니즘과 배출 물질 대응 | 병합 |
 | 2026년 공휴일 공식 달력 대조 | 실행 전 |
 
-> **GitHub 파일 상태(2026-10-22):** 이 절은 기존 `SMOKE_Busan_Case_Run_Guide.md`에 직접 통합했다. [2023capss 스크립트 폴더](files/busan/2023capss/)에 **설치 스크립트 1개, CASE 설정 파일 2개, 실행 스크립트 5개**를 등록했다. 반면 **입력 생성기 3개, 실제 FF10 4개, surrogate 12개, 참조표 등 ZIP 내 전체 입력자료는 GitHub에 아직 등록하지 않았다.** 따라서 저장소 파일만으로 단독 설치할 수 없으며 전체 설치에는 사용자가 제공한 ZIP 원본이 필요하다.
+> **GitHub 파일 상태(2026-10-22):** 이 절은 기존 `SMOKE_Busan_Case_Run_Guide.md`에 직접 통합했다. [2023capss 스크립트 폴더](files/busan/2023capss/)에 **설치 스크립트 1개, CASE 설정 파일 2개, 실행 스크립트 5개**를 등록했다. 반면 **CAPSS 2023 주요 생성기 1개는 GitHub에 등록했다. 공통 생성기 1개는 기존 `files/busan/`에 이미 등록되어 있다. 이전 단계 변환 생성기 1개, 실제 FF10 4개, surrogate 12개, 참조표 등 ZIP의 전체 입력자료는 GitHub에 모두 등록된 상태가 아니다.** 따라서 저장소 파일만으로 단독 설치할 수 없으며 전체 설치에는 사용자가 제공한 ZIP 원본이 필요하다.
 
 
 ### 7.3 ZIP 패키지 원본 및 재현에 필요한 파일 관리
 
 2026-10-22 제공된 `busan_2023capss_full_setup_20261022.zip`에는 설치 스크립트 `install_busan_2023capss.sh`, 생성기 3개, 국내 점·면·이동·바다 FF10 4개, 4개 도메인 × 3부문 surrogate 12개, 실행 스크립트 5개, 공통 참조·설정 및 검증 CSV가 포함된다.
 
-- **재현 우선:** 설치 스크립트, 생성기, CASE 실행 스크립트, 신규 참조표는 가능하면 GitHub의 `docs/smoke/files/busan/2023capss/` 아래 원래 상대경로를 유지해 보관한다. 개별 파일을 등록했다면 실제 링크로 연결한다.
+- **재현 파일 관리:** 설치 스크립트·핵심 생성기·CASE 실행 스크립트는 `docs/smoke/files/busan/2023capss/`에 원래 상대경로를 유지해 보관한다. 공통 입력 생성기는 이전 `docs/smoke/files/busan/make_busan_common_inputs.py`에 이미 있다. 나머지 실제 입력자료는 원본 ZIP이 필요하다.
 - **대용량 원자료 분리:** 약 155 MB의 설치 해제 데이터 중 대형 FF10 및 surrogate는 저장소 용량을 고려해 ZIP 원본 별도 보관과 생성기·무결성 검증값으로 관리한다. GitHub에 등록된 파일만으로 전체 설치가 가능하다고 오인해서는 안 된다.
 - **파괴적 설치 동작:** `install_busan_2023capss.sh`는 기존 파일을 덮어쓰고, `2023capss_cb6/intermed/09KM/kor_point` 및 `2023capss_cb6/inputs/asia` 등을 삭제한다. 재실행 전에 백업과 경로 확인이 필요하다.
 - **실행 수준 구별:** 09KM 점 Smkinven **시험 정상 종료**와 점 `onetime` 전체 정상 종료는 서로 다른 상태다. `Spcmat`가 비활성화된 형식 시험에서 `PSSUP` 미생성으로 Smkreport 오류가 발생했으며, 전체 실행의 성공은 아직 검증되지 않았다.
@@ -386,7 +386,8 @@ bash ~/busan_setup/install_busan_2023capss.sh 2>&1 | tee ~/busan_install.log
 
 | 역할 | GitHub 파일 |
 |---|---|
-| 전체 입력 설치 | [`install_busan_2023capss.sh`](files/busan/2023capss/install_busan_2023capss.sh) |
+| 전체 입력 설치 | [`install_busan_2023capss.sh`](files/busan/2023capss/install_busan_2023capss.sh) (원본 ZIP과 일치) |
+| CAPSS 2023 국내 입력 생성 | [`make_busan_2023_domestic_inputs.py`](files/busan/2023capss/generators/make_busan_2023_domestic_inputs.py) (원본 ZIP과 일치) |
 | CASE 기본 경로·변수 | [`directory_definitions.csh`](files/busan/2023capss/EMIS/2023capss_cb6/scripts/directory_definitions.csh) |
 | 프로그램 실행 설정 | [`run_settings.txt`](files/busan/2023capss/EMIS/2023capss_cb6/scripts/run_settings.txt) |
 | 국내 점 onetime | [`Annual_kor_point_onetime_2023capss_cb6.csh`](files/busan/2023capss/EMIS/2023capss_cb6/scripts/point/Annual_kor_point_onetime_2023capss_cb6.csh) |
@@ -394,6 +395,8 @@ bash ~/busan_setup/install_busan_2023capss.sh 2>&1 | tee ~/busan_install.log
 | 국내 면 | [`Annual_kor_area_2023capss_cb6.csh`](files/busan/2023capss/EMIS/2023capss_cb6/scripts/nonpoint/Annual_kor_area_2023capss_cb6.csh) |
 | 국내 이동 | [`Annual_kor_mobile_2023capss_cb6.csh`](files/busan/2023capss/EMIS/2023capss_cb6/scripts/nonpoint/Annual_kor_mobile_2023capss_cb6.csh) |
 | 국내 바다 | [`Annual_kor_sea_2023capss_cb6.csh`](files/busan/2023capss/EMIS/2023capss_cb6/scripts/nonpoint/Annual_kor_sea_2023capss_cb6.csh) |
+
+등록된 핵심 생성기: [`make_busan_2023_domestic_inputs.py`](files/busan/2023capss/generators/make_busan_2023_domestic_inputs.py) (GitHub 파일과 사용자 제공 ZIP 원본의 Git blob SHA 일치). 기존 공통 생성기: [`make_busan_common_inputs.py`](files/busan/make_busan_common_inputs.py) (ZIP과 일치). `make_busan_step4_inputs.py`는 ZIP 내부에 있지만 이 경로에는 별도 등록하지 않았다.
 
 설치 ZIP 원본: `busan_2023capss_full_setup_20261022.zip` (SHA-256: `34f5c8b7b8134cf2867de44cff0e1a838a8caa4831a35bce88179e2abddfb367`, 검사 결과 ZIP 내부 오류 없음). **GitHub에 ZIP 전체를 올린 것은 아니다.**
 
