@@ -4,7 +4,9 @@
 > **목표:** SMOKE 5.3 공식 예제(SMOKE-ExampleCase-v3)의 폴더·스크립트·ASSIGNS 틀을 이용하여 `CASES/BUSAN/TEST_20260901`의 27/09/03/01 km 배출량 산정.  
 > **검증 근거:** 2026-10-20~22 사용자 제공 실행 화면과 `cmaq_model_structure.txt`, `smoke_example_files.txt`, `smoke_step2_check.txt`, `smoke_invtable_check.txt`, `smoke_speciation_check.txt`, `smoke_speciation_check2.txt`. **실제 부산 SMOKE 배출량 계산은 미실행(단계 5 실행 대기).**
 
-관련: [기존 SMOKE 2.7 배출 처리 분석](Legacy_SMOKE27_Emission_Processing.md) · [SMOKE 5.3 설치 및 공식 예제 검증](SMOKE_Installation_Guide.md).
+관련: [배출량 개선 계획 — 신규 CAPSS 2023/HTAP v3.1 실행 기준](SMOKE_Emission_Improvement_Plan.md) · [기존 SMOKE 2.7 배출 처리 분석](Legacy_SMOKE27_Emission_Processing.md) · [SMOKE 5.3 설치 및 공식 예제 검증](SMOKE_Installation_Guide.md).
+
+> **2026-10-22 작업 방향 변경:** 본 문서의 §1~§10에 기재된 `2017capss_cb6` 입력 준비·단계 5 실행 명령은 **CAPSS 2017 기준선의 기존 작업 기록**으로 보존한다. 사용자는 기존 2017 시나리오를 실행하지 않고 비교 기준선으로만 유지하며, 향후 실제 부산 배출량 처리를 **새 `2023capss_cb6` 시나리오에서 국내 점오염원(09KM)부터** 진행하기로 결정했다. 따라서 아래의 **2017 국내 면 첫 실행 명령은 현재 실행 지시가 아니다.** 신규 입력 작성·프로그램별 실행·검증 기록은 후속 섹션으로 추가한다. 상세 자료·변환 원칙 및 작업 순서는 [배출량 개선 계획](SMOKE_Emission_Improvement_Plan.md)을 따른다.
 
 ## 1. 진행 현황 (2026-10-22)
 
@@ -437,9 +439,9 @@ cp "$EX/2022he_cb6_22m/scripts/run_settings.txt" "$B/2017capss_cb6/scripts/"
 )
 ```
 
-## 9. 단계 5: 국내 면 첫 실행 (대기)
+## 9. 종전 2017 기준선 단계 5: 국내 면 첫 실행 (실행하지 않고 보존)
 
-**아직 부산 실제 배출량 계산은 수행하지 않았다.** 09KM에서 먼저 2026년 9월을 테스트하고 통과하면 27/03/01KM으로 확장한다.
+**기존 CAPSS 2017 실행 준비 기록만 보존한다.** 2026-10-22 개선 계획 확정에 따라 이 2017 국내 면 테스트는 현재 실행하지 않는다. 실제 다음 대상은 신규 `2023capss_cb6`의 CAPSS 2023 국내 점 09KM이다. 이하 명령은 과거에 준비한 참고용이며 실행 지시가 아니다.
 
 ### 9.1 프로그램 순서
 
@@ -490,3 +492,20 @@ find "$C" -name "*.log" -path "*kor_area*" | sort | head -30
 **GitHub에 보관하지 않을 대용량 자료:** 기존 CAPSS/ASIA surrogate 약 170MB, 국내 면 FF10 약 21.5MB, 예제에서 재복사 가능한 종분배 원본.
 
 **검증 경계:** 단계 4의 완료는 사용자 제공 설치·비교 기록을 근거로 한다. 실제 부산 SMOKE 5.3 실행, SMOKE→CMAQ 연계 검증, 해상 03/01KM 신규 surrogate의 Linux 검증은 아직 수행되지 않았다.
+
+## 11. 신규 CAPSS 2023 / HTAP v3.1 실행 전환 (2026-10-22 결정)
+
+새 배출량 체계의 상세 기준은 [배출량 개선 계획](SMOKE_Emission_Improvement_Plan.md)을 따른다. 이전 §1~§10은 수정·삭제하지 않고 CAPSS 2017 기준선의 준비 근거로 유지한다.
+
+| 항목 | 이전 2017 기준선 | 신규 2023 시나리오 |
+|---|---|---|
+| CASE | `2017capss_cb6` (실행하지 않음) | **`2023capss_cb6`** |
+| 국내 배출량 | CAPSS 2017 IDA→FF10 | **CAPSS 2023 1km 원자료→FF10** |
+| 국외 | 기존 2010/2016 아시아 | **HTAP_v3.1 2020, 남한 제외** |
+| 공간배분 | CAPSS 2017 surrogate | **CAPSS 2023 1km 기반으로 4개 영역 재작성, 바다 포함** |
+| 첫 처리 | 국내 면 09KM 테스트 준비 | **국내 점 09KM의 Smkinven부터 단계별 실행** |
+| 시간배분 | 기존 UTC 일변화 + GMT | 우선 유지, 신규 SCC 참조는 보완 |
+| 종분배 | SPECIATE 5.3 예제 연결 | 기존 프로파일 번호 재사용 여부 검증, CB6/AE7 대응 |
+| 실행 상태 | 입력 준비 기록만 있음 | **생성·실행 예정, SMOKE 배출 계산 미수행** |
+
+신규 점오염원 처리에서는 kg/yr→short ton/yr 환산(÷907.18474), 8자리 SCC+연료 2자리 매핑, 신규 연료(G1~G6/S1~S2)의 SMOKE 입력 지원 확인, FF10 지역코드·COSTCY 작성, 점 굴뚝 결측값 보완 및 원자료 배출량 합계 검증이 선행되어야 한다. 이후 국내 면·이동·바다 → HTAP 국외 → 생물성 → 병합 순으로 기록한다. **이번 기록은 방향 변경만 반영한 것이며 신규 CASE 파일 생성이나 실행 완료를 뜻하지 않는다.**
