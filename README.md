@@ -77,7 +77,7 @@ Master Plan §22의 구축 단계는 그대로 적용한다. §23의 산출물�
 | Phase 2 | GNU Compiler / OpenMPI / 공통 라이브러리 | GCC/GFortran 11.5.0, OpenMPI, HDF5, netCDF, I/O API 설치·테스트 완료 | 개별 모델과의 호환성 지속 확인 |
 | Phase 3 | WRF 4.5.1 / WPS 4.5 | 반복 사례 `TEST_20260901_REPEAT`에서 WPS, `real.exe`, WRF dmpar 4코어 실행 완료 | 실제 대기질 사례의 입력·출력 QA |
 | Phase 4 | MCIP 5.5 | `TEST_20260901` d01~d04 변환 및 격자 일치 확인 완료 | CCTM 기상 입력 및 수직층 정합성 검증 |
-| Phase 5 | SMOKE 5.3 | 공식 예제 검증 완료(2026-10-19); 기존 CAPSS 2017 국내 면 입력 준비(단계 4) 완료·미실행; CAPSS 2023 및 HTAP v3.1 전환 계획 확정(2026-10-22 사용자 기록 기준) | **신규 `2023capss_cb6` 국내 점 09KM Smkinven 형식 시험 통과**; 국내 4부문 FF10·surrogate·스크립트는 작성 환경에서 생성(2026-10-22 기록) | 설치 패키지 Linux 최종 배치 확인, 국내 점 onetime/daily 전체 실행, 국내 면·이동·바다·국외·생물성·병합은 후속 |
+| Phase 5 | SMOKE 5.3 | 공식 예제 검증 완료; CAPSS 2017 기준선 보존. CAPSS 2023 국내 4부문 FF10·surrogate·스크립트 작성 환경 생성 및 점 09KM Smkinven 형식 시험 통과(2026-10-22 기록) | 설치 패키지 Linux 전체 설치 확인, 점 onetime/daily 전 단계 실행, 국내 면·이동·바다 및 국외·생물성·병합 검증 |
 | Phase 6 | CMAQ CCTM | 컴파일·benchmark 미완료 | 기준 태그 확정, 컴파일 및 benchmark |
 | Phase 7 | CMAQ-ISAM | 미수행 | benchmark 및 배출원 기여도 분석 |
 
@@ -102,7 +102,7 @@ WRF 반복 검증에서는 `rsl.error.0000`의 `SUCCESS COMPLETE WRF` 메시지�
 
 현재 확인된 버전은 HDF5 1.14.6, netCDF-C 4.9.3, netCDF-Fortran 4.6.2, I/O API 3.2-20200828이다. I/O API 산출물은 `/home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/Linux2_x86_64gfort10`, include 파일은 같은 소스 루트의 `ioapi/fixed_src`에 있다.
 
-**2026-10-22 배출량 개선에 따른 계획 변경:** 새 체계는 CAPSS 2023 국내 점·면·이동·바다와 HTAP v3.1(2020년) 국외 자료를 사용하고, `2017capss_cb6`를 실행하지 않은 비교 기준선으로 보존한다. **새 `2023capss_cb6`는 국내 점 09KM부터 진행한다.** 기존 27/09KM 해상 surrogate 확보 및 03/01KM 신규 생성안은 2017 기준선에 관한 이전 계획으로 보존하며, 신규 CAPSS 2023의 바다 자료는 4개 도메인 공간배분으로 다시 작성할 계획이다. [배출량 개선 계획](docs/smoke/SMOKE_Emission_Improvement_Plan.md) 및 [부산 실행 가이드](docs/smoke/SMOKE_Busan_Case_Run_Guide.md)를 참조한다. 기존 2017 기준 단계 4 생성기·부문 스크립트·해상 surrogate 생성기의 GitHub 원본 등록은 아직 확인되지 않았다. 해당 입력 준비 내역과 미실행 명령은 [2017 기준선 보존본](docs/smoke/SMOKE_Busan_Case_2017_Baseline_Archive.md)에 두며, [현재 실행 가이드](docs/smoke/SMOKE_Busan_Case_Run_Guide.md)는 공통 구축기반을 유지하고 2023 국내 점 A단계부터 기록한다.
+**2026-10-22 배출량 개선에 따른 계획 변경:** 새 체계는 CAPSS 2023 국내 점·면·이동·바다와 HTAP v3.1(2020년) 국외 자료를 사용하고, `2017capss_cb6`를 실행하지 않은 비교 기준선으로 보존한다. **새 `2023capss_cb6`는 국내 점 09KM부터 진행한다.** 기존 27/09KM 해상 surrogate 확보 및 03/01KM 신규 생성안은 2017 기준선에 관한 이전 계획으로 보존하며, 신규 CAPSS 2023의 바다 자료는 4개 도메인 surrogate 생성까지 작성 환경에서 확인됐으며, Grdmat 실제 실행은 미검증이다. [배출량 개선 계획](docs/smoke/SMOKE_Emission_Improvement_Plan.md) 및 [부산 실행 가이드](docs/smoke/SMOKE_Busan_Case_Run_Guide.md)를 참조한다. 기존 2017 기준 단계 4 생성기·부문 스크립트·해상 surrogate 생성기의 GitHub 원본 등록은 아직 확인되지 않았다. 해당 입력 준비 내역과 미실행 명령은 [2017 기준선 보존본](docs/smoke/SMOKE_Busan_Case_2017_Baseline_Archive.md)에 두며, [현재 실행 가이드](docs/smoke/SMOKE_Busan_Case_Run_Guide.md)는 공통 구축기반을 유지하고 2023 국내 점 A단계부터 기록한다.
 
 ### 모델 버전 기준
 
