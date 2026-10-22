@@ -62,7 +62,7 @@ Master Plan §22의 구축 단계는 그대로 적용한다. §23의 산출물�
 | Phase 4. MCIP | `06_MCIP_Install_Run.md` | [MCIP 구축](docs/mcip/MCIP_Installation_Guide.md) |
 | Phase 5. SMOKE | `07_SMOKE_Install.md` | [SMOKE 5.3 구축](docs/smoke/SMOKE_Installation_Guide.md) |
 
-### 구축 진행 현황 (2026-10-21 기준)
+### 구축 진행 현황 (2026-10-22 기준)
 
 | Phase | 구성요소 | 검증된 진행 상태 | 다음 확인 사항 |
 |---|---|---|---|
@@ -70,13 +70,13 @@ Master Plan §22의 구축 단계는 그대로 적용한다. §23의 산출물�
 | Phase 2 | GNU Compiler / OpenMPI / 공통 라이브러리 | GCC/GFortran 11.5.0, OpenMPI, HDF5, netCDF, I/O API 설치·테스트 완료 | 개별 모델과의 호환성 지속 확인 |
 | Phase 3 | WRF 4.5.1 / WPS 4.5 | 반복 사례 `TEST_20260901_REPEAT`에서 WPS, `real.exe`, WRF dmpar 4코어 실행 완료 | 실제 대기질 사례의 입력·출력 QA |
 | Phase 4 | MCIP 5.5 | `TEST_20260901` d01~d04 변환 및 격자 일치 확인 완료 | CCTM 기상 입력 및 수직층 정합성 검증 |
-| Phase 5 | SMOKE 5.3 | 공식 예제 검증 완료(2026-10-19); 부산 `EMIS/`·MCIP 링크·예제 스크립트 복사·공통 설정 확인 및 공통 입력 5종 설치(2026-10-21, 사용자 제공 기록 기준) | 국내 면 FF10·대리자료·시간·종분배 준비(단계 4) 및 첫 배출량 계산; 부산 배출량 계산은 미실행 |
+| Phase 5 | SMOKE 5.3 | 공식 예제 검증 완료(2026-10-19); 부산 단계 0~3 완료, 단계 4 국내 면 FF10·surrogate·시간·종분배·실행 스크립트 설치 완료(2026-10-22 사용자 기록 기준) | 국내 면 09KM 첫 실행(2026년 9월) 대기, 이후 4개 영역·점·국외·BEIS4·병합; 부산 배출량 계산은 미실행 |
 | Phase 6 | CMAQ CCTM | 컴파일·benchmark 미완료 | 기준 태그 확정, 컴파일 및 benchmark |
 | Phase 7 | CMAQ-ISAM | 미수행 | benchmark 및 배출원 기여도 분석 |
 
 WRF 반복 검증에서는 `rsl.error.0000`의 `SUCCESS COMPLETE WRF` 메시지와 d01~d04의 요청 종료시각(`2026-09-02_00:00:00`) 도달을 확인했다. MCIP는 네 영역 모두 `NORMAL TERMINATION`으로 종료되었고, GRIDDESC(27KM/09KM/03KM/01KM)가 기존 운영체계 격자와 일치했다.
 
-**SMOKE 공식 예제 검증 완료(2026-10-19).** 면오염원·점오염원·도로이동·BEIS4 및 최종 병합 완료 기록은 사용자 제공 문서에 근거한다. 부산 사례는 `TEST_20260901/EMIS/` 폴더 구성, 예제 스크립트 복사, 공통 입력 5종 설치 및 `docs/smoke/files/busan/` 보관을 확인했으나 부산 SMOKE 배출량 계산 및 CMAQ 연계 검증은 미완료다. [부산 사례 실행 가이드](docs/smoke/SMOKE_Busan_Case_Run_Guide.md)를 따른다. [설치·예제 가이드](docs/smoke/SMOKE_Installation_Guide.md), [procar2pt 수정 기록](docs/smoke/SMOKE_procar2pt_Fix.md)을 참고한다. 재설치에 쓰는 수정본 4개는 [`docs/smoke/files/`](docs/smoke/files/)에 보관했다.
+**SMOKE 공식 예제 검증 완료(2026-10-19).** 면오염원·점오염원·도로이동·BEIS4 및 최종 병합 완료 기록은 사용자 제공 문서에 근거한다. 부산 사례는 `TEST_20260901/EMIS/` 폴더·예제 스크립트·공통 입력 5종에 이어 2026-10-22 국내 면 FF10·공간/시간/종분배·부문 실행 스크립트 설치까지 사용자 기록상 완료했으나 부산 SMOKE 배출량 계산 및 CMAQ 연계 검증은 미완료다. [부산 사례 실행 가이드](docs/smoke/SMOKE_Busan_Case_Run_Guide.md)를 따른다. [설치·예제 가이드](docs/smoke/SMOKE_Installation_Guide.md), [procar2pt 수정 기록](docs/smoke/SMOKE_procar2pt_Fix.md)을 참고한다. 재설치에 쓰는 수정본 4개는 [`docs/smoke/files/`](docs/smoke/files/)에 보관했다.
 
 재설치할 때 필요한 수정과 적용 순서는 다음과 같다. 수정본은 모두 [`docs/smoke/files/`](docs/smoke/files/)에 있다.
 
@@ -94,6 +94,8 @@ WRF 반복 검증에서는 `rsl.error.0000`의 `SUCCESS COMPLETE WRF` 메시지�
 설치 가이드는 기존 Linux 및 Compiler/MPI 문서처럼 번호 없는 설명형 파일명을 사용한다. 공통 라이브러리 문서의 기존 `01_common_libraries_installation.md`는 `Common_Libraries_Installation_Guide.md`로 변경했다. 기본계획의 `00_`와 향후 산출물 번호는 계획 문서 체계로 유지한다.
 
 현재 확인된 버전은 HDF5 1.14.6, netCDF-C 4.9.3, netCDF-Fortran 4.6.2, I/O API 3.2-20200828이다. I/O API 산출물은 `/home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/Linux2_x86_64gfort10`, include 파일은 같은 소스 루트의 `ioapi/fixed_src`에 있다.
+
+**2026-10-22 부산 사례 추가:** 27/09KM 해상 surrogate가 확인되었으나 03/01KM 신규 생성·검증은 예정이며, 국내 면 첫 실행에서는 해상 배출을 제외한다. 단계 4 생성기·부문 스크립트·해상 surrogate 생성기의 GitHub 원본 등록은 아직 확인되지 않았다. [부산 사례 실행 가이드 §8~§10](docs/smoke/SMOKE_Busan_Case_Run_Guide.md)를 확인한다.
 
 ### 모델 버전 기준
 
