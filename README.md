@@ -11,11 +11,11 @@
 3. [소스 다운로드부터 HDF5·netCDF·I/O API 설치](docs/libraries/Common_Libraries_Installation_Guide.md#library-start)
 4. [WRF/WPS 설치·전체 namelist 생성·개별 프로그램 실행](docs/wrf/WRF_WPS_Installation_Guide.md#case-run)
 5. [CMAQ 5.5 소스·config_cmaq.csh·MCIP 컴파일, 격자 결정과 MCIP 사례 실행](docs/mcip/MCIP_Installation_Guide.md#case-run)
-6. [SMOKE 5.3 소스·포인터 수정·컴파일·공식 예제 검증](docs/smoke/SMOKE_Installation_Guide.md)
-7. [부산 배출량 개선 계획: CAPSS 2023·HTAP v3.1·신규 시나리오](docs/smoke/SMOKE_Emission_Improvement_Plan.md)
-8. [부산 실제사례 실행 가이드 — CAPSS 2023 입력 생성·설치 및 점 Smkinven 시험 (§7)](docs/smoke/SMOKE_Busan_Case_Run_Guide.md)
+6. [SMOKE 5.3 소스·포인터 수정·컴파일·공식 예제 검증](docs/smoke/01_SMOKE_Installation_Guide.md)
+7. [부산 배출량 개선 계획: CAPSS 2023·HTAP v3.1·신규 시나리오](docs/smoke/03_SMOKE_Emission_Improvement_Plan.md)
+8. [부산 실제사례 실행 가이드 — CAPSS 2023 입력 생성·설치 및 점 Smkinven 시험 (§7)](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md)
 
-기존 CAPSS 2017 입력 준비 문서는 현행 목록에서 제외했다. 2023에도 필요한 공통 설정·검증 절차는 [부산 실행 가이드 §8](docs/smoke/SMOKE_Busan_Case_Run_Guide.md)에 통합했으며, 과거 원문은 Git 이력에서 확인할 수 있다.
+기존 CAPSS 2017 입력 준비 문서는 현행 목록에서 제외했다. 2023에도 필요한 공통 설정·검증 절차는 [부산 실행 가이드 §8](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md)에 통합했으며, 과거 원문은 Git 이력에서 확인할 수 있다.
 
 새 시스템 프로젝트 폴더 생성은 Master Plan §4.3을 따른다. 현재 성공 기록, 재구축용 보완 명령, 향후 계획을 각 문서에서 구분한다. 사용자 제공 `SCRIPTS/download_fnl.sh` 원문·생성·호출·기간별 파일 검사 명령은 [WRF/WPS §14.3.4](docs/wrf/WRF_WPS_Installation_Guide.md#fnl-download)에 통합했다. WPS는 CASE별 `WPS/namelist.wps`를 기준으로 설치본 실행파일을 절대경로로 호출하며, `GEOGRID.TBL`/`METGRID.TBL`은 `namelist.wps`의 절대경로 옵션으로 직접 참조한다. WRF runtime 자료는 `WRFV4.5.1/run/` 전체를 링크하지 않고, 현재 물리설정에 필요한 기본 7개(`LANDUSE.TBL`, `VEGPARM.TBL`, `SOILPARM.TBL`, `GENPARM.TBL`, `RRTM_DATA`, `RRTM_DATA_DBL`, `CAMtr_volume_mixing_ratio`)만 CASE/WRF에 심볼릭 링크하는 방식으로 정리했다.
 
@@ -47,11 +47,13 @@
 
 ### SMOKE
 
-- [SMOKE 5.3 설치·컴파일 및 공식 예제 실행 가이드](docs/smoke/SMOKE_Installation_Guide.md)
-- [procar2pt.f 포인터 초기화 수정 기록](docs/smoke/SMOKE_procar2pt_Fix.md)
-- [기존 SMOKE 2.7 배출량 산정체계 분석 (신규 5.3 전환 참고)](docs/smoke/Legacy_SMOKE27_Emission_Processing.md)
-- [SMOKE 부산 배출량 개선 계획: CAPSS 2023 / HTAP v3.1 전환 기준](docs/smoke/SMOKE_Emission_Improvement_Plan.md)
-- [SMOKE 부산 실제사례 실행 가이드: CAPSS 2023 국내 입력 생성·설치와 점 Smkinven 시험 (§7)](docs/smoke/SMOKE_Busan_Case_Run_Guide.md)
+**[00. SMOKE 문서 읽는 순서 및 재작업 시작점](docs/smoke/00_README_First.md)** — 01 설치 → 02 기존 체계 분석 → 03 개선 계획 → 04 부산 실제 실행, 90 오류 수정 참고자료.
+
+- [SMOKE 5.3 설치·컴파일 및 공식 예제 실행 가이드](docs/smoke/01_SMOKE_Installation_Guide.md)
+- [procar2pt.f 포인터 초기화 수정 기록](docs/smoke/90_SMOKE_procar2pt_Fix.md)
+- [기존 SMOKE 2.7 배출량 산정체계 분석 (신규 5.3 전환 참고)](docs/smoke/02_Legacy_SMOKE27_Emission_Processing.md)
+- [SMOKE 부산 배출량 개선 계획: CAPSS 2023 / HTAP v3.1 전환 기준](docs/smoke/03_SMOKE_Emission_Improvement_Plan.md)
+- [SMOKE 부산 실제사례 실행 가이드: CAPSS 2023 국내 입력 생성·설치와 점 Smkinven 시험 (§7)](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md)
 
 ### Master Plan과 현재 문서의 대응
 
@@ -64,7 +66,7 @@ Master Plan §22의 구축 단계는 그대로 적용한다. §23의 산출물�
 | Phase 2. Compiler 및 공통 library | `03_NetCDF_HDF5_IOAPI_Setup.md` | [공통 라이브러리](docs/libraries/Common_Libraries_Installation_Guide.md) |
 | Phase 3. WRF/WPS | `04_WRF_WPS_Install.md` | [WRF/WPS 설치](docs/wrf/WRF_WPS_Installation_Guide.md) |
 | Phase 4. MCIP | `06_MCIP_Install_Run.md` | [MCIP 구축](docs/mcip/MCIP_Installation_Guide.md) |
-| Phase 5. SMOKE | `07_SMOKE_Install.md` | [SMOKE 5.3 구축](docs/smoke/SMOKE_Installation_Guide.md) |
+| Phase 5. SMOKE | `07_SMOKE_Install.md` | [SMOKE 5.3 구축](docs/smoke/01_SMOKE_Installation_Guide.md) |
 
 ### 구축 진행 현황 (2026-10-22 기준)
 
@@ -80,7 +82,7 @@ Master Plan §22의 구축 단계는 그대로 적용한다. §23의 산출물�
 
 WRF 반복 검증에서는 `rsl.error.0000`의 `SUCCESS COMPLETE WRF` 메시지와 d01~d04의 요청 종료시각(`2026-09-02_00:00:00`) 도달을 확인했다. MCIP는 네 영역 모두 `NORMAL TERMINATION`으로 종료되었고, GRIDDESC(27KM/09KM/03KM/01KM)가 기존 운영체계 격자와 일치했다.
 
-**SMOKE 공식 예제 검증 완료(2026-10-19).** 면오염원·점오염원·도로이동·BEIS4 및 최종 병합 완료 기록은 사용자 제공 문서에 근거한다. 부산 사례의 **기존 CAPSS 2017 기준선**은 `TEST_20260901/EMIS/` 폴더·공통 입력 5종 및 국내 면 FF10·공간/시간/종분배·실행 스크립트 준비까지 사용자 기록상 완료했으나 부산 SMOKE 배출량 계산 및 CMAQ 연계 검증은 미완료다. [부산 사례 실행 가이드](docs/smoke/SMOKE_Busan_Case_Run_Guide.md)를 따른다. [설치·예제 가이드](docs/smoke/SMOKE_Installation_Guide.md), [procar2pt 수정 기록](docs/smoke/SMOKE_procar2pt_Fix.md)을 참고한다. 재설치에 쓰는 수정본 4개는 [`docs/smoke/files/`](docs/smoke/files/)에 보관했다.
+**SMOKE 공식 예제 검증 완료(2026-10-19).** 면오염원·점오염원·도로이동·BEIS4 및 최종 병합 완료 기록은 사용자 제공 문서에 근거한다. 부산 사례의 **기존 CAPSS 2017 기준선**은 `TEST_20260901/EMIS/` 폴더·공통 입력 5종 및 국내 면 FF10·공간/시간/종분배·실행 스크립트 준비까지 사용자 기록상 완료했으나 부산 SMOKE 배출량 계산 및 CMAQ 연계 검증은 미완료다. [부산 사례 실행 가이드](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md)를 따른다. [설치·예제 가이드](docs/smoke/01_SMOKE_Installation_Guide.md), [procar2pt 수정 기록](docs/smoke/90_SMOKE_procar2pt_Fix.md)을 참고한다. 재설치에 쓰는 수정본 4개는 [`docs/smoke/files/`](docs/smoke/files/)에 보관했다.
 
 재설치할 때 필요한 수정과 적용 순서는 다음과 같다. 수정본은 모두 [`docs/smoke/files/`](docs/smoke/files/)에 있다.
 
@@ -91,15 +93,15 @@ WRF 반복 검증에서는 `rsl.error.0000`의 `SUCCESS COMPLETE WRF` 메시지�
 | 예제 실행 전 | `directory_definitions.csh` | 예제·SMOKE 실행파일·I/O API 경로 지정 |
 | 최종 병합 전 | `sectorlist_2022he_cb6_22m_withbeis_withrwc` | 교육 서버 경로를 실제 예제 경로로 변경 |
 
-적용 위치와 원본·수정본 md5는 [설치 가이드 §6·§10.3](docs/smoke/SMOKE_Installation_Guide.md)에 있다. 예제의 `afdust_adj` 보조 실행파일은 EPA 제공 Intel 빌드를 사용했으므로 전체 GNU 빌드 검증 완료를 의미하지 않는다. 다음 작업은 해당 보조 프로그램의 GNU 빌드·대체 방법 확인, 부산 배출량 처리와 CMAQ 입력 정합성 검증이다.
+적용 위치와 원본·수정본 md5는 [설치 가이드 §6·§10.3](docs/smoke/01_SMOKE_Installation_Guide.md)에 있다. 예제의 `afdust_adj` 보조 실행파일은 EPA 제공 Intel 빌드를 사용했으므로 전체 GNU 빌드 검증 완료를 의미하지 않는다. 다음 작업은 해당 보조 프로그램의 GNU 빌드·대체 방법 확인, 부산 배출량 처리와 CMAQ 입력 정합성 검증이다.
 
 **검증 범위:** 완료 표시는 사용자 제공 실행 화면·로그와 기존 문서에 기록된 종료 메시지·시간·격자 확인 결과에 근거한다. 이번 GitHub 문서 수정 과정에서 Linux 서버의 원본 로그·netCDF 파일을 직접 열거나 모델을 재실행하지 않았다. CMAQ CCTM 실행, 입력 결측값·물리량 QA, 기존 15층 배출량·IC/BC와 새로운 34층 기상의 정합성은 아직 검증되지 않았다.
 
-설치 가이드는 기존 Linux 및 Compiler/MPI 문서처럼 번호 없는 설명형 파일명을 사용한다. 공통 라이브러리 문서의 기존 `01_common_libraries_installation.md`는 `Common_Libraries_Installation_Guide.md`로 변경했다. 기본계획의 `00_`와 향후 산출물 번호는 계획 문서 체계로 유지한다.
+SMOKE 하위 문서는 재작업 시 읽는 순서를 드러내기 위해 `00_` 안내 → `01_` 설치 → `02_` 기존 체계 분석 → `03_` 배출량 개선 → `04_` 실제 실행으로 번호를 붙였다. `90_`은 오류 수정용 참고자료다. 공통 라이브러리 문서의 기존 `01_common_libraries_installation.md`는 `Common_Libraries_Installation_Guide.md`로 변경했다. 기본계획의 `00_`와 향후 산출물 번호는 계획 문서 체계로 유지한다.
 
 현재 확인된 버전은 HDF5 1.14.6, netCDF-C 4.9.3, netCDF-Fortran 4.6.2, I/O API 3.2-20200828이다. I/O API 산출물은 `/home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/Linux2_x86_64gfort10`, include 파일은 같은 소스 루트의 `ioapi/fixed_src`에 있다.
 
-**2026-10-22 배출량 개선:** CAPSS 2023 국내 점·면·이동·바다 FF10 및 4개 도메인 공간배분 자료 생성(작성 환경), 09KM 점 Smkinven 단독 형식 시험 정상 종료(사용자 기록). 새 시나리오는 `2023capss_cb6`, 국외 적용 예정 자료는 HTAP v3.1(2020년). 국내 점 onetime/daily를 포함한 전 부문 실행은 아직 완료되지 않았다. [부산 실행 가이드](docs/smoke/SMOKE_Busan_Case_Run_Guide.md)와 [배출량 개선 계획](docs/smoke/SMOKE_Emission_Improvement_Plan.md)을 따른다. GitHub에는 [2023capss 설치·생성·실행 스크립트](docs/smoke/files/busan/2023capss/)를 보관하고 대용량 FF10·surrogate는 별도 ZIP 원본으로 관리한다. 2017 과거 문서 중 공통 유효 절차만 실행 가이드 §8에 통합했다.
+**2026-10-22 배출량 개선:** CAPSS 2023 국내 점·면·이동·바다 FF10 및 4개 도메인 공간배분 자료 생성(작성 환경), 09KM 점 Smkinven 단독 형식 시험 정상 종료(사용자 기록). 새 시나리오는 `2023capss_cb6`, 국외 적용 예정 자료는 HTAP v3.1(2020년). 국내 점 onetime/daily를 포함한 전 부문 실행은 아직 완료되지 않았다. [부산 실행 가이드](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md)와 [배출량 개선 계획](docs/smoke/03_SMOKE_Emission_Improvement_Plan.md)을 따른다. GitHub에는 [2023capss 설치·생성·실행 스크립트](docs/smoke/files/busan/2023capss/)를 보관하고 대용량 FF10·surrogate는 별도 ZIP 원본으로 관리한다. 2017 과거 문서 중 공통 유효 절차만 실행 가이드 §8에 통합했다.
 
 ### 모델 버전 기준
 
