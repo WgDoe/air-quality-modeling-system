@@ -13,7 +13,9 @@
 5. [CMAQ 5.5 소스·config_cmaq.csh·MCIP 컴파일, 격자 결정과 MCIP 사례 실행](docs/mcip/MCIP_Installation_Guide.md#case-run)
 6. [SMOKE 5.3 소스·포인터 수정·컴파일·공식 예제 검증](docs/smoke/SMOKE_Installation_Guide.md)
 7. [부산 배출량 개선 계획: CAPSS 2023·HTAP v3.1·신규 시나리오](docs/smoke/SMOKE_Emission_Improvement_Plan.md)
-8. [부산 실제사례 SMOKE 입력 준비·실행 가이드 (2017 기준선 작업 기록 및 신규 실행 기록)](docs/smoke/SMOKE_Busan_Case_Run_Guide.md)
+8. [부산 실제사례 실행 가이드 — CAPSS 2023 국내 점 A단계부터](docs/smoke/SMOKE_Busan_Case_Run_Guide.md)
+
+종전 CAPSS 2017 국내 면 준비 기록은 [기준선 보존본](docs/smoke/SMOKE_Busan_Case_2017_Baseline_Archive.md)을 참조한다.
 
 새 시스템 프로젝트 폴더 생성은 Master Plan §4.3을 따른다. 현재 성공 기록, 재구축용 보완 명령, 향후 계획을 각 문서에서 구분한다. 사용자 제공 `SCRIPTS/download_fnl.sh` 원문·생성·호출·기간별 파일 검사 명령은 [WRF/WPS §14.3.4](docs/wrf/WRF_WPS_Installation_Guide.md#fnl-download)에 통합했다. WPS는 CASE별 `WPS/namelist.wps`를 기준으로 설치본 실행파일을 절대경로로 호출하며, `GEOGRID.TBL`/`METGRID.TBL`은 `namelist.wps`의 절대경로 옵션으로 직접 참조한다. WRF runtime 자료는 `WRFV4.5.1/run/` 전체를 링크하지 않고, 현재 물리설정에 필요한 기본 7개(`LANDUSE.TBL`, `VEGPARM.TBL`, `SOILPARM.TBL`, `GENPARM.TBL`, `RRTM_DATA`, `RRTM_DATA_DBL`, `CAMtr_volume_mixing_ratio`)만 CASE/WRF에 심볼릭 링크하는 방식으로 정리했다.
 
@@ -49,7 +51,8 @@
 - [procar2pt.f 포인터 초기화 수정 기록](docs/smoke/SMOKE_procar2pt_Fix.md)
 - [기존 SMOKE 2.7 배출량 산정체계 분석 (신규 5.3 전환 참고)](docs/smoke/Legacy_SMOKE27_Emission_Processing.md)
 - [SMOKE 부산 배출량 개선 계획: CAPSS 2023 / HTAP v3.1 전환 기준](docs/smoke/SMOKE_Emission_Improvement_Plan.md)
-- [SMOKE 부산 실제사례 실행 가이드: 기존 2017 기준선 준비 및 후속 실행 기록](docs/smoke/SMOKE_Busan_Case_Run_Guide.md)
+- [SMOKE 부산 실제사례 실행 가이드: CAPSS 2023 점 A단계부터](docs/smoke/SMOKE_Busan_Case_Run_Guide.md)
+- [CAPSS 2017 국내 면 입력 준비·미실행 절차 보존본](docs/smoke/SMOKE_Busan_Case_2017_Baseline_Archive.md)
 
 ### Master Plan과 현재 문서의 대응
 
@@ -97,7 +100,7 @@ WRF 반복 검증에서는 `rsl.error.0000`의 `SUCCESS COMPLETE WRF` 메시지�
 
 현재 확인된 버전은 HDF5 1.14.6, netCDF-C 4.9.3, netCDF-Fortran 4.6.2, I/O API 3.2-20200828이다. I/O API 산출물은 `/home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/Linux2_x86_64gfort10`, include 파일은 같은 소스 루트의 `ioapi/fixed_src`에 있다.
 
-**2026-10-22 배출량 개선에 따른 계획 변경:** 새 체계는 CAPSS 2023 국내 점·면·이동·바다와 HTAP v3.1(2020년) 국외 자료를 사용하고, `2017capss_cb6`를 실행하지 않은 비교 기준선으로 보존한다. **새 `2023capss_cb6`는 국내 점 09KM부터 진행한다.** 기존 27/09KM 해상 surrogate 확보 및 03/01KM 신규 생성안은 2017 기준선에 관한 이전 계획으로 보존하며, 신규 CAPSS 2023의 바다 자료는 4개 도메인 공간배분으로 다시 작성할 계획이다. [배출량 개선 계획](docs/smoke/SMOKE_Emission_Improvement_Plan.md) 및 [부산 실행 가이드](docs/smoke/SMOKE_Busan_Case_Run_Guide.md)를 참조한다. 기존 단계 4 생성기·부문 스크립트·해상 surrogate 생성기의 GitHub 원본 등록은 아직 확인되지 않았다.
+**2026-10-22 배출량 개선에 따른 계획 변경:** 새 체계는 CAPSS 2023 국내 점·면·이동·바다와 HTAP v3.1(2020년) 국외 자료를 사용하고, `2017capss_cb6`를 실행하지 않은 비교 기준선으로 보존한다. **새 `2023capss_cb6`는 국내 점 09KM부터 진행한다.** 기존 27/09KM 해상 surrogate 확보 및 03/01KM 신규 생성안은 2017 기준선에 관한 이전 계획으로 보존하며, 신규 CAPSS 2023의 바다 자료는 4개 도메인 공간배분으로 다시 작성할 계획이다. [배출량 개선 계획](docs/smoke/SMOKE_Emission_Improvement_Plan.md) 및 [부산 실행 가이드](docs/smoke/SMOKE_Busan_Case_Run_Guide.md)를 참조한다. 기존 2017 기준 단계 4 생성기·부문 스크립트·해상 surrogate 생성기의 GitHub 원본 등록은 아직 확인되지 않았다. 해당 입력 준비 내역과 미실행 명령은 [2017 기준선 보존본](docs/smoke/SMOKE_Busan_Case_2017_Baseline_Archive.md)에 두며, [현재 실행 가이드](docs/smoke/SMOKE_Busan_Case_Run_Guide.md)는 공통 구축기반을 유지하고 2023 국내 점 A단계부터 기록한다.
 
 ### 모델 버전 기준
 
