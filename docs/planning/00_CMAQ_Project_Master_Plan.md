@@ -232,7 +232,7 @@ MCIP/CMAQ가 처리 가능한 WRF/WPS 버전 결정
 | netCDF-C / netCDF-Fortran | 4.9.3 / 4.6.2 | 설치 완료. CMAQ 5.5는 C/Fortran 경로를 별도 변수로 지정 가능 |
 | HDF5 | 1.14.6 | 설치 완료 |
 | Compiler / MPI | GNU 11.5.0 / OpenMPI | 설치 완료 |
-| SMOKE | 5.3 (태그 `SMOKEv5.3_June2026`, 커밋 `f29374bbffe7425973376c3091da634d1a718a62`) | 설치·컴파일 및 공식 SMOKE-ExampleCase-v3 검증 완료(2026-10-19, 사용자 제공 문서 기준). 최종 병합 31개·굴뚝/inline 파일 1,032개 생성 기록. 부산 CAPSS·REAS·자연배출 및 CMAQ 연계 검증은 미완료. [SMOKE 가이드](../smoke/SMOKE_Installation_Guide.md) |
+| SMOKE | 5.3 (태그 `SMOKEv5.3_June2026`, 커밋 `f29374bbffe7425973376c3091da634d1a718a62`) | 설치·컴파일 및 공식 SMOKE-ExampleCase-v3 검증 완료(2026-10-19, 사용자 제공 문서 기준). 최종 병합 31개·굴뚝/inline 파일 1,032개 생성 기록. 부산 CAPSS·REAS·자연배출 및 CMAQ 연계 검증은 미완료. [SMOKE 가이드](../smoke/01_SMOKE_Installation_Guide.md) |
 
 WRF 4.5.1을 선택한 이유:
 
@@ -596,7 +596,7 @@ Emission Inventory
 
 ## 10.2 초기 구축
 
-1. SMOKE 5.3 최초 설치·컴파일 완료(2026-10-10), 포인터 초기화 수정 후 재구축·공식 예제 검증 완료(2026-10-19). 실행파일 36개·내부 라이브러리 3개; [설치 가이드](../smoke/SMOKE_Installation_Guide.md)
+1. SMOKE 5.3 최초 설치·컴파일 완료(2026-10-10), 포인터 초기화 수정 후 재구축·공식 예제 검증 완료(2026-10-19). 실행파일 36개·내부 라이브러리 3개; [설치 가이드](../smoke/01_SMOKE_Installation_Guide.md)
 2. SMOKE 공식 ExampleCase-v3 실행·결과 검증 완료(2026-10-19, 사용자 제공 문서 기준)
 3. 기존 국내 배출량 처리방식 분석
 4. 국내 CAPSS 처리
@@ -604,7 +604,7 @@ Emission Inventory
 6. 자연배출 처리
 7. 부산 사례의 최종 merge·QA 및 CMAQ 입력 정합성 검증(미완료)
 
-재구축 시 컴파일 전에 `Makeinclude`의 GNU 옵션·netCDF 경로·rpath와 `procar2pt.f` 지역 포인터 15개 초기화를 적용한다. 예제 실행 전 `directory_definitions.csh`의 설치·실행파일·I/O API 경로를 수정하고, 최종 병합 전 `sectorlist_2022he_cb6_22m_withbeis_withrwc`의 교육 서버 경로를 실제 경로로 변경한다. 절차는 [설치 가이드 §6·§10.3](../smoke/SMOKE_Installation_Guide.md), 소스 수정 근거는 [포인터 초기화 기록](../smoke/SMOKE_procar2pt_Fix.md)을 따른다.
+재구축 시 컴파일 전에 `Makeinclude`의 GNU 옵션·netCDF 경로·rpath와 `procar2pt.f` 지역 포인터 15개 초기화를 적용한다. 예제 실행 전 `directory_definitions.csh`의 설치·실행파일·I/O API 경로를 수정하고, 최종 병합 전 `sectorlist_2022he_cb6_22m_withbeis_withrwc`의 교육 서버 경로를 실제 경로로 변경한다. 절차는 [설치 가이드 §6·§10.3](../smoke/01_SMOKE_Installation_Guide.md), 소스 수정 근거는 [포인터 초기화 기록](../smoke/90_SMOKE_procar2pt_Fix.md)을 따른다.
 
 수정본 4개는 `docs/smoke/files/`에 보관했다. 예제 `afdust_adj`는 EPA 제공 Intel 보조 실행파일을 사용했으며, 부산 적용 전 GNU 빌드 또는 대체 방법을 확인한다. 기존 설치본·입력·로그·결과는 백업하며, 오류 검색 0건만으로 성공 판정하지 않고 종료 상태·단계별 정상 종료·산출물 날짜·격자·화학종·단위·수치 QA를 함께 확인한다.
 
@@ -1013,7 +1013,7 @@ ncdump -h filename.nc
 - **Phase 3 WRF/WPS 재현 검증 완료**: `TEST_20260901_REPEAT`에서 WPS·real.exe·WRF dmpar 4코어 정상 종료. `SUCCESS COMPLETE WRF` 및 d01~d04 종료시각 `2026-09-02_00:00:00` 확인. 원본 CASE `TEST_20260901`의 MCIP 변환 기록과 구분한다.
 - **Phase 4 MCIP 완료 (2026-10-09)**: CMAQ 5.5 저장소(`src/CMAQ_REPO`)와 프로젝트 폴더(`CMAQv5.5`) 생성, `config_cmaq.csh` gcc 경로 설정, MCIP gfortran 컴파일 완료. `TEST_20260901` d01~d04를 이전 운영체계 격자(EASTASIA 27KM/09KM/03KM/01KM)로 변환해 GRIDDESC 일치, 34층, 48시간 출력 확인. 상세는 [MCIP 구축 가이드](../mcip/MCIP_Installation_Guide.md).
 - **확인 필요**: CMAQ 저장소를 `main` 브랜치로 내려받았다. `PREP/mcip`는 확정 태그와 동일하나 CCTM은 다르므로 Phase 6 전에 별도 태그 소스·프로젝트를 준비한다(§3.5.3). 2026-10-08 UTC(한국시간 10-09) 공개된 `CMAQv5.5.0.4_08Oct2026`은 §3.5.4 재검토 대상이다.
-- **Phase 5 SMOKE 공식 예제 검증 완료 (2026-10-19)**: 설치·컴파일 및 공식 SMOKE-ExampleCase-v3 검증 완료(2026-10-19, 사용자 제공 문서 기준). 최종 병합 31개·굴뚝/inline 파일 1,032개 생성 기록. 부산 CAPSS·REAS·자연배출 및 CMAQ 연계 검증은 미완료. `procar2pt.f` 지역 포인터 초기화 수정 후 전 부문·최종 병합 완료. EPA Intel 보조 실행파일 사용 예외와 수정본 4개(`docs/smoke/files/`)는 [SMOKE 가이드](../smoke/SMOKE_Installation_Guide.md)에 기록한다.
+- **Phase 5 SMOKE 공식 예제 검증 완료 (2026-10-19)**: 설치·컴파일 및 공식 SMOKE-ExampleCase-v3 검증 완료(2026-10-19, 사용자 제공 문서 기준). 최종 병합 31개·굴뚝/inline 파일 1,032개 생성 기록. 부산 CAPSS·REAS·자연배출 및 CMAQ 연계 검증은 미완료. `procar2pt.f` 지역 포인터 초기화 수정 후 전 부문·최종 병합 완료. EPA Intel 보조 실행파일 사용 예외와 수정본 4개(`docs/smoke/files/`)는 [SMOKE 가이드](../smoke/01_SMOKE_Installation_Guide.md)에 기록한다.
 - **다음 작업**: 부산 CAPSS/REAS/자연배출 처리 및 SMOKE 결과 QA·CMAQ 연계 검증; CMAQ CCTM·ICON·BCON 컴파일과 benchmark(Phase 6). CMAQ 결과는 아직 완료로 기록하지 않는다.
 
 완료 상태는 사용자 제공 실행 기록과 기존 문서에 기재된 종료 메시지·시간·격자 확인 결과를 근거로 한다. 이번 문서 검토에서는 Linux 서버의 원본 로그·netCDF 파일을 직접 열거나 모델을 재실행하지 않았다. CMAQ CCTM 실행, 입력 결측값·물리량 QA 및 기존 15층 배출량·IC/BC와 새 34층 기상의 정합성은 아직 검증되지 않았다.
@@ -1076,7 +1076,7 @@ ncdump -h filename.nc
 
 ## Phase 5. SMOKE
 
-**설치·컴파일 및 공식 예제 검증 완료(2026-10-19). 부산 배출량 처리·CMAQ 연계 검증은 미완료.** 상세는 [SMOKE 구축 가이드](../smoke/SMOKE_Installation_Guide.md)를 따른다.
+**설치·컴파일 및 공식 예제 검증 완료(2026-10-19). 부산 배출량 처리·CMAQ 연계 검증은 미완료.** 상세는 [SMOKE 구축 가이드](../smoke/01_SMOKE_Installation_Guide.md)를 따른다.
 
 - [x] SMOKE 5.3 소스 태그 확정·설치, 실행파일 36개 및 내부 라이브러리 3개 컴파일, `ldd` 확인
 - [x] 공식 SMOKE-ExampleCase-v3 실행·결과 검증(2026-10-19, 사용자 제공 문서 기준)
