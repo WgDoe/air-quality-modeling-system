@@ -4,7 +4,7 @@
 > **현재 상태(2026-10-22):** 공식 예제 및 부산 공통 기반 구축 완료. **CAPSS 2023 점·면·이동·바다의 FF10·surrogate·참조·실행 스크립트 생성 완료(작성 환경 기준)**, **Linux 09KM 점 Smkinven 단독 형식 시험 정상 종료**. 다만 **ZIP 최종 일괄 설치 확인 및 점 onetime/daily·면·이동·바다의 SMOKE 전 단계 실행은 아직 미수행**.  
 > **이 문서의 역할:** 새 시나리오의 **실제 실행 및 검증 기록**을 단계별로 축적. 배출량 자료 선정·변환 원칙은 [배출량 개선 계획](SMOKE_Emission_Improvement_Plan.md)을 기준으로 한다.
 
-이전 `2017capss_cb6`의 폴더·FF10·공간/시간/종분배 준비 과정과 **실행하지 않은 국내 면 테스트 명령**은 [CAPSS 2017 기준선 작업 기록](SMOKE_Busan_Case_2017_Baseline_Archive.md)에 완전히 보존했다. 해당 명령은 **신규 2023 시나리오에 그대로 실행하지 않는다.** 설치·미국 공식 예제 검증은 [SMOKE 5.3 설치 가이드](SMOKE_Installation_Guide.md), 기존 운영자료 분석은 [SMOKE 2.7 분석](Legacy_SMOKE27_Emission_Processing.md)을 참고한다.
+이전 `2017capss_cb6`의 국내 면 입력 준비와 미실행 명령은 **새 2023 시나리오의 실행 지침이 아니므로 제외**했다. 공통 설치·설정·검증 절차 중 여전히 유효한 사항은 아래 §8에 통합했다. 설치·미국 공식 예제 검증은 [SMOKE 5.3 설치 가이드](SMOKE_Installation_Guide.md), 기존 운영자료 분석은 [SMOKE 2.7 분석](Legacy_SMOKE27_Emission_Processing.md)을 참고한다.
 
 ## 0. 진행 현황
 
@@ -144,7 +144,7 @@
 
 ## 6. 파일 관리 및 검증 원칙
 
-- **신규 2023 결과만 이 문서의 완료 내역으로 기록한다.** 기존 2017 준비본/해상 surrogate 생성안은 [보존본](SMOKE_Busan_Case_2017_Baseline_Archive.md)에 둔다.
+- **신규 2023 결과만 이 문서의 완료 내역으로 기록한다.** 기존 2017 국내 면 준비·해상 surrogate 생성안은 현행 절차에서 제외했으며, 과거 Git 이력에서 확인할 수 있다.
 - `docs/smoke/files/busan/`의 기존 공통 입력들은 2017 기준으로 작성된 내용이 섞여 있으므로, **2023 호환성을 검토한 뒤 신규 버전으로 구분 보관한다.**
 - 원본 CAPSS 대용량 격자 데이터, FF10 대용량 자료 등은 저장소에 무조건 넣지 않고, 생성 스크립트·해시·원자료 출처·검증 절차를 관리한다.
 - `2023capss_cb6` 신규 자료 작성, 09KM Smkinven 성공, 4개 영역 확장, 국외 처리, CMAQ 병합은 **모두 아직 검증 전**이다.
@@ -401,3 +401,63 @@ bash ~/busan_setup/install_busan_2023capss.sh 2>&1 | tee ~/busan_install.log
 설치 ZIP 원본: `busan_2023capss_full_setup_20261022.zip` (SHA-256: `34f5c8b7b8134cf2867de44cff0e1a838a8caa4831a35bce88179e2abddfb367`, 검사 결과 ZIP 내부 오류 없음). **GitHub에 ZIP 전체를 올린 것은 아니다.**
 
 **주의:** `directory_definitions.csh`의 `EMF_LOGNAME`은 절대경로가 중복 결합될 가능성이 있으므로 실제 실행 전 수정·검증이 필요하다. 설치 스크립트는 중간결과를 지우므로 해당 경로 백업 여부를 확인하고 수행한다.
+
+## 8. 공통 구축 절차와 검증 기준 통합 (이전 작업에서 계승, 2026-10-22 정리)
+
+이 절은 2017 시나리오 입력 준비 중 얻었지만 **CAPSS 2023에도 적용되는 공통 설정과 재구축 절차**를 정리한다. 여기에 과거의 2017 면 FF10 입력, 2010/2016 아시아 배출량, 2017 해상 surrogate, 2017 국내 면 최초 실행 명령은 포함하지 않는다. 아래 명령은 설치·점검 절차이지 이번 정리 과정에서 새로 실행한 결과는 아니다.
+
+### 8.1 SMOKE 예제 실행구조와 초기 설정
+
+공식 예제의 실행 흐름은 **부문별 `.csh` → `source ../directory_definitions.csh` → `RUNSCRIPTS/emf`의 프로그램별 실행 스크립트**다. 입력 유형은 FF10 점/면, INVTABLE 고정폭, 시간 참조 `MONTHLY/WEEKLY/ALLDAY`, 프로파일 월 12·주 7·시간 24열 형식을 따른다.
+
+| 항목 | 부산 적용 | 확인할 이유 |
+|---|---|---|
+| `WEST_HSPHERE` | `N` | 한국은 동반구 |
+| `SMK_ARTOPNT_YN` | `N` | 예제 미국 항공 면→점 전환 제외 |
+| `MRGDATE_FILES` | 2026년 `smk_merge_dates_202609.txt` | 기상 사례 연도 |
+| `L_TYPE` / `M_TYPE` | `all` | 일별 처리 |
+| `OUTZONE` | `0` | 기존 UTC 프로파일 및 GMT와 일관성 |
+| `SMK_DEFAULT_SRGID` | 부문별 900/901/902(2023 국내 면·이동·바다) | 미국 예제 ID 100 무검토 사용 금지 |
+| HAP 관련 | 국내 원자료에 해당 입력이 없는 경우 제외 | 미국 예제의 HAP 처리와 구분 |
+
+공식 예제의 `smoke5.2`라는 디렉터리명과 `MODEL_LABEL SMOKE5.2`, `EMF_AQM CMAQ v5.2` 등의 예제 문자열은 설치된 **SMOKE 5.3 실행 바이너리 / CMAQ 5.5 구축 계획의 실제 버전이 아니다.** `directory_definitions.csh`의 `EMF_SCRIPTNAME`을 절대경로로 정한 후 `EMF_LOGNAME`에 중첩하는 경로 오류 가능성은 별도 점검한다.
+
+### 8.2 재구축 및 4개 도메인 MCIP 연결 점검
+
+기존 사용자 기록상 2026-10-21 `met -> ../MCIP` 링크 및 27/09/03/01KM 접근, 예제 `smoke5.2/{scripts,assigns}` 복사가 확인됐다. 재구축 시 기존 자료를 무분별하게 덮어쓰지 않고 필요한 경우에만 다음 사항을 확인한다.
+
+```bash
+B=/home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS
+EX=/home/woogon/CMAQ_MODEL/CASES/SMOKE_TEST/smoke_example_case_v3
+ls -l "$B/met"
+for g in 27KM 09KM 03KM 01KM; do
+  echo "=== $g ==="
+  ls "$B/met/$g"/GRIDCRO2D* "$B/met/$g"/GRIDBDY2D* 2>/dev/null | head -4
+done
+ls "$B/smoke5.2/assigns" "$B/smoke5.2/scripts/emf"
+# 예제 스크립트가 없을 때만 복사:
+# mkdir -p "$B/smoke5.2" && cp -a "$EX/smoke5.2/." "$B/smoke5.2/"
+```
+
+새 CASE는 반드시 `2023capss_cb6`로 설정한다. 현재 설치 스크립트·CASE 설정은 [2023capss 파일 폴더](files/busan/2023capss/)를 참고한다. 설치 스크립트는 기존 `intermed/09KM/kor_point` 및 일부 입력을 삭제할 수 있으므로 **기존 산출물 백업 후 실행**한다.
+
+### 8.3 공통 입력 검사 및 2023 적용 구분
+
+| 파일 | 검증 사항 | 신규 2023 적용 |
+|---|---|---|
+| `griddesc_busan_4domains.txt` | MCIP 격자 원점·크기·행열 수 일치 | 유지 |
+| `costcy_busan_2023capss_20261022.txt` | `ADMIN_CD` 앞 5자리, 바다 90100, 국외/BIO 코드, GMT | **2017 COSTCY 대신 신규 파일 사용** |
+| `holidays_korea_2012_2026_20261021.txt` | 2026년 공휴일, 노동절 포함 여부 공식 대조 | 기존 작성본 사용, 공식 검증 대기 |
+| `smk_dates/2026/smk_merge_dates_202609.txt` | 8열 날짜·대표일 규칙 확인 | 기존 작성본 사용, `all` 열 |
+| `invtable_busan_2017capss_20261021.txt` | `CO NOX VOC NH3 SO2 PM10 PM2_5 PMC` 8물질의 형식 및 매핑 | 이름은 2017이지만 2023 입력에서 재사용(호환 검증 필요) |
+| `tpro_*` 월/주/시간 | 월 12·주 7·시간 24개 및 합계, UTC 전환 | 기존 시간 프로파일을 GMT와 조합 |
+
+공통 지역코드표의 고정폭 구조는 SMOKE 5.3 `rdstcy.f` 기준 이름 5–24열, 국가 26열, 시도 27–28열, 시군구 29–31열, 시간대 40–42열로 확인된 방식이다. **KST 프로파일과 GMT 지역코드를 섞지 않는다.**
+
+기존 사용 자료에서 2021~2030년 일부 공휴일 월이 `01`로 잘못 기록된 문제가 있어 2012~2020 + 2026 자료를 분리·작성했다. 2026년의 공식 공휴일 및 노동절 포함 여부는 여전히 확인할 항목이다. 날짜 파일은 `Date, aveday_N, aveday_Y, mwdss_N, mwdss_Y, week_N, week_Y, all`의 8열이며, `week` 등 대표일 파생 규칙은 추정이어서 별도 QA가 필요하다.
+
+### 8.4 신규 실행 검증 기준
+
+점 `onetime` / `daily` 및 국내 면·이동·바다 실제 실행 시에는 SMOKE 로그 **정상 종료 여부와 오류·경고**, FF10 원배출 합계(short ton/yr), Smkreport의 지역·SCC·물질 총량, 도메인 경계 밖 배출 몫, 시간대(UTC/GMT), 최종 격자·물질 일치를 확인한다. **점 단독 Smkinven 형식 시험의 정상 종료는 나머지 단계의 성공을 의미하지 않는다.** 점의 `Spcmat` 비활성 시험에서 발생했던 `PSSUP` 누락도 전체 실행으로 재확인해야 한다.
+
+이 절에 반영한 공통 절차 외의 과거 CAPSS 2017 입력 생성·미실행 명령은 더 이상 현재 작업 문서에서 관리하지 않는다.
