@@ -42,7 +42,7 @@ python3 make_busan_2023_domestic_inputs.py --capss capss \
 
 ## 3. 설치 패키지 및 자료 배치
 
-사용자 제공 `busan_2023capss_full_setup_20261022.zip`에 다음을 포함한다. ZIP은 압축 기준 약 **28.3 MB**, 압축해제 후 약 **154.9 MB**이며 85개 디렉터리/파일 항목이 확인됐다(이번 첨부 검사 기준). 실제 인벤토리·surrogate 등 대용량 자료는 ZIP으로 별도 전달·보관하고 GitHub에는 설치 절차와 핵심 스크립트 위치를 기록한다.
+사용자 제공 `busan_2023capss_full_setup_20261022.zip`에 다음을 포함한다. ZIP은 압축 기준 약 **28.3 MB**, 압축해제 후 약 **154.9 MB**이며 85개 디렉터리/파일 항목이 확인됐다(이번 첨부 검사 기준). ZIP 구조 점검은 통과했으며, SHA-256은 `34f5c8b7b8134cf2867de44cff0e1a838a8caa4831a35bce88179e2abddfb367`이다. 실제 인벤토리·surrogate 등 대용량 자료는 ZIP으로 별도 전달·보관하고 GitHub에는 설치 절차와 핵심 스크립트 위치를 기록한다.
 
 ### 3.1 공통 입력 및 지역코드
 
