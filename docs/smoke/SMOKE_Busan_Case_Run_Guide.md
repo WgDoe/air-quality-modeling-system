@@ -1,7 +1,7 @@
 # SMOKE 부산 사례 실행 가이드 — CAPSS 2023 / HTAP v3.1
 
 > **실행 기준:** SMOKE 5.3 · `CASES/BUSAN/TEST_20260901` · 신규 배출 시나리오 **`2023capss_cb6`** (2026-10-22 기준).  
- > **현재 상태(2026-10-22):** 공식 예제 및 부산 공통 기반 구축 완료. **CAPSS 2023 점·면·이동·바다의 FF10·surrogate·참조·실행 스크립트 생성 완료(작성 환경 기준)**, **Linux 09KM 점 Smkinven 단독 형식 시험 정상 종료**. 다만 **ZIP 최종 일괄 설치 확인 및 점 onetime/daily·면·이동·바다의 SMOKE 전 단계 실행은 아직 미수행**.  
+> **현재 상태(2026-10-22):** 공식 예제 및 부산 공통 기반 구축 완료. **CAPSS 2023 점·면·이동·바다의 FF10·surrogate·참조·실행 스크립트 생성 완료(작성 환경 기준)**, **Linux 09KM 점 Smkinven 단독 형식 시험 정상 종료**. 다만 **ZIP 최종 일괄 설치 확인 및 점 onetime/daily·면·이동·바다의 SMOKE 전 단계 실행은 아직 미수행**.  
 > **이 문서의 역할:** 새 시나리오의 **실제 실행 및 검증 기록**을 단계별로 축적. 배출량 자료 선정·변환 원칙은 [배출량 개선 계획](SMOKE_Emission_Improvement_Plan.md)을 기준으로 한다.
 
 이전 `2017capss_cb6`의 폴더·FF10·공간/시간/종분배 준비 과정과 **실행하지 않은 국내 면 테스트 명령**은 [CAPSS 2017 기준선 작업 기록](SMOKE_Busan_Case_2017_Baseline_Archive.md)에 완전히 보존했다. 해당 명령은 **신규 2023 시나리오에 그대로 실행하지 않는다.** 설치·미국 공식 예제 검증은 [SMOKE 5.3 설치 가이드](SMOKE_Installation_Guide.md), 기존 운영자료 분석은 [SMOKE 2.7 분석](Legacy_SMOKE27_Emission_Processing.md)을 참고한다.
@@ -366,7 +366,7 @@ bash ~/busan_setup/install_busan_2023capss.sh 2>&1 | tee ~/busan_install.log
 | CMAQ 5.5 메커니즘과 배출 물질 대응 | 병합 |
 | 2026년 공휴일 공식 달력 대조 | 실행 전 |
 
-> **GitHub 파일 상태:** 이 절은 기존 `SMOKE_Busan_Case_Run_Guide.md`에 직접 통합했다. `busan_2023capss_full_setup_20261022.zip` 및 그 안의 대용량 FF10·surrogate·생성기·실행 스크립트는 현재 GitHub에 등록하지 않았다. 실제 설치 시 사용자가 제공한 ZIP 원본이 필요하다.
+> **GitHub 파일 상태(2026-10-22):** 이 절은 기존 `SMOKE_Busan_Case_Run_Guide.md`에 직접 통합했다. [2023capss 스크립트 폴더](files/busan/2023capss/)에 **설치 스크립트 1개, CASE 설정 파일 2개, 실행 스크립트 5개**를 등록했다. 반면 **입력 생성기 3개, 실제 FF10 4개, surrogate 12개, 참조표 등 ZIP 내 전체 입력자료는 GitHub에 아직 등록하지 않았다.** 따라서 저장소 파일만으로 단독 설치할 수 없으며 전체 설치에는 사용자가 제공한 ZIP 원본이 필요하다.
 
 
 ### 7.3 ZIP 패키지 원본 및 재현에 필요한 파일 관리
@@ -379,3 +379,22 @@ bash ~/busan_setup/install_busan_2023capss.sh 2>&1 | tee ~/busan_install.log
 - **실행 수준 구별:** 09KM 점 Smkinven **시험 정상 종료**와 점 `onetime` 전체 정상 종료는 서로 다른 상태다. `Spcmat`가 비활성화된 형식 시험에서 `PSSUP` 미생성으로 Smkreport 오류가 발생했으며, 전체 실행의 성공은 아직 검증되지 않았다.
 
 다음 실제 진행은 **국내 점 09KM onetime → daily → 국내 면 → 이동 → 바다**의 순서이며, 각 부문에서 실제 실행 로그와 Smkreport 총량 QA를 별도로 기록한다.
+
+### 7.4 GitHub에 등록한 설치·실행 스크립트
+
+이 경로들은 사용자 제공 ZIP의 2026-10-22 국내 배출량 시나리오를 위한 스크립트다. **개별 GitHub 파일의 Linux 동작 검증은 수행하지 않았고, 입력자료 일괄 설치·부문 전체 실행도 아직 확인되지 않았다.**
+
+| 역할 | GitHub 파일 |
+|---|---|
+| 전체 입력 설치 | [`install_busan_2023capss.sh`](files/busan/2023capss/install_busan_2023capss.sh) |
+| CASE 기본 경로·변수 | [`directory_definitions.csh`](files/busan/2023capss/EMIS/2023capss_cb6/scripts/directory_definitions.csh) |
+| 프로그램 실행 설정 | [`run_settings.txt`](files/busan/2023capss/EMIS/2023capss_cb6/scripts/run_settings.txt) |
+| 국내 점 onetime | [`Annual_kor_point_onetime_2023capss_cb6.csh`](files/busan/2023capss/EMIS/2023capss_cb6/scripts/point/Annual_kor_point_onetime_2023capss_cb6.csh) |
+| 국내 점 daily | [`Annual_kor_point_daily_2023capss_cb6.csh`](files/busan/2023capss/EMIS/2023capss_cb6/scripts/point/Annual_kor_point_daily_2023capss_cb6.csh) |
+| 국내 면 | [`Annual_kor_area_2023capss_cb6.csh`](files/busan/2023capss/EMIS/2023capss_cb6/scripts/nonpoint/Annual_kor_area_2023capss_cb6.csh) |
+| 국내 이동 | [`Annual_kor_mobile_2023capss_cb6.csh`](files/busan/2023capss/EMIS/2023capss_cb6/scripts/nonpoint/Annual_kor_mobile_2023capss_cb6.csh) |
+| 국내 바다 | [`Annual_kor_sea_2023capss_cb6.csh`](files/busan/2023capss/EMIS/2023capss_cb6/scripts/nonpoint/Annual_kor_sea_2023capss_cb6.csh) |
+
+설치 ZIP 원본: `busan_2023capss_full_setup_20261022.zip` (SHA-256: `34f5c8b7b8134cf2867de44cff0e1a838a8caa4831a35bce88179e2abddfb367`, 검사 결과 ZIP 내부 오류 없음). **GitHub에 ZIP 전체를 올린 것은 아니다.**
+
+**주의:** `directory_definitions.csh`의 `EMF_LOGNAME`은 절대경로가 중복 결합될 가능성이 있으므로 실제 실행 전 수정·검증이 필요하다. 설치 스크립트는 중간결과를 지우므로 해당 경로 백업 여부를 확인하고 수행한다.
