@@ -13,7 +13,7 @@
 5. [CMAQ 5.5 소스·config_cmaq.csh·MCIP 컴파일, 격자 결정과 MCIP 사례 실행](docs/mcip/MCIP_Installation_Guide.md#case-run)
 6. [SMOKE 5.3 소스·포인터 수정·컴파일·공식 예제 검증](docs/smoke/01_SMOKE_Installation_Guide.md)
 7. [부산 배출량 개선 계획: CAPSS 2023·HTAP v3.1·신규 시나리오](docs/smoke/03_SMOKE_Emission_Improvement_Plan.md)
-8. [부산 실제사례 실행 가이드 — CAPSS 2023 입력 생성·설치 및 점 Smkinven 시험 (§7)](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md)
+8. [부산 실제사례 실행 가이드 — CAPSS 2023 입력 생성·설치와 점 onetime 완료 (§8.1)](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md)
 
 기존 CAPSS 2017 입력 준비 문서는 현행 목록에서 제외했다. 2023에도 필요한 공통 설정·검증 절차는 [부산 실행 가이드 §8](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md)에 통합했으며, 과거 원문은 Git 이력에서 확인할 수 있다.
 
@@ -53,7 +53,7 @@
 - [procar2pt.f 포인터 초기화 수정 기록](docs/smoke/90_SMOKE_procar2pt_Fix.md)
 - [기존 SMOKE 2.7 배출량 산정체계 분석 (신규 5.3 전환 참고)](docs/smoke/02_Legacy_SMOKE27_Emission_Processing.md)
 - [SMOKE 부산 배출량 개선 계획: CAPSS 2023 / HTAP v3.1 전환 기준](docs/smoke/03_SMOKE_Emission_Improvement_Plan.md)
-- [SMOKE 부산 실제사례 실행 가이드: CAPSS 2023 국내 입력 생성·설치와 점 Smkinven 시험 (§7)](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md)
+- [SMOKE 부산 실제사례 실행 가이드: CAPSS 2023 입력 일괄 설치와 점 onetime 09KM 완료 (§8.1)](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md)
 
 ### Master Plan과 현재 문서의 대응
 
@@ -76,7 +76,7 @@ Master Plan §22의 구축 단계는 그대로 적용한다. §23의 산출물�
 | Phase 2 | GNU Compiler / OpenMPI / 공통 라이브러리 | GCC/GFortran 11.5.0, OpenMPI, HDF5, netCDF, I/O API 설치·테스트 완료 | 개별 모델과의 호환성 지속 확인 |
 | Phase 3 | WRF 4.5.1 / WPS 4.5 | 반복 사례 `TEST_20260901_REPEAT`에서 WPS, `real.exe`, WRF dmpar 4코어 실행 완료 | 실제 대기질 사례의 입력·출력 QA |
 | Phase 4 | MCIP 5.5 | `TEST_20260901` d01~d04 변환 및 격자 일치 확인 완료 | CCTM 기상 입력 및 수직층 정합성 검증 |
-| Phase 5 | SMOKE 5.3 | 공식 예제 검증 완료; CAPSS 2017 구 입력은 실행 대상에서 제외. CAPSS 2023 국내 4부문 FF10·surrogate·실행 스크립트 작성 환경 생성 및 점 09KM Smkinven 단독 형식 시험 정상 종료(2026-10-22 제공 기록) | 사용자 Linux의 일괄 설치 로그 확인, 국내 점 onetime/daily 전체 실행 및 국내 면·이동·바다·국외·생물성·병합 후속 검증 |
+| Phase 5 | SMOKE 5.3 | 공식 예제 검증 완료; CAPSS 2017 구 입력은 실행 대상에서 제외. CAPSS 2023 국내 4부문 입력 생성·설치 및 점 09KM onetime 정상 종료·시도별 보고서 합계 일치(2026-10-22 제공 기록) | 국내 점 09KM daily 실행 및 면·이동·바다·나머지 격자·국외·생물성·병합 후속 검증 |
 | Phase 6 | CMAQ CCTM | 컴파일·benchmark 미완료 | 기준 태그 확정, 컴파일 및 benchmark |
 | Phase 7 | CMAQ-ISAM | 미수행 | benchmark 및 배출원 기여도 분석 |
 
@@ -101,7 +101,7 @@ SMOKE 하위 문서는 재작업 시 읽는 순서를 드러내기 위해 `00_` 
 
 현재 확인된 버전은 HDF5 1.14.6, netCDF-C 4.9.3, netCDF-Fortran 4.6.2, I/O API 3.2-20200828이다. I/O API 산출물은 `/home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/Linux2_x86_64gfort10`, include 파일은 같은 소스 루트의 `ioapi/fixed_src`에 있다.
 
-**2026-10-22 배출량 개선:** CAPSS 2023 국내 점·면·이동·바다 FF10 및 4개 도메인 공간배분 자료 생성(작성 환경), 09KM 점 Smkinven 단독 형식 시험 정상 종료(사용자 기록). 새 시나리오는 `2023capss_cb6`, 국외 적용 예정 자료는 HTAP v3.1(2020년). 국내 점 onetime/daily를 포함한 전 부문 실행은 아직 완료되지 않았다. [부산 실행 가이드](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md)와 [배출량 개선 계획](docs/smoke/03_SMOKE_Emission_Improvement_Plan.md)을 따른다. GitHub에는 [2023capss 설치·생성·실행 스크립트](docs/smoke/files/busan/2023capss/)를 보관하고 대용량 FF10·surrogate는 별도 ZIP 원본으로 관리한다. 2017 과거 문서 중 공통 유효 절차만 실행 가이드 §8에 통합했다.
+**2026-10-22 CAPSS 2023 실행 갱신:** 국내 점·면·이동·바다 입력자료 생성 및 일괄 설치, **09KM 국내 점 onetime 정상 종료·시도별 배출량 보고서 합계 일치**(제공받은 실행 기록 기준). 다음 단계는 **09KM 국내 점 daily** 실행이다. 국외 적용 예정 자료는 HTAP v3.1(2020년)이다. [04 부산 실행 가이드](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md) §8~§9 및 [03 배출량 개선 계획](docs/smoke/03_SMOKE_Emission_Improvement_Plan.md)을 따른다. GitHub에는 [2023capss 설치·생성·실행 스크립트](docs/smoke/files/busan/2023capss/)가 있으며 대용량 FF10·surrogate는 별도 ZIP 원본 또는 생성기로 관리한다. 기존 2017 작업에서 계승할 공통 검증 기준은 04 가이드 부록 B에 통합했다. CAPSS 코드표 XLSX 2개와 운영체계 참조 TXT 6개는 입력 재현에 필요하며 GitHub 등록 여부를 별도 확인한다.
 
 ### 모델 버전 기준
 
