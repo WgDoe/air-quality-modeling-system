@@ -358,6 +358,6 @@ nm = {r.SCC_CD: ' / '.join(x for x in [r.SCC_NAME1, r.SCC_NAME2, r.SCC_NAME3, r.
 f23 = pd.read_excel(a.code2023, sheet_name='fuel_cd', dtype=str); fnm = dict(zip(f23['연료코드'], f23['연료명']))
 desc = {f'"{r["SCC10"]}","{nm.get(r["SCC"], r["SCC"])} | {fnm.get(r["FUEL"], r["FUEL"])}"' for r in allrows + prow}
 open(mk(f'{OUT}/ge_dat/smkreport/sccdesc_busan_2023capss_{TAG}.txt'), 'w', encoding='utf-8').write(
-    '# SCC description 2023capss_cb6 (CAPSS 2023 SCC name | fuel name)\n' + '\n'.join(sorted(desc)) + '\n')
+    '#DELIMITED\n# SCC description 2023capss_cb6 (CAPSS 2023 SCC name | fuel name); #DELIMITED header required by SMOKE rdsccdsc.f\n' + '\n'.join(sorted(desc)) + '\n')
 pd.DataFrame(SUMMARY, columns=['sector', 'item', 'value']).to_csv(mk(f'{OUT}/{CASE}/inputs/generation_summary_{TAG}.csv'), index=False)
 log('done')
