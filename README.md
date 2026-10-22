@@ -101,7 +101,7 @@ SMOKE 하위 문서는 재작업 시 읽는 순서를 드러내기 위해 `00_` 
 
 현재 확인된 버전은 HDF5 1.14.6, netCDF-C 4.9.3, netCDF-Fortran 4.6.2, I/O API 3.2-20200828이다. I/O API 산출물은 `/home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/Linux2_x86_64gfort10`, include 파일은 같은 소스 루트의 `ioapi/fixed_src`에 있다.
 
-**2026-10-22 CAPSS 2023 실행 갱신:** 국내 점·면·이동·바다 입력자료 생성 및 일괄 설치, **09KM 국내 점 onetime 정상 종료·시도별 배출량 보고서 합계 일치**(제공받은 실행 기록 기준). 다음 단계는 **09KM 국내 점 daily** 실행이다. 국외 적용 예정 자료는 HTAP v3.1(2020년)이다. [04 부산 실행 가이드](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md) §8~§9 및 [03 배출량 개선 계획](docs/smoke/03_SMOKE_Emission_Improvement_Plan.md)을 따른다. GitHub에는 [2023capss 설치·생성·실행 스크립트](docs/smoke/files/busan/2023capss/)가 있으며 대용량 FF10·surrogate는 별도 ZIP 원본 또는 생성기로 관리한다. 기존 2017 작업에서 계승할 공통 검증 기준은 04 가이드 부록 B에 통합했다. CAPSS 코드표 XLSX 2개와 운영체계 참조 TXT 6개는 입력 재현에 필요하며 GitHub 등록 여부를 별도 확인한다.
+**2026-10-22 CAPSS 2023 실행 갱신:** 국내 점·면·이동·바다 입력자료 생성 및 일괄 설치, **09KM 국내 점 onetime 정상 종료·시도별 배출량 보고서 합계 일치**(제공받은 실행 기록 기준). 다음 단계는 **09KM 국내 점 daily** 실행이다. 국외 적용 예정 자료는 HTAP v3.1(2020년)이다. [04 부산 실행 가이드](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md) §8~§9 및 [03 배출량 개선 계획](docs/smoke/03_SMOKE_Emission_Improvement_Plan.md)을 따른다. GitHub에는 [2023capss 설치·생성·실행 스크립트](docs/smoke/files/busan/2023capss/)가 있으며 대용량 FF10·surrogate는 별도 ZIP 원본 또는 생성기로 관리한다. 기존 2017 작업에서 계승할 공통 검증 기준은 04 가이드 부록 B에 통합했다. CAPSS 코드표 XLSX 2개와 운영체계 참조 TXT 6개는 입력 재현에 필요하며 [reference/](docs/smoke/files/busan/2023capss/reference/)에 등록했다(2026-10-22).
 
 ### 모델 버전 기준
 

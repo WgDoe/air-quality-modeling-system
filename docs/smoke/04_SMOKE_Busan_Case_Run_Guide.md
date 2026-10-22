@@ -60,7 +60,7 @@ git clone https://github.com/WgDoe/air-quality-modeling-system.git
 | `temporal/tpro_{monthly,weekly,hourly}_busan_2020ver_*.csv` | 월·요일·시간 배분 프로파일 (시간은 UTC) |
 | `smk_dates/2026/` | 2026년 날짜 파일 12개 |
 
-**파일 등록 주의:** 이 문서와 GitHub에서 실제로 조회 가능한 파일은 구분한다. 입력 재현에는 코드리스트 XLSX 2개와 기존 참조 TXT 6개가 모두 필요하며, 업로드 전에 참조 폴더의 8개 파일 존재 여부를 반드시 확인한다. 파일이 없으면 6.2의 생성기 명령이 동작하지 않는다.
+**참조파일 등록 완료:** 코드리스트 XLSX 2개와 기존 참조 TXT 6개는 `2023capss/reference/`에 등록되어 있다(2026-10-22). 이 파일이 없으면 6.2의 생성기 명령이 동작하지 않으므로 `git pull` 후 8개가 모두 있는지 확인한다.
 
 ### 3.2 CAPSS 2023 원자료 (저장소에 없음)
 
