@@ -1,7 +1,7 @@
 # SMOKE 부산 사례 실행 가이드 — CAPSS 2023 / HTAP v3.1
 
 > **실행 기준:** SMOKE 5.3 · `CASES/BUSAN/TEST_20260901` · 신규 배출 시나리오 **`2023capss_cb6`** (2026-10-22 기준).  
-> **현재 상태:** 기존 공식 예제 검증과 `EMIS/` 공통 기반 준비까지 완료. CAPSS 2023용 새 입력 생성·실제 부산 SMOKE 실행은 **아직 미수행**.  
+ > **현재 상태(2026-10-22):** 공식 예제 및 부산 공통 기반 구축 완료. **CAPSS 2023 점·면·이동·바다의 FF10·surrogate·참조·실행 스크립트 생성 완료(작성 환경 기준)**, **Linux 09KM 점 Smkinven 단독 형식 시험 정상 종료**. 다만 **ZIP 최종 일괄 설치 확인 및 점 onetime/daily·면·이동·바다의 SMOKE 전 단계 실행은 아직 미수행**.  
 > **이 문서의 역할:** 새 시나리오의 **실제 실행 및 검증 기록**을 단계별로 축적. 배출량 자료 선정·변환 원칙은 [배출량 개선 계획](SMOKE_Emission_Improvement_Plan.md)을 기준으로 한다.
 
 이전 `2017capss_cb6`의 폴더·FF10·공간/시간/종분배 준비 과정과 **실행하지 않은 국내 면 테스트 명령**은 [CAPSS 2017 기준선 작업 기록](SMOKE_Busan_Case_2017_Baseline_Archive.md)에 완전히 보존했다. 해당 명령은 **신규 2023 시나리오에 그대로 실행하지 않는다.** 설치·미국 공식 예제 검증은 [SMOKE 5.3 설치 가이드](SMOKE_Installation_Guide.md), 기존 운영자료 분석은 [SMOKE 2.7 분석](Legacy_SMOKE27_Emission_Processing.md)을 참고한다.
@@ -367,3 +367,15 @@ bash ~/busan_setup/install_busan_2023capss.sh 2>&1 | tee ~/busan_install.log
 | 2026년 공휴일 공식 달력 대조 | 실행 전 |
 
 > **GitHub 파일 상태:** 이 절은 기존 `SMOKE_Busan_Case_Run_Guide.md`에 직접 통합했다. `busan_2023capss_full_setup_20261022.zip` 및 그 안의 대용량 FF10·surrogate·생성기·실행 스크립트는 현재 GitHub에 등록하지 않았다. 실제 설치 시 사용자가 제공한 ZIP 원본이 필요하다.
+
+
+### 7.3 ZIP 패키지 원본 및 재현에 필요한 파일 관리
+
+2026-10-22 제공된 `busan_2023capss_full_setup_20261022.zip`에는 설치 스크립트 `install_busan_2023capss.sh`, 생성기 3개, 국내 점·면·이동·바다 FF10 4개, 4개 도메인 × 3부문 surrogate 12개, 실행 스크립트 5개, 공통 참조·설정 및 검증 CSV가 포함된다.
+
+- **재현 우선:** 설치 스크립트, 생성기, CASE 실행 스크립트, 신규 참조표는 가능하면 GitHub의 `docs/smoke/files/busan/2023capss/` 아래 원래 상대경로를 유지해 보관한다. 개별 파일을 등록했다면 실제 링크로 연결한다.
+- **대용량 원자료 분리:** 약 155 MB의 설치 해제 데이터 중 대형 FF10 및 surrogate는 저장소 용량을 고려해 ZIP 원본 별도 보관과 생성기·무결성 검증값으로 관리한다. GitHub에 등록된 파일만으로 전체 설치가 가능하다고 오인해서는 안 된다.
+- **파괴적 설치 동작:** `install_busan_2023capss.sh`는 기존 파일을 덮어쓰고, `2023capss_cb6/intermed/09KM/kor_point` 및 `2023capss_cb6/inputs/asia` 등을 삭제한다. 재실행 전에 백업과 경로 확인이 필요하다.
+- **실행 수준 구별:** 09KM 점 Smkinven **시험 정상 종료**와 점 `onetime` 전체 정상 종료는 서로 다른 상태다. `Spcmat`가 비활성화된 형식 시험에서 `PSSUP` 미생성으로 Smkreport 오류가 발생했으며, 전체 실행의 성공은 아직 검증되지 않았다.
+
+다음 실제 진행은 **국내 점 09KM onetime → daily → 국내 면 → 이동 → 바다**의 순서이며, 각 부문에서 실제 실행 로그와 Smkreport 총량 QA를 별도로 기록한다.
