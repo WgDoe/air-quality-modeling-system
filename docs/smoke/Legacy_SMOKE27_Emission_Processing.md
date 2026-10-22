@@ -143,6 +143,6 @@ IDA 파일에서 입력되는 7종: **SO2, NOX, CO, PM10, VOC, NH3, PM2.5**.
 - **추정·미확인:** 실제 최종 병합의 국외 처리 순서, 전체 점오염원 상승 설정, 해상 Grdmat 공간배분, 국외 VOC 기본 프로파일 대체 여부, MEGAN/BEIS 영역별 실행 관계.
 - **아직 미수행:** 기존 SMOKE 2.7 재실행/로그 확인, 신규 5.3 부산 사례 실험, CMAQ 입출력 일치 검증.
 
-관련 문서: [SMOKE 5.3 설치·공식 예제 가이드](SMOKE_Installation_Guide.md), [SMOKE 포인터 수정 기록](SMOKE_procar2pt_Fix.md), [프로젝트 기본계획](../planning/00_CMAQ_Project_Master_Plan.md).
+관련 문서: [SMOKE 5.3 설치·공식 예제 가이드](SMOKE_Installation_Guide.md), [2023 CAPSS·HTAP 배출량 개선 계획](SMOKE_Emission_Improvement_Plan.md), [SMOKE 부산 실행 가이드](SMOKE_Busan_Case_Run_Guide.md), [SMOKE 포인터 수정 기록](SMOKE_procar2pt_Fix.md), [프로젝트 기본계획](../planning/00_CMAQ_Project_Master_Plan.md).
 
 > 이 문서는 기존 처리방식의 **출처·구조·검증상태를 보존**하기 위한 참고자료다. 신규 구축 단계에서 확인된 값과 수정한 값은 원자료와 구분하여 기록한다.
