@@ -1,0 +1,7 @@
+#POPULATION 2012
+/COUNTRY/
+1 ASIA
+/STATE/
+111   KOREA
+/COUNTY/
+    BEIS                 111020        GMTx

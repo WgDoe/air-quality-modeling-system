@@ -1,0 +1,13 @@
+#POPULATION 2010
+/COUNTRY/
+1 ASIA
+/STATE/
+111 EASTASIA                     GMT
+/COUNTY/
+    China                111001        GMTx 
+    North.K              111002        GMTx 
+    Japan                111003        GMTx 
+    Mongolia             111004        GMTx 
+    South.K              111005        GMTx 
+    Taiwan               111006        GMTx 
+    other                111007        GMTx 
