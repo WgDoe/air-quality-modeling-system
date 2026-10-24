@@ -11,10 +11,8 @@ if ($?SLURM_SUBMIT_DIR) then
 endif
 source ../directory_definitions.csh
 
-setenv RUN_MONTHS "9"
 setenv SPINUP_DURATION "0"
 setenv SPINUP_MONTH_END "Y"
-setenv BASE_YEAR "2026"
 setenv EPI_STDATE_TIME "${BASE_YEAR}-01-01 00:00:00.0"
 setenv EPI_ENDATE_TIME "${BASE_YEAR}-12-31 23:59:00.0"
 
@@ -24,7 +22,7 @@ setenv COSTCY        "${GE_DAT}/costcy_busan_2023capss_20261022.txt"            
 setenv INVTABLE      "${GE_DAT}/invtable_busan_2017capss_20261021.txt"
 setenv SCCDESC       "${GE_DAT}/smkreport/sccdesc_busan_2023capss_20261022.txt"   # NEW
 setenv HOLIDAYS      "${GE_DAT}/temporal/holidays_korea_2012_2026_20261021.txt"
-setenv MRGDATE_FILES "${INSTALL_DIR}/smoke5.2/scripts/smk_dates/2026/smk_merge_dates_202609.txt"
+setenv MRGDATE_FILES "${INSTALL_DIR}/smoke5.2/scripts/smk_dates/${BASE_YEAR}/smk_merge_dates_${BASE_YEAR}01.txt"   # folder is used; one file per month
 setenv GSCNV         "${GE_DAT}/speciation/gscnv_SPECIATE_5_3_fromS2S_20230911_16jun2025_v1.txt"
 
 ## Spatial (NEW: CAPSS 2023 1 km cell surrogates, one file per sector and domain)

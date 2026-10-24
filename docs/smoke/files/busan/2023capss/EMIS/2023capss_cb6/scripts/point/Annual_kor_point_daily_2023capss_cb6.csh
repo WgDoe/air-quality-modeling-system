@@ -14,11 +14,9 @@ endif
 
 source ../directory_definitions.csh
 
-## Months / spinup / modeling year (meteorological year)
-setenv RUN_MONTHS "9"
+## Months / spinup (RUN_MONTHS, BASE_YEAR, RUN_SDATE, RUN_EDATE are set from MCIP in ../directory_definitions.csh)
 setenv SPINUP_DURATION "0"
 setenv SPINUP_MONTH_END "Y"
-setenv BASE_YEAR "2026"
 setenv EPI_STDATE_TIME "${BASE_YEAR}-01-01 00:00:00.0"
 setenv EPI_ENDATE_TIME "${BASE_YEAR}-12-31 23:59:00.0"
 
@@ -28,7 +26,7 @@ setenv COSTCY        "${GE_DAT}/costcy_busan_2023capss_20261022.txt"            
 setenv INVTABLE      "${GE_DAT}/invtable_busan_2017capss_20261021.txt"            # same 8 pollutants
 setenv SCCDESC       "${GE_DAT}/smkreport/sccdesc_busan_2023capss_20261022.txt"   # NEW
 setenv HOLIDAYS      "${GE_DAT}/temporal/holidays_korea_2012_2026_20261021.txt"
-setenv MRGDATE_FILES "${INSTALL_DIR}/smoke5.2/scripts/smk_dates/2026/smk_merge_dates_202609.txt"
+setenv MRGDATE_FILES "${INSTALL_DIR}/smoke5.2/scripts/smk_dates/${BASE_YEAR}/smk_merge_dates_${BASE_YEAR}01.txt"   # folder is used; one file per month
 setenv GSCNV         "${GE_DAT}/speciation/gscnv_SPECIATE_5_3_fromS2S_20230911_16jun2025_v1.txt"
 setenv ORISDESC      "${GE_DAT}/smkreport/orisdesc_04dec2006_v0.txt"              # example (report only)
 setenv NAICSDESC     "${GE_DAT}/smkreport/naicsdesc_20220222_29feb2024_nf_v1.txt" # example (report only)
@@ -59,7 +57,7 @@ setenv REPCONFIG_TEMP "${GE_DAT}/smkreport/repconfig/repconfig_point_temporal_20
 setenv EMISINV_A "${CASEINPUTS}/kor_point/kor_point_CAPSS2023_ff10_20261022.csv"      # NEW: CAPSS 2023 point (make_busan_2023_domestic_inputs.py)
 
 ## Parameters
-setenv L_TYPE "all"
+setenv L_TYPE "week"                  # point byday (MRG_BYDAY P): one temporal day per weekday + holidays; "all" fails in smk_pt_annual_byday_emf.csh
 setenv M_TYPE "all"
 setenv M3XTRACT_LENGTH "240000"
 setenv PLATFORM "v9.2"

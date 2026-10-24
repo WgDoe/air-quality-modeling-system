@@ -23,19 +23,23 @@ Decisions: docs/smoke/SMOKE_Emission_Improvement_Plan.md (2026-10-22)
     (emissions of the region outside a domain are dropped). Default surrogate per sector = all-pollutant mass.
 
 Usage
-  python3 make_busan_2023_domestic_inputs.py --capss <dir with point/area/mobile/sea files> --code2017 <xlsx> \
+  python3 make_busan_2023_domestic_inputs.py --capss <folder with CAPSS 2023 original files> --code2017 <xlsx> \
       --code2023 <xlsx> --legacy <dir with legacy 4_*/5_*/9_* reference files> --out <dir>
-  file names expected in --capss (change with options): point.txt, area.txt, mobile.txt, sea.txt
+  --capss: copy the CAPSS 2023 originals there unchanged. Detected automatically (zip or extracted txt):
+    point  : file name containing '점오염원' (national point file)
+    sea    : file name containing '바다'
+    area   : '면오염원*.zip' and/or '*a(2023).txt' files (by-province files and/or the national file)
+    mobile : '이동오염원*.zip' and/or '*m(2023).txt' files (excluding '바다')
+  For area/mobile: if the largest file equals the sum of the others (national file present), only it is read;
+  otherwise all province files are read. Repeated header lines are skipped.
 """
-import argparse, os, collections, time
+import argparse, os, collections, time, glob, zipfile, io
 import numpy as np, pandas as pd
 from pyproj import CRS, Transformer
 
 ap = argparse.ArgumentParser()
 for k in ('capss', 'code2017', 'code2023', 'legacy', 'out'):
     ap.add_argument('--' + k, required=True)
-ap.add_argument('--point', default='point.txt'); ap.add_argument('--area', default='area.txt')
-ap.add_argument('--mobile', default='mobile.txt'); ap.add_argument('--sea', default='sea.txt')
 ap.add_argument('--sub', type=int, default=10, help='sub-points per km for surrogate overlap')
 a = ap.parse_args()
 TAG, CASE = '20261022', '2023capss_cb6'
@@ -43,6 +47,40 @@ OUT = a.out.rstrip('/') + '/EMIS'
 T0 = time.time()
 def log(*x): print(f'[{time.time()-T0:6.0f}s]', *x, flush=True)
 def mk(p): os.makedirs(os.path.dirname(p), exist_ok=True); return p
+
+# ---------------- CAPSS original files (auto-detected in --capss)
+def _members():
+    """list of (label, size, opener) for every txt file in --capss (also inside zip files)"""
+    out = []
+    for f in sorted(glob.glob(os.path.join(a.capss, '*'))):
+        if f.lower().endswith('.zip'):
+            z = zipfile.ZipFile(f)
+            for i in z.infolist():
+                if i.is_dir(): continue
+                out.append((os.path.basename(f) + ':' + i.filename, i.file_size,
+                            (lambda z=z, i=i: io.TextIOWrapper(z.open(i), encoding='cp949', errors='replace'))))
+        elif os.path.isfile(f):
+            out.append((os.path.basename(f), os.path.getsize(f), (lambda f=f: open(f, encoding='cp949', errors='replace'))))
+    return out
+MEMBERS = _members()
+def _pick(cond, what):
+    m = [x for x in MEMBERS if cond(x[0])]
+    if not m: raise SystemExit(f'ERROR: no CAPSS {what} file found in {a.capss}')
+    m.sort(key=lambda x: -x[1])
+    if len(m) > 1 and abs(m[0][1] - sum(x[1] for x in m[1:])) <= 0.01 * m[0][1]:
+        m = m[:1]                                  # national file = sum of province files
+    log(f'{what}: ' + ', '.join(f'{x[0]} ({x[1]:,} B)' for x in m))
+    return m
+def _base(n): return n.split(':')[-1]
+SRC = {'point': _pick(lambda n: '점오염원' in n and not n.lower().endswith('.zip'), 'point'),
+       'kor_sea': _pick(lambda n: '바다' in n, 'sea'),
+       'kor_area': _pick(lambda n: '바다' not in n and (n.split(':')[0].startswith('면오염원') or _base(n).endswith('a(2023).txt')) and n.endswith('.txt'), 'area'),
+       'kor_mobile': _pick(lambda n: '바다' not in n and (n.split(':')[0].startswith('이동오염원') or _base(n).endswith('m(2023).txt')) and n.endswith('.txt'), 'mobile')}
+def read_chunks(sector, **kw):
+    for label, size, op in SRC[sector]:
+        with op() as fh:
+            for ch in pd.read_csv(fh, dtype=str, chunksize=1_500_000, **kw):
+                yield ch
 
 POL = {'CO': 'CO', 'NOx': 'NOX', 'SOx': 'SO2', 'PM10r': 'PM10', 'PM25r': 'PM2_5', 'VOC': 'VOC', 'NH3': 'NH3'}
 PCOL = list(POL)
@@ -139,7 +177,8 @@ GRIDS = {'27KM': (-2349000., -1728000., 27000., 174, 128), '09KM': (-180000., -5
 # 1. POINT
 # =====================================================================================
 log('point: reading')
-d = pd.read_csv(os.path.join(a.capss, a.point), dtype={'ADMIN_CD': str, 'POINT_ID': str, 'SCC_CD': str, 'FUEL_CD': str})
+with SRC['point'][0][2]() as fh:
+    d = pd.read_csv(fh, dtype={'ADMIN_CD': str, 'POINT_ID': str, 'SCC_CD': str, 'FUEL_CD': str})
 d.columns = fixcols(d.columns)
 nraw = len(d)
 key = ['ADMIN_CD', 'POINT_ID', 'SCC_CD', 'FUEL_CD']
@@ -202,15 +241,15 @@ FF10_DESC = ('#DESC "country_cd","region_cd","tribal_code","census_tract_cd","sh
              '"jun_value","jul_value","aug_value","sep_value","oct_value","nov_value","dec_value","jan_pctred","feb_pctred",'
              '"mar_pctred","apr_pctred","may_pctred","jun_pctred","jul_pctred","aug_pctred","sep_pctred","oct_pctred","nov_pctred",'
              '"dec_pctred","comment","comments"')
-SECT = {'kor_area': a.area, 'kor_mobile': a.mobile, 'kor_sea': a.sea}
+SECT = {'kor_area': 'area', 'kor_mobile': 'mobile', 'kor_sea': 'sea'}
 CODEBASE = {'kor_area': 1000, 'kor_mobile': 3000, 'kor_sea': 5000}
 DEFCODE = {'kor_area': 900, 'kor_mobile': 901, 'kor_sea': 902}
 allrows, nptref, npgsref, srgdesc_lines, agref_lines = [], [], [], {g: [] for g in GRIDS}, []
 cellmaps = {}
 for sec, fn in SECT.items():
-    log(f'{sec}: reading {fn}')
+    log(f'{sec}: reading')
     parts, cparts = [], []
-    for ch in pd.read_csv(os.path.join(a.capss, fn), dtype=str, chunksize=1_500_000):
+    for ch in read_chunks(sec):
         ch.columns = fixcols(ch.columns)
         ch = ch[ch.INVEST_YEAR == '2023']
         for p in PCOL: ch[p] = pd.to_numeric(ch[p]).astype('float32')
@@ -257,7 +296,7 @@ for sec, fn in SECT.items():
     codes = {s10: CODEBASE[sec] + i + 1 for i, s10 in enumerate(sorted(nat.index))}
     agref_lines += [f'000000 {s10} {codes[s10]}' for s10 in sorted(codes)]
     for g in GRIDS:
-        srgdesc_lines[g] += [f'KOREA,{DEFCODE[sec]},{sec} all sources,srg_{sec}_2023capss_{g}.txt'] + \
+        srgdesc_lines[g] += [f'KOREA,{DEFCODE[sec]},{sec}_all_sources,srg_{sec}_2023capss_{g}.txt'] + \
                             [f'KOREA,{codes[s10]},{s10},srg_{sec}_2023capss_{g}.txt' for s10 in sorted(codes)]
     cellmaps[sec] = (c[['REG', 'SCC10', 'X', 'Y', 'W', 'WALL']].copy(), codes, dom)
     del c
@@ -265,8 +304,10 @@ for sec, fn in SECT.items():
 pd.DataFrame(allrows + prow).to_csv(mk(f'{OUT}/{CASE}/inputs/scc10_reference_map_{TAG}.csv'), index=False)
 hdr = ['# rules: 1 exact / 2 borrowed fuel / 3 same SCC8 same fuel class / 4 same SCC8 / 5 same SCC6 / 6 default; see inputs/scc10_reference_map',
        '# hourly profiles are UTC-shifted legacy profiles (COSTCY time zone GMT)']
-open(mk(f'{OUT}/ge_dat/temporal/tref_kor_point_2023capss_{TAG}.csv'), 'w').write('\n'.join(['# TREF kor_point 2023 (legacy point references)'] + hdr + sorted(set(ptref))) + '\n')
-open(mk(f'{OUT}/ge_dat/temporal/tref_kor_nonpoint_2023capss_{TAG}.csv'), 'w').write('\n'.join(['# TREF kor_area/kor_mobile/kor_sea 2023 (legacy area references)'] + hdr + sorted(set(nptref))) + '\n')
+# default temporal profiles for rule-6 sources: uniform monthly 262 / weekly 7 / hourly 24 (same as L-NEAS default 0000000000 262 7 24)
+TDEF = ['"0000000000",,,,,,,"MONTHLY","262",""', '"0000000000",,,,,,,"WEEKLY","7",""', '"0000000000",,,,,,,"ALLDAY","24",""']
+open(mk(f'{OUT}/ge_dat/temporal/tref_kor_point_2023capss_{TAG}.csv'), 'w').write('\n'.join(['# TREF kor_point 2023 (legacy point references)'] + hdr + TDEF + sorted(set(ptref))) + '\n')
+open(mk(f'{OUT}/ge_dat/temporal/tref_kor_nonpoint_2023capss_{TAG}.csv'), 'w').write('\n'.join(['# TREF kor_area/kor_mobile/kor_sea 2023 (legacy area references)'] + hdr + TDEF + sorted(set(nptref))) + '\n')
 gh = ['# VOC: SPECIATE numbers with gspro_CB6R3_AE7_criteria + gscnv_SPECIATE_5_3; PM2_5: gspro_PM2_5_AE6; defaults below']
 open(mk(f'{OUT}/ge_dat/speciation/gsref_kor_point_2023capss_{TAG}.csv'), 'w').write('\n'.join(['# GSREF kor_point 2023'] + hdr[:1] + gh + GSDEF + sorted(set(pgsref))) + '\n')
 open(mk(f'{OUT}/ge_dat/speciation/gsref_kor_nonpoint_2023capss_{TAG}.csv'), 'w').write('\n'.join(['# GSREF kor_area/kor_mobile/kor_sea 2023'] + hdr[:1] + gh + GSDEF + sorted(set(npgsref))) + '\n')

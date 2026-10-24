@@ -45,3 +45,15 @@ setenv EMF_LOGNAME    "${CASESCRIPTS}/logs/$EMF_SCRIPTNAME.log"
 setenv EMF_JOBKEY "busan_2023capss_cb6"
 setenv EMF_LOGGERPYTHONDIR "$EMF_SCRIPTDIR/case_logs_python"
 setenv EMF_JOBID "1"
+
+## Run period from MCIP (all domains share the same period; read from the selected domain)
+##   RUN_SDATE/RUN_EDATE (YYYYDDD) limit the "all" dates in smoke5.2/scripts/run/set_days_v5.csh (Busan patch)
+set _per = ( `python3 $CASESCRIPTS/utils/mcip_period.py $MET_ROOT` )
+if ( $#_per < 4 ) then
+  echo "ERROR: cannot read run period from MCIP files in $MET_ROOT"; exit 1
+endif
+setenv RUN_SDATE  $_per[1]
+setenv RUN_EDATE  $_per[2]
+setenv BASE_YEAR  $_per[3]
+setenv RUN_MONTHS "$_per[4-]"
+echo "Run period from MCIP: $RUN_SDATE - $RUN_EDATE (months: $RUN_MONTHS)"

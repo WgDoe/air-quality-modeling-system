@@ -48,15 +48,30 @@ cp -n $EX/ge_dat/smkreport/orisdesc_04dec2006_v0.txt $EX/ge_dat/smkreport/naicsd
 echo "   done"
 
 say "5. remove obsolete files (format test 2026-10-22, East Asia 2010)"
-rm -rf $C/intermed/09KM/kor_point $C/inputs/kor_point/scc10_reference_map_20261022.csv $C/inputs/asia
+# Preserve existing results unless cleanup is explicitly requested.
+if [ "${BUSAN_REMOVE_OBSOLETE:-NO}" = YES ]; then
+  expected=/home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS/2023capss_cb6
+  [ "$(realpath -e -- "$C")" = "$expected" ] && [ ! -L "$C" ] || { echo "ERROR: unsafe cleanup path"; exit 1; }
+  for target in "$C/intermed/09KM/kor_point" "$C/inputs/kor_point/scc10_reference_map_20261022.csv" "$C/inputs/asia"; do
+    resolved=$(realpath -m -- "$target") || exit 1
+    case "$resolved" in "$expected"/*) ;; *) echo "ERROR: unsafe cleanup target: $target"; exit 1 ;; esac
+  done
+  echo "WARNING: deleting old point intermediates and obsolete inputs under $C"
+  rm -rf -- "$C/intermed/09KM/kor_point" "$C/inputs/kor_point/scc10_reference_map_20261022.csv" "$C/inputs/asia" || exit 1
+else
+  echo "WARNING: old results preserved; set BUSAN_REMOVE_OBSOLETE=YES only after backup to remove obsolete files."
+fi
 echo "   done"
 
 say "6. check files referenced by sector scripts"
+YR=$(python3 $C/scripts/utils/mcip_period.py $CASE_DIR/MCIP/09KM 2>/dev/null | awk '{print $3}')
+[ -n "$YR" ] || YR=2026
+echo "   run period from MCIP: $(python3 $C/scripts/utils/mcip_period.py $CASE_DIR/MCIP/09KM 2>/dev/null)"
 for s in $C/scripts/point/*.csh $C/scripts/nonpoint/*.csh; do
   for g in 27KM 09KM 03KM 01KM; do
     grep -E '^setenv [A-Z_0-9]+ +"\$\{(GE_DAT|CASEINPUTS|INSTALL_DIR)\}' $s | awk '{print $2, $3}' | tr -d '"' |
     while read v p; do
-      f=$(echo "$p" | sed -e "s|\${GE_DAT}|$B/ge_dat|" -e "s|\${CASEINPUTS}|$C/inputs|" -e "s|\${INSTALL_DIR}|$B|" -e "s|\${GRID}|$g|g")
+      f=$(echo "$p" | sed -e "s|\${GE_DAT}|$B/ge_dat|" -e "s|\${CASEINPUTS}|$C/inputs|" -e "s|\${INSTALL_DIR}|$B|" -e "s|\${GRID}|$g|g" -e "s|\${BASE_YEAR}|$YR|g")
       [ -e "$f" ] || echo "   MISSING  $(basename $s)  $g  $v  $f"
     done
   done
