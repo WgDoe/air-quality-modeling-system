@@ -1,0 +1,5 @@
+# Busan 2023capss_cb6 run settings (same format as example run_settings.txt)
+# Column labels:
+# Sector, Grid, Environment, Variable Name, Part, Start Date, End Date, Value
+# Add a line with value N to skip a program, e.g.:
+#kor_point, 09KM, elevpoint, ALL, 0, 0, N
