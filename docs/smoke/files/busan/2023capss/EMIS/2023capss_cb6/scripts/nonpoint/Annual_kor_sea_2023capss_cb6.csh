@@ -27,7 +27,7 @@ setenv GSCNV         "${GE_DAT}/speciation/gscnv_SPECIATE_5_3_fromS2S_20230911_1
 
 ## Spatial (NEW: CAPSS 2023 1 km cell surrogates, one file per sector and domain)
 setenv SRGDESC "${GE_DAT}/gridding/srgdesc_kor_2023capss_${GRID}_20261022.txt"
-setenv AGREF   "${GE_DAT}/gridding/agref_kor_nonpoint_2023capss_20261022.txt"
+setenv AGREF   "${GE_DAT}/gridding/agref_kor_sea_2023capss_20261022.txt"   # per-sector AGREF (2026-10-24)
 setenv SRGPRO  "${GE_DAT}/gridding/surrogates/kor_2023capss_${GRID}/srg_kor_sea_2023capss_${GRID}.txt"
 setenv SMK_DEFAULT_SRGID "902"                 # sector-wide CAPSS 2023 distribution
 
