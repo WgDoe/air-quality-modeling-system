@@ -244,7 +244,7 @@ FF10_DESC = ('#DESC "country_cd","region_cd","tribal_code","census_tract_cd","sh
 SECT = {'kor_area': 'area', 'kor_mobile': 'mobile', 'kor_sea': 'sea'}
 CODEBASE = {'kor_area': 1000, 'kor_mobile': 3000, 'kor_sea': 5000}
 DEFCODE = {'kor_area': 900, 'kor_mobile': 901, 'kor_sea': 902}
-allrows, nptref, npgsref, srgdesc_lines, agref_lines = [], [], [], {g: [] for g in GRIDS}, []
+allrows, nptref, npgsref, srgdesc_lines, agref_lines = [], [], [], {g: [] for g in GRIDS}, {}
 cellmaps = {}
 for sec, fn in SECT.items():
     log(f'{sec}: reading')
@@ -294,7 +294,7 @@ for sec, fn in SECT.items():
     c['W'] = W
     c['WALL'] = c[PCOL].sum(axis=1).astype('float32')
     codes = {s10: CODEBASE[sec] + i + 1 for i, s10 in enumerate(sorted(nat.index))}
-    agref_lines += [f'000000 {s10} {codes[s10]}' for s10 in sorted(codes)]
+    agref_lines[sec] = [f'000000 {s10} {codes[s10]}' for s10 in sorted(codes)]
     for g in GRIDS:
         srgdesc_lines[g] += [f'KOREA,{DEFCODE[sec]},{sec}_all_sources,srg_{sec}_2023capss_{g}.txt'] + \
                             [f'KOREA,{codes[s10]},{s10},srg_{sec}_2023capss_{g}.txt' for s10 in sorted(codes)]
@@ -311,9 +311,10 @@ open(mk(f'{OUT}/ge_dat/temporal/tref_kor_nonpoint_2023capss_{TAG}.csv'), 'w').wr
 gh = ['# VOC: SPECIATE numbers with gspro_CB6R3_AE7_criteria + gscnv_SPECIATE_5_3; PM2_5: gspro_PM2_5_AE6; defaults below']
 open(mk(f'{OUT}/ge_dat/speciation/gsref_kor_point_2023capss_{TAG}.csv'), 'w').write('\n'.join(['# GSREF kor_point 2023'] + hdr[:1] + gh + GSDEF + sorted(set(pgsref))) + '\n')
 open(mk(f'{OUT}/ge_dat/speciation/gsref_kor_nonpoint_2023capss_{TAG}.csv'), 'w').write('\n'.join(['# GSREF kor_area/kor_mobile/kor_sea 2023'] + hdr[:1] + gh + GSDEF + sorted(set(npgsref))) + '\n')
-open(mk(f'{OUT}/ge_dat/gridding/agref_kor_nonpoint_2023capss_{TAG}.txt'), 'w').write(
-    '# AGREF kor_area/kor_mobile/kor_sea 2023: SCC10 -> surrogate code (area 1001-, mobile 3001-, sea 5001-; defaults 900/901/902)\n'
-    + '\n'.join(agref_lines) + '\n')
+for sec, lines_ in agref_lines.items():   # one AGREF per sector: ship SCC10 (0803...) exist in kor_mobile and kor_sea
+    open(mk(f'{OUT}/ge_dat/gridding/agref_{sec}_2023capss_{TAG}.txt'), 'w').write(
+        f'# AGREF {sec} 2023: SCC10 -> surrogate code (area 1001-/900, mobile 3001-/901, sea 5001-/902); per-sector file\n'
+        + '\n'.join(lines_) + '\n')
 for g, (x0, y0, dx, nc, nr) in GRIDS.items():
     open(mk(f'{OUT}/ge_dat/gridding/srgdesc_kor_2023capss_{g}_{TAG}.txt'), 'w').write(
         f'# SRGDESC kor_area/kor_mobile/kor_sea 2023 {g}: surrogates from CAPSS 2023 1km cells (files in ge_dat/gridding/surrogates/kor_2023capss_{g}/)\n'
