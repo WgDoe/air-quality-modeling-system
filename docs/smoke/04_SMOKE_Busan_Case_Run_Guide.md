@@ -15,13 +15,13 @@
   ↓
 6장  입력 생성 (CAPSS 원본 → 생성기 → 설치 패키지)
   ↓
-7장  입력 설치 (설치 스크립트)
+7장  입력 설치 (설치 스크립트), 7.1 SMOKE Grdmat 패치 (한 번만)
   ↓
 8장  실행 (기간은 MCIP에서 자동 설정)
      8.1 국내 점 → 8.2 국내 면 → 8.3 국내 이동 → 8.4 바다   (각 4개 도메인)
 ```
 
-현재 상태(2026-10-23): **5~7장 완료, 8.1 국내 점·8.2 국내 면 4개 도메인 정상 완료.** 8.3부터 진행 중.
+현재 상태(2026-10-26): **5~7장 완료, 8.1 국내 점·8.2 국내 면 4개 도메인 정상 완료.** 8.3부터 진행 중.
 
 ## 2. 구축 환경
 
@@ -40,7 +40,7 @@
 
 ### 3.1 저장소에서 필요한 파일만 받기
 
-저장소 전체를 받지 않고, 이 절차에 필요한 37개 파일만 GitHub에서 내려받아 `~/busan_smoke_files`에 저장소와 같은 폴더 구조로 둔다. 받을 파일 목록은 저장소의 `docs/smoke/files/busan/2023capss/file_list.txt`에 있다.
+저장소 전체를 받지 않고, 이 절차에 필요한 38개 파일만 GitHub에서 내려받아 `~/busan_smoke_files`에 저장소와 같은 폴더 구조로 둔다. 받을 파일 목록은 저장소의 `docs/smoke/files/busan/2023capss/file_list.txt`에 있다.
 
 ```bash
 (
@@ -58,12 +58,12 @@ while IFS= read -r p || [ -n "$p" ]; do
   mv -- "$F/$p.part" "$F/$p"
   count=$((count + 1))
 done < "$F/file_list.txt"
-[ "$count" -eq 37 ] || { echo "ERROR: expected 37 files, got $count"; exit 1; }
+[ "$count" -eq 38 ] || { echo "ERROR: expected 38 files, got $count"; exit 1; }
 echo "Downloaded $count files (+ file_list.txt)"
 )
 ```
 
-정상 기준: `Downloaded 37 files (+ file_list.txt)`가 나온다. curl 실패 시 블록은 즉시 중단하며 `.part` 파일은 정상 파일로 교체하지 않는다. 파일이 바뀌었을 때는 같은 명령을 다시 실행하면 최신 파일로 덮어쓴다.
+정상 기준: `Downloaded 38 files (+ file_list.txt)`가 나온다. curl 실패 시 블록은 즉시 중단하며 `.part` 파일은 정상 파일로 교체하지 않는다. 파일이 바뀌었을 때는 같은 명령을 다시 실행하면 최신 파일로 덮어쓴다.
 
 받는 파일 (`~/busan_smoke_files/` 기준, 저장소의 `docs/smoke/files/busan/`과 같은 구조):
 
@@ -72,6 +72,7 @@ echo "Downloaded $count files (+ file_list.txt)"
 | `2023capss/generators/make_busan_2023_domestic_inputs.py` | 국내 입력 생성기 (6장) |
 | `2023capss/reference/code_list_2023.xlsx`, `code_list_2017.xlsx` | CAPSS 코드리스트 (지역·SCC·연료) |
 | `2023capss/reference/4_Point_Temporal_Reference_Profile.txt`, `4_Area_Temporal_Reference_Profile.txt`, `5_Point_Speciation_Reference_Profile.txt`, `5_Area_Speciation_Reference_Profile.txt`, `9_Asia_TimeZone.txt`, `9_Bio_TimeZone.txt` | 기존 운영체계(SMOKE 2.7, 2020년 버전) 시간·종분배 참조, 국외·생물성 지역 코드 |
+| `2023capss/smoke_patch/sizgmat.f` | SMOKE 5.3 Grdmat 소스 패치본 (7.1) |
 | `2023capss/install_busan_2023capss.sh` | 설치 스크립트 (7장) |
 | `2023capss/EMIS/2023capss_cb6/scripts/` | 실행 스크립트 5개, `directory_definitions.csh`, `run_settings.txt`, `utils/mcip_period.py` |
 | `2023capss/EMIS/smoke5.2/scripts/run/set_days_v5.csh` | 예제 날짜 결정 스크립트의 기간 패치본 |
@@ -149,7 +150,7 @@ CASES/BUSAN/TEST_20260901/EMIS/
 ├── ge_dat/                          공통 입력
 │   ├── costcy_busan_2023capss_20261022.txt, invtable_busan_2017capss_20261021.txt
 │   ├── gridding/   griddesc_busan_4domains.txt, srgdesc_kor_2023capss_<GRID>_20261022.txt,
-│   │               agref_kor_nonpoint_2023capss_20261022.txt,
+│   │               agref_kor_{area,mobile,sea}_2023capss_20261022.txt,
 │   │               surrogates/kor_2023capss_<GRID>/srg_{kor_area,kor_mobile,kor_sea}_2023capss_<GRID>.txt
 │   ├── temporal/   tpro_*, tref_kor_{point,nonpoint}_2023capss_20261022.csv, holidays_*
 │   ├── speciation/ gsref_kor_{point,nonpoint}_2023capss_20261022.csv, 예제 gscnv·gspro 5개
@@ -168,11 +169,17 @@ CASES/BUSAN/TEST_20260901/EMIS/
 
 ### 6.1 파이썬 모듈 설치
 
+생성기는 `pandas`, `numpy`, `openpyxl`, `pyproj`가 필요하다. 이 단계를 건너뛰면 6.2에서 `ModuleNotFoundError: No module named 'pandas'`로 멈춘다.
+
 ```bash
+python3 --version
+pip3 --version || sudo dnf install -y python3-pip
 pip3 install --user pandas numpy openpyxl pyproj
 python3 -c "import pandas, numpy, openpyxl, pyproj; print('ok')"
 which ncdump
 ```
+
+정상 기준: `ok`가 나오고 `ncdump` 경로가 나온다.
 
 ### 6.2 생성기 실행
 
@@ -209,6 +216,7 @@ grep -E "FF10 lines|NOX" "$PKG"/EMIS/2023capss_cb6/inputs/generation_summary_202
 head -1 "$PKG"/EMIS/ge_dat/smkreport/sccdesc_busan_2023capss_20261022.txt
 grep -c '^"0000000000"' "$PKG"/EMIS/ge_dat/temporal/tref_kor_point_2023capss_20261022.csv
 grep "all_sources" "$PKG"/EMIS/ge_dat/gridding/srgdesc_kor_2023capss_09KM_20261022.txt
+ls "$PKG"/EMIS/ge_dat/gridding/agref_*
 ```
 
 정상 기준:
@@ -220,7 +228,7 @@ grep "all_sources" "$PKG"/EMIS/ge_dat/gridding/srgdesc_kor_2023capss_09KM_202610
 | kor_mobile | 163,810 | 459,587 |
 | kor_sea | 63 | 90,191 |
 
-`sccdesc` 첫 줄 `#DELIMITED`, 시간 참조 기본값 줄 `3`, 대리자료 설명에 `kor_area_all_sources` 등 3줄.
+`sccdesc` 첫 줄 `#DELIMITED`, 시간 참조 기본값 줄 `3`, 대리자료 설명에 `kor_area_all_sources` 등 3줄. 부문별 `agref_kor_area/mobile/sea_2023capss_20261022.txt` 3개.
 
 ### 6.4 공통 입력·실행 스크립트를 패키지에 넣기
 
@@ -254,6 +262,31 @@ bash ~/busan_2023capss_pkg/install_busan_2023capss.sh 2>&1 | tee ~/busan_install
 - 대리자료 폴더 4개 (01KM 32M, 03KM 43M, 09KM 24M, 27KM 7.0M)와 FF10 4개
 
 > **삭제 경고:** 기본 설치는 기존 결과를 보존한다. `BUSAN_REMOVE_OBSOLETE=YES`를 지정하면 `intermed/09KM/kor_point`, `inputs/kor_point/scc10_reference_map_20261022.csv`, `inputs/asia`가 삭제된다. 백업 후 의도적으로 정리할 때만 지정한다. 설치는 패키지의 입력·스크립트를 덮어쓰므로 재설치 전 이 파일들도 백업한다.
+
+### 7.1 SMOKE Grdmat 패치 (한 번만)
+
+SMOKE 5.3 `src/grdmat/sizgmat.f`는 격자 한 칸에 들어갈 최대 배출원 수(`MXSCEL`)를 실제보다 적게 셀 수 있어 Grdmat이 `Arrays would have overflowed`로 멈춘다(부록 A). 계산용 임시 배열 크기만 늘린 패치본으로 바꾸고 다시 컴파일한다. 결과 파일에 기록되는 행렬 길이(`NMATX`)는 바꾸지 않는다.
+
+```bash
+(
+set -o pipefail
+export SMK_HOME=/home/woogon/CMAQ_MODEL/SMOKEv5.3
+export BIN=Linux2_x86_64gfort10
+G=$SMK_HOME/subsys/smoke/src/grdmat
+cd "$G" || exit 1
+[ -f sizgmat.f.orig ] || cp sizgmat.f sizgmat.f.orig
+md5sum sizgmat.f.orig | cut -c1-12
+cp ~/busan_smoke_files/2023capss/smoke_patch/sizgmat.f "$G"/sizgmat.f
+diff sizgmat.f.orig sizgmat.f
+cd $SMK_HOME/subsys/smoke/src || exit 1
+LC_ALL=C make 2>&1 | tee ../Linux2_x86_64gfort10/make_SMOKEv5.3_fix_sizgmat.log > /dev/null
+[ $? -eq 0 ] || { echo "빌드 실패"; exit 1; }
+grep -c "Error:" ../Linux2_x86_64gfort10/make_SMOKEv5.3_fix_sizgmat.log
+ls -l --time-style=long-iso ../Linux2_x86_64gfort10/grdmat
+)
+```
+
+정상 기준: 원본 md5 `1b39f8eb5608`(다르면 멈추고 확인), `diff`는 추가 7줄(설명 5줄, `MXSCEL = 2 * MXSCEL + 10`, 빈 줄), 컴파일 오류 `0`, `grdmat` 시각이 방금으로 바뀜. 컴파일에는 `SMK_HOME`, `BIN` 환경변수가 반드시 필요하다(없으면 `Makeinclude.: No such file`).
 
 ## 8. 실행
 
@@ -364,7 +397,7 @@ ls $C/smoke_out/2023capss_cb6/*/cmaq_cb6ae7/kor_point/inln_mole_* | sed 's/.*kor
 |---|---|---|---|---|
 | 배출량 | `2023capss_cb6/inputs/kor_area/kor_area_CAPSS2023_ff10_20261022.csv` | 시군구 × SCC 145,564줄 | Smkinven | 신규 |
 | 공간배분 | `ge_dat/gridding/srgdesc_kor_2023capss_<GRID>_20261022.txt` | 대리자료 번호 → 파일 | Grdmat | 신규 |
-| | `ge_dat/gridding/agref_kor_nonpoint_2023capss_20261022.txt` | SCC → 대리자료 번호 (면 1001~, 기본 900) | Grdmat | 신규 |
+| | `ge_dat/gridding/agref_kor_area_2023capss_20261022.txt` | SCC → 대리자료 번호 (면 1001~, 기본 900). 부문별 파일 | Grdmat | 신규 |
 | | `ge_dat/gridding/surrogates/kor_2023capss_<GRID>/srg_kor_area_2023capss_<GRID>.txt` | CAPSS 2023 1km 격자 기반 대리자료 | Grdmat | 신규 |
 | 종분배 | `ge_dat/speciation/gsref_kor_nonpoint_2023capss_20261022.csv` | SCC → 종분배 프로파일 | Spcmat | 신규 |
 | 시간배분 | `ge_dat/temporal/tref_kor_nonpoint_2023capss_20261022.csv` | SCC → 시간 프로파일 (기본값 포함) | Temporal | 신규 |
@@ -417,6 +450,7 @@ awk -F'|' '/^#Label/{for(i=1;i<=NF;i++){g=$i;gsub(/ /,"",g);if(g=="NOX")c=i}} /^
 |---|---|
 | 배출량 | `2023capss_cb6/inputs/kor_mobile/kor_mobile_CAPSS2023_ff10_20261022.csv` (163,810줄: 도로 07, 비도로 08, 도로비산 12) |
 | 대리자료 | `ge_dat/gridding/surrogates/kor_2023capss_<GRID>/srg_kor_mobile_2023capss_<GRID>.txt` (번호 3001~, 기본 901) |
+| 대리자료 번호 | `ge_dat/gridding/agref_kor_mobile_2023capss_20261022.txt` (이동 전용) |
 | 스크립트 | `2023capss_cb6/scripts/nonpoint/Annual_kor_mobile_2023capss_cb6.csh` |
 | 결과 | `2023capss_cb6/premerged/kor_mobile/emis_mole_kor_mobile_<날짜>_<GRID>_…ncf` |
 | 확인 | 8.2 확인 명령에서 `S=kor_mobile`, 기대 NOx 459,587 |
@@ -436,6 +470,7 @@ done
 |---|---|
 | 배출량 | `2023capss_cb6/inputs/kor_sea/kor_sea_CAPSS2023_ff10_20261022.csv` (지역 90100, 선박 SCC 9종) |
 | 대리자료 | `ge_dat/gridding/surrogates/kor_2023capss_<GRID>/srg_kor_sea_2023capss_<GRID>.txt` (번호 5001~, 기본 902, 4개 도메인 모두 값 있음) |
+| 대리자료 번호 | `ge_dat/gridding/agref_kor_sea_2023capss_20261022.txt` (바다 전용) |
 | 스크립트 | `2023capss_cb6/scripts/nonpoint/Annual_kor_sea_2023capss_cb6.csh` |
 | 결과 | `2023capss_cb6/premerged/kor_sea/emis_mole_kor_sea_<날짜>_<GRID>_…ncf` |
 | 확인 | 8.2 확인 명령에서 `S=kor_sea`, 기대 NOx 90,191 |
@@ -447,15 +482,43 @@ for g in 27KM 09KM 03KM 01KM; do
 done
 ```
 
+### 8.5 격자 배분 합계 확인
+
+오류가 없어도 격자에 실제로 배분된 양을 확인한다. 27KM는 전국을 덮으므로 인벤토리와 같아야 하고, 좁은 도메인은 영역 안 몫만 들어간다. Smkreport의 격자 배분 보고서(`invgrid_national_srgid`)를 쓴다.
+
+```bash
+C=/home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS/2023capss_cb6
+nox() { awk -F'|' '/^#Label/{c=0;for(i=1;i<=NF;i++){g=$i;gsub(/ /,"",g);if(g=="NOX")c=i}} c && !/^#/ && NF>3 {s+=$c} END{printf "%.0f", s}' "$@"; }
+printf "%-11s %10s %10s %10s %10s %10s\n" SECTOR INVENTORY 27KM 09KM 03KM 01KM
+for S in kor_area kor_mobile kor_sea; do
+  line=$(printf "%-11s %10s" $S $(nox $C/reports/inv/rep_${S}_2023capss_cb6_inv_state.txt))
+  for g in 27KM 09KM 03KM 01KM; do
+    f=$C/reports/inv/rep_${S}_2023capss_cb6_invgrid_national_srgid_${g}.txt
+    [ -f $f ] && line="$line $(printf '%10s' $(nox $f))" || line="$line $(printf '%10s' NA)"
+  done
+  echo "$line"
+done
+```
+
+정상 기준 (NOx, short ton/yr; 생성 자료로 미리 계산한 값):
+
+| 부문 | 인벤토리 | 27KM | 09KM | 03KM | 01KM |
+|---|---|---|---|---|---|
+| kor_area | 139,736 | 139,736 | 139,736 | 53,274 | 20,853 |
+| kor_mobile | 459,587 | 459,587 | 459,568 | 166,372 | 59,983 |
+| kor_sea | 90,191 | 90,191 | 85,144 | 21,581 | 4,602 |
+
+2026-10-24 확인: `kor_area` 4개 도메인 일치, `kor_sea` 09·03·01KM 일치(부문별 `agref` 적용 후). 이동·바다 전체 재실행 결과는 9장 참조.
+
 ## 9. 완료 현황
 
-| 단계 | 상태 (2026-10-23) |
+| 단계 | 상태 (2026-10-26) |
 |---|---|
-| 5~7장 폴더·입력 생성·설치 | 완료 |
+| 5~7장 폴더·입력 생성·설치, 7.1 Grdmat 패치 | 완료 |
 | 8.1 국내 점 4개 도메인 | 완료 (MCIP 기간 2일, 합계 일치) |
-| 8.2 국내 면 4개 도메인 | 완료 |
-| 8.3 국내 이동 4개 도메인 | 진행 |
-| 8.4 바다 4개 도메인 | 미실행 |
+| 8.2 국내 면 4개 도메인 | 완료 (격자 합계 일치) |
+| 8.3 국내 이동, 8.4 바다 4개 도메인 | 부문별 `agref`·패치 반영 후 재실행 필요 (부록 A 10-24·10-25) |
+| 8.5 격자 배분 합계 | 이동·바다 재실행 후 확인 |
 | 국외(HTAP v3.1, 27·09KM)·생물성·병합 | 미착수 ([03 개선 계획 §5](03_SMOKE_Emission_Improvement_Plan.md)) |
 
 ## 부록 A. 실행 중 발생한 문제 기록
@@ -473,6 +536,12 @@ done
 | 10-23 | 9월 1~30일로 실행되고 8월 31일이 빠짐 | 부문 스크립트에 `RUN_MONTHS "9"` 고정, 예제 `set_days_v5.csh`는 월 단위로만 날짜를 고름 | `utils/mcip_period.py`·`directory_definitions.csh`로 MCIP 기간을 읽고, 부문 스크립트 고정값 삭제, `set_days_v5.csh`에 `RUN_SDATE`~`RUN_EDATE` 밖 날짜를 건너뛰는 4줄 추가 |
 | 10-23 | 03·01KM Grdmat `The surrogate NNNN does not exist within a domain range: … set to zero`(로그 분석기 우선순위 0) | 그 SCC의 CAPSS 배출 위치가 도메인 안에 하나도 없음 | 조치 없음 (영역 안 실제 배출이 0). 확인 명령에서 `OUTDOMAIN`으로 따로 셈 |
 | 10-23 | 문서대로 재현할 때 CAPSS 원본 위치·사용 파일이 불명확 | 생성기가 미리 이름을 바꾼 파일(`point.txt` 등)을 요구했음 | 생성기가 원본 폴더(`--capss`)를 그대로 읽어 점·면·이동·바다 파일을 자동으로 고르도록 수정 (3.2) |
+| 10-24 | 바다 01KM Grdmat `INTERNAL ERROR: Gridding matrix not written. Arrays would have overflowed. MXSCEL = 4, actual = 5` | SMOKE `sizgmat.f`가 셀별 최대 배출원 수를 `genagmat.f`보다 적게 셈 | `sizgmat.f`에 `MXSCEL = 2 * MXSCEL + 10` 추가 후 재컴파일 (7.1) |
+| 10-24 | 재컴파일 `Makeinclude:44: /subsys/ioapi/ioapi/Makeinclude.: No such file` | `SMK_HOME`, `BIN` 환경변수 없이 `make` | 7.1 명령처럼 두 변수를 지정하고 `make` |
+| 10-24 | 8.5 격자 합계: 이동 27KM 93%, 바다 27KM 53% | 같은 선박 SCC10 9개(`0803…`)가 이동·바다 양쪽에 있는데 `agref` 하나를 같이 써서 한 SCC에 대리자료 번호가 두 개 → SMOKE가 하나만 골라 다른 부문 대리자료를 받음 | `agref`를 부문별 3개(`agref_kor_area/mobile/sea_…`)로 나누고 부문 스크립트가 자기 파일만 읽게 수정 (생성기 포함) |
+| 10-25 | 이동 4개 도메인·바다 27KM Smkreport `invgrid` `Segmentation fault` → Temporal·Smkmerge 미실행, 배출 파일 0개 | 처음 패치에서 `NMATX`(결과 파일에 기록되는 행렬 길이)까지 늘려 빈 항목(배출원 번호 0)이 기록됨 | 패치를 `MXSCEL`만 늘리도록 수정(`smoke_patch/sizgmat.f`), 재컴파일 후 이동·바다 결과를 지우고 재실행 |
+| 10-26 | 6.2 생성기 `ModuleNotFoundError: No module named 'pandas'` | 6.1 파이썬 모듈 설치를 하지 않음 | 6.1 실행 (`pip3`가 없으면 `sudo dnf install -y python3-pip`) |
+
 
 ## 10. 검토 근거 및 관련 문서
 
