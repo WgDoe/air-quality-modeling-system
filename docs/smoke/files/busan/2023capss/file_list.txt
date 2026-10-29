@@ -17,7 +17,7 @@
 2023capss/reference/9_Bio_TimeZone.txt
 2023capss/reference/code_list_2017.xlsx
 2023capss/reference/code_list_2023.xlsx
-2023capss/smoke_patch/sizgmat.f
+2023capss/smoke_patch/genagmat.f
 griddesc_busan_4domains.txt
 holidays_korea_2012_2026_20261021.txt
 invtable_busan_2017capss_20261021.txt

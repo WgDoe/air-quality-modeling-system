@@ -10,7 +10,7 @@
 # Usage:  unzip busan_2023capss_full_setup_20261022.zip -d ~/busan_setup
 #         bash ~/busan_setup/install_busan_2023capss.sh
 # =====================================================================
-set -u
+set -euo pipefail
 CASE_DIR=/home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901
 EX=/home/woogon/CMAQ_MODEL/CASES/SMOKE_TEST/smoke_example_case_v3
 PKG=$(cd "$(dirname "$0")" && pwd)
@@ -24,8 +24,10 @@ say "1. folders"
 [ -d $EX/ge_dat ]    || { echo "ERROR: example case $EX not found"; exit 1; }
 mkdir -p $B/ioapi $B/ge_dat/{gridding/surrogates,speciation,temporal,point,beis,smkreport} \
          $C/inputs $C/scripts/{point,nonpoint,logs} $C/{intermed,reports,logs}
-[ -L $B/met ] || ln -sfn ../MCIP $B/met
-ls -l $B | grep met
+if [ -e "$B/met" ] && [ ! -L "$B/met" ]; then echo "ERROR: met must be a symlink"; exit 1; fi
+[ -L "$B/met" ] || ln -s ../MCIP "$B/met"
+[ -L "$B/met" ] && [ "$(readlink -f "$B/met")" = "$(realpath "$CASE_DIR/MCIP")" ] || { echo "ERROR: invalid met link"; exit 1; }
+ls -ld "$B/met"
 
 say "2. SMOKE example run system (smoke5.2)"
 if [ -d $B/smoke5.2/scripts/emf ]; then echo "   already installed"
@@ -37,13 +39,26 @@ chmod +x $C/scripts/point/*.csh $C/scripts/nonpoint/*.csh
 echo "   $(cd $PKG && find EMIS -type f | wc -l) files installed"
 
 say "4. example files (unchanged)"
+copy_example() {
+  local src=$1 dst=$2
+  [ -f "$src" ] || { echo "ERROR: missing example input: $src"; exit 1; }
+  if [ -e "$dst" ]; then
+    cmp -s "$src" "$dst" || { echo "ERROR: existing example differs: $dst (back up and resolve before reinstall)"; exit 1; }
+  else
+    cp "$src" "$dst"
+  fi
+}
 for f in gscnv_SPECIATE_5_3_fromS2S_20230911_16jun2025_v1.txt gspro_static_cmaq_21feb2012_v13.txt \
          gspro_PM2_5_AE6_Spec_5_3_S2S_20230911_01nov2023_v0.txt \
          gspro_CB6R3_AE7_criteria_Spec_5_3_S2S_20230911_01nov2023_v0.txt gspro_nox_hono_pf4_06aug2008_v0.txt; do
-  cp -n $EX/ge_dat/speciation/$f $B/ge_dat/speciation/
+  copy_example "$EX/ge_dat/speciation/$f" "$B/ge_dat/speciation/$f"
 done
-cp -n $EX/ge_dat/point/pelvconfig_elevate_everything_17apr2020_v0.txt $EX/ge_dat/point/pstk_13nov2018_v1.txt $B/ge_dat/point/
-cp -n $EX/ge_dat/smkreport/orisdesc_04dec2006_v0.txt $EX/ge_dat/smkreport/naicsdesc_20220222_29feb2024_nf_v1.txt $B/ge_dat/smkreport/
+for f in pelvconfig_elevate_everything_17apr2020_v0.txt pstk_13nov2018_v1.txt; do
+  copy_example "$EX/ge_dat/point/$f" "$B/ge_dat/point/$f"
+done
+for f in orisdesc_04dec2006_v0.txt naicsdesc_20220222_29feb2024_nf_v1.txt; do
+  copy_example "$EX/ge_dat/smkreport/$f" "$B/ge_dat/smkreport/$f"
+done
 [ -d $B/ge_dat/smkreport/repconfig ] || cp -r $EX/ge_dat/smkreport/repconfig $B/ge_dat/smkreport/
 echo "   done"
 
@@ -64,9 +79,15 @@ fi
 echo "   done"
 
 say "6. check files referenced by sector scripts"
-YR=$(python3 $C/scripts/utils/mcip_period.py $CASE_DIR/MCIP/09KM 2>/dev/null | awk '{print $3}')
-[ -n "$YR" ] || YR=2026
-echo "   run period from MCIP: $(python3 $C/scripts/utils/mcip_period.py $CASE_DIR/MCIP/09KM 2>/dev/null)"
+for g in 27KM 09KM 03KM 01KM; do
+  python3 "$C/scripts/utils/mcip_period.py" "$CASE_DIR/MCIP/$g" > /dev/null
+done
+PERIOD=$(python3 "$C/scripts/utils/mcip_period.py" "$CASE_DIR/MCIP/09KM")
+YR=$(printf '%s\n' "$PERIOD" | awk '{print $3}')
+[[ "$YR" =~ ^[0-9]{4}$ ]] || { echo "ERROR: invalid MCIP year"; exit 1; }
+echo "   run period from MCIP: $PERIOD"
+CHECK_FILE=$(mktemp)
+trap 'rm -f -- "$CHECK_FILE"' EXIT
 for s in $C/scripts/point/*.csh $C/scripts/nonpoint/*.csh; do
   for g in 27KM 09KM 03KM 01KM; do
     grep -E '^setenv [A-Z_0-9]+ +"\$\{(GE_DAT|CASEINPUTS|INSTALL_DIR)\}' $s | awk '{print $2, $3}' | tr -d '"' |
@@ -75,12 +96,13 @@ for s in $C/scripts/point/*.csh $C/scripts/nonpoint/*.csh; do
       [ -e "$f" ] || echo "   MISSING  $(basename $s)  $g  $v  $f"
     done
   done
-done > /tmp/busan_check_missing.txt
-if [ -s /tmp/busan_check_missing.txt ]; then cat /tmp/busan_check_missing.txt; echo "   -> see list above"
+done > "$CHECK_FILE"
+if [ -s "$CHECK_FILE" ]; then cat "$CHECK_FILE"; echo "ERROR: required inputs missing"; exit 1
 else echo "   all referenced files exist (5 scripts x 4 domains)"; fi
 for f in $B/smoke5.2/scripts/emf/smk_pt_annual_onetime_emf.csh $B/smoke5.2/scripts/emf/smk_pt_annual_byday_emf.csh \
          $B/smoke5.2/scripts/emf/smk_ar_annual_emf.csh $C/scripts/directory_definitions.csh $C/scripts/run_settings.txt; do
-  [ -e $f ] && echo "   ok  $(basename $f)" || echo "   MISSING  $f"
+  [ -e "$f" ] || { echo "ERROR: MISSING $f"; exit 1; }
+  echo "   ok  $(basename "$f")"
 done
 
 say "7. summary"
