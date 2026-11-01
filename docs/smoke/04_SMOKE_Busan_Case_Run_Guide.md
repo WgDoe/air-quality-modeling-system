@@ -124,108 +124,9 @@ ls -l "$CAPSS"
 - 명령은 bash에서 입력한다. SMOKE 실행 스크립트(`*.csh`)는 `GRID=09KM ./스크립트` 형태로 부른다. 도메인은 `GRID`(27KM·09KM·03KM·01KM)로 고른다.
 - **배출량 기간은 MCIP에서 자동으로 정해진다.** `scripts/directory_definitions.csh`가 `scripts/utils/mcip_period.py`로 `MCIP/<GRID>/METCRO2D*`의 시작 시각·시간 수를 읽어 `RUN_SDATE`, `RUN_EDATE`, `BASE_YEAR`, `RUN_MONTHS`를 정하고, 패치한 `set_days_v5.csh`가 그 밖의 날짜를 건너뛴다. 이번 사례 MCIP는 2026-08-31 01시 ~ 09-02 00시(UTC, 48시간)이므로 배출 파일은 **8월 31일·9월 1일 2개**(각 0시~다음날 0시, 25시간)이다. 실행 화면에 `Run period from MCIP: 2026243 - 2026244 (months: 8 9)`가 나온다.
 - 실행 화면은 `tee`로 `EMIS/2023capss_cb6/scripts/logs/`에 남긴다. 프로그램 로그는 `EMIS/2023capss_cb6/intermed/<GRID>/<부문>/logs/`, 보고서는 `EMIS/2023capss_cb6/reports/`에 생긴다.
-- 03·01KM의 영역 밖 SCC 경고로 로그 분석기가 비영 종료할 수 있다(부록 A). 이 코드만으로 반복을 멈추지 않으며, 아래 4.1의 이번 실행 로그·출력 확인을 통과할 때 계속한다. 실제 프로그램 오류 및 검증 실패는 중단한다.
+- 실행 반복은 실행 기록에서 `ERROR detected in` 또는 `Segmentation fault`가 발견되면 중단한다. 실행 스크립트의 종료 코드가 0이 아니라는 이유만으로 반복을 중단하지 않는다. 03·01KM에서는 영역 밖 SCC 경고 때문에 로그 분석기가 `ERROR: At least one message's priority…`를 출력하고 비영 종료할 수 있다(부록 A). 이 경고만이 원인으로 확인된 경우에는 처리 실패로 판단하지 않는다. 두 오류 문구가 없다는 사실만으로 성공을 확정하지 않으며, 결과는 각 절의 확인 명령과 8.5, 10장의 확인 기준으로 판단한다.
+- 위 단순 반복은 `set -e`가 꺼진 bash에서 입력한다. `set -e`와 `pipefail`이 함께 켜져 있으면 분석기 비영 종료로 오류 문구 확인 전에 셸이 종료될 수 있다. 두 오류 문구 확인은 모든 실패를 감지하지 않으며, 실행파일 누락·다른 비정상 종료·로그 저장 실패 및 인용된 오류 문구는 실제 로그 문맥과 기존 결과 확인 절차로 판단한다. 이 반복은 csh와 `tee`의 종료 상태를 `PIPESTATUS`로 따로 판정하지 않는다.
 - 배출량 단위는 SMOKE 기준 short ton(907.18474 kg)이다.
-
-
-### 4.1 반복 실행의 안전 확인 (8장 실행 전에 같은 bash에서 한 번 정의)
-
-종료 코드만으로 중단하지 않는다. `ERROR detected in`·`Segmentation fault` 두 문자열만으로도 성공을 판정하지 않는다(다른 오류 누락, 인용된 문구 오탐 가능). 아래 함수는 파이프 직후 `PIPESTATUS` 전체를 한 번에 보관해 csh와 tee 실패를 구분하고, 이번 실행에서 갱신된 필수 프로그램 로그의 정상 완료 및 출력 파일을 확인한다. 확인 불가능한 실패는 다음 도메인으로 넘기지 않는다. 경고만으로 인한 비영 종료는 로그 분석기 메시지와 아래 검증을 모두 통과하면 계속한다.
-
-```bash
-smoke_run_checked() (
-  # 호출자의 set -e/pipefail 때문에 상태 저장 전에 끝나지 않게 이 함수 안에서만 해제
-  set +e
-  set +u
-  set +o pipefail
-  local sector=$1 phase=$2 grid=$3 script=$4
-  local C=/home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS/2023capss_cb6
-  local log="$C/scripts/logs/${sector}${phase:+_$phase}_$grid.log"
-  local mark f p dir prefix date day dump
-  local -a ps fresh programs files
-  mkdir -p "$C/scripts/logs" || exit 1
-  mark=$(mktemp "$C/scripts/logs/.run-start.XXXXXX") || exit 1
-  trap 'rm -f -- "$mark"' EXIT
-  # 시간 해상도가 낮은 파일시스템에서도 이전 파일을 새 결과로 보지 않도록 간격 확보
-  sleep 1
-  GRID=$grid "$script" 2>&1 | tee "$log"
-  ps=("${PIPESTATUS[@]}")
-  [ "${ps[1]}" -eq 0 ] && [ -s "$log" ] || { echo "ERROR: tee/실행 기록 저장 실패"; exit 1; }
-  # 알려진 분석기 종료 문구만 제외. 그 외 ERROR/ABORT/시그널·셸 오류는 보수적으로 중단
-  if ! awk '
-    /ERROR: At least one message.s priority is less than or equal to the exit priority:/ {next}
-    /ERROR: The log analyzer has detected warning or error messages in your SMOKE logs/ {next}
-    /ERROR: Level 1 errors or Level 0 warnings found[.] Check log files, fix inputs, and rerun[.]/ {next}
-    {s=tolower($0); if(s ~ /(^|[[:space:]])error[[:space:]:]|error detected in|fortran runtime error|abort|segmentation fault|core dumped|killed|floating point exception|command not found|permission denied|no such file|too many arguments/) bad=1}
-    END {exit bad}
-  ' "$log"; then
-    echo "ERROR: $grid 프로그램/실행 오류 의심 - $log 확인"; exit 1
-  fi
-  shopt -s nullglob
-  fresh=()
-  for f in "$C/intermed/$grid/$sector/logs/"*.log; do
-    [ "$f" -nt "$mark" ] && fresh+=("$f")
-  done
-  [ "${#fresh[@]}" -gt 0 ] || { echo "ERROR: 이번 실행 프로그램 로그 없음"; exit 1; }
-  for f in "${fresh[@]}"; do
-    [ -s "$f" ] && grep -qi 'Normal completion' "$f" || {
-      echo "ERROR: 정상 완료 미확인 - $f"; exit 1;
-    }
-  done
-  if [ "$phase" = daily ]; then
-    programs=(temporal smkmerge)
-  elif [ "$phase" = onetime ]; then
-    programs=(smkinven spcmat grdmat smkreport elevpoint)
-  else
-    programs=(smkinven spcmat grdmat smkreport temporal smkmerge)
-  fi
-  for p in "${programs[@]}"; do
-    files=()
-    for f in "${fresh[@]}"; do
-      [[ ${f##*/} == ${p}* ]] && files+=("$f")
-    done
-    [ "${#files[@]}" -gt 0 ] || { echo "ERROR: $p 이번 실행 로그 누락"; exit 1; }
-  done
-  if [ "$sector" = kor_point ]; then
-    dir="$C/smoke_out/2023capss_cb6/$grid/cmaq_cb6ae7/kor_point"
-    prefix=inln_mole
-  else
-    dir="$C/premerged/$sector"
-    prefix=emis_mole
-  fi
-  if [ "$phase" = onetime ]; then
-    files=("$dir"/stack_groups_kor_point_"${grid}"_*.ncf)
-  else
-    files=()
-    for date in 20260831 20260901; do
-      local -a matches=("$dir"/${prefix}_${sector}_${date}_${grid}_cmaq_cb6ae7_2023capss_cb6.ncf)
-      files+=("${matches[@]}")
-    done
-  fi
-  [ "${#files[@]}" -gt 0 ] || { echo "ERROR: 출력 파일 없음"; exit 1; }
-  for f in "${files[@]}"; do
-    [ -s "$f" ] && [ "$f" -nt "$mark" ] || { echo "ERROR: 출력 누락/이전 결과 - $f"; exit 1; }
-    dump=$(ncdump -h "$f") || exit 1
-    if [ "$phase" != onetime ]; then
-      grep -Eq 'TSTEP = UNLIMITED ;.*[(]25 currently[)]' <<< "$dump" &&
-      grep -Eq 'TFLAG[[:space:]]*[(]' <<< "$dump" || { echo "ERROR: 시간 차원/TFLAG 없음 - $f"; exit 1; }
-      date=${f##*/}; date=${date#${prefix}_${sector}_}; date=${date%%_*}
-      day=2026243; [ "$date" = 20260901 ] && day=2026244
-      dump=$(ncdump -v TFLAG "$f") || exit 1
-      # 헤더가 아닌 TFLAG 데이터에서 시작 날짜(UTC)를 확인
-      sed -n '/TFLAG =/,$p' <<< "$dump" | grep -Eq "(^|[^0-9])$day,[[:space:]]*0([,[:space:]]|$)" ||
-        { echo "ERROR: TFLAG 시작 날짜 불일치 - $f"; exit 1; }
-    fi
-  done
-  if [ "${ps[0]}" -ne 0 ]; then
-    grep -q "ERROR: The log analyzer has detected warning or error messages in your SMOKE logs" "$log" ||
-      { echo "ERROR: 원인 미확인 종료 코드 ${ps[0]} - $log"; exit 1; }
-    echo "WARNING: $grid 분석기 비영 종료(${ps[0]}), 프로그램 정상 완료·새 출력 확인 후 계속"
-  fi
-)
-```
-
-이 함수는 위 사례의 2일 출력에 맞춘 보수적 확인이다. 기간을 바꾸면 날짜·시간 기준도 함께 바꾼다. 로그 이름이나 정상 완료 문구가 다른 환경에서는 실제 로그를 확인한 뒤 기준을 조정한다. 출력 헤더·시각만으로 수치의 정확성을 보장하지 않으므로 각 절 확인과 8.5 합계 검증도 수행한다. 분석기 보고서의 새 PRIO01 메시지는 반드시 검토하며, 알려진 영역 밖 경고를 제외한 메시지를 정상으로 일괄 처리하지 않는다. 로그·출력 누락, 기록 실패, 원인 미확인 비영 종료도 검증 실패로 중단한다. 이전 결과는 삭제하지 않으며, 출력의 갱신 시각은 실행 시작 표식보다 새로워야 한다.
 
 ## 5. 폴더 만들기
 
@@ -503,8 +404,10 @@ mkdir -p "$C"/intermed "$C"/reports "$C"/logs "$C"/scripts/logs
 ```bash
 cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS/2023capss_cb6/scripts/point
 for g in 27KM 09KM 03KM 01KM; do
-  smoke_run_checked kor_point onetime "$g" ./Annual_kor_point_onetime_2023capss_cb6.csh || break
-  smoke_run_checked kor_point daily "$g" ./Annual_kor_point_daily_2023capss_cb6.csh || break
+  GRID=$g ./Annual_kor_point_onetime_2023capss_cb6.csh 2>&1 | tee ../logs/kor_point_onetime_$g.log
+  grep -q -i "ERROR detected in\|Segmentation fault" ../logs/kor_point_onetime_$g.log && { echo "ERROR: $g 프로그램 오류 - ../logs/kor_point_onetime_$g.log 확인"; break; }
+  GRID=$g ./Annual_kor_point_daily_2023capss_cb6.csh   2>&1 | tee ../logs/kor_point_daily_$g.log
+  grep -q -i "ERROR detected in\|Segmentation fault" ../logs/kor_point_daily_$g.log && { echo "ERROR: $g 프로그램 오류 - ../logs/kor_point_daily_$g.log 확인"; break; }
 done
 ```
 
@@ -568,7 +471,8 @@ ls $C/smoke_out/2023capss_cb6/*/cmaq_cb6ae7/kor_point/inln_mole_* | sed 's/.*kor
 ```bash
 cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS/2023capss_cb6/scripts/nonpoint
 for g in 27KM 09KM 03KM 01KM; do
-  smoke_run_checked kor_area '' "$g" ./Annual_kor_area_2023capss_cb6.csh || break
+  GRID=$g ./Annual_kor_area_2023capss_cb6.csh 2>&1 | tee ../logs/kor_area_$g.log
+  grep -q -i "ERROR detected in\|Segmentation fault" ../logs/kor_area_$g.log && { echo "ERROR: $g 프로그램 오류 - ../logs/kor_area_$g.log 확인"; break; }
 done
 ```
 
@@ -613,7 +517,8 @@ awk -F'|' '/^#Label/{for(i=1;i<=NF;i++){g=$i;gsub(/ /,"",g);if(g=="NOX")c=i}} /^
 ```bash
 cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS/2023capss_cb6/scripts/nonpoint
 for g in 27KM 09KM 03KM 01KM; do
-  smoke_run_checked kor_mobile '' "$g" ./Annual_kor_mobile_2023capss_cb6.csh || break
+  GRID=$g ./Annual_kor_mobile_2023capss_cb6.csh 2>&1 | tee ../logs/kor_mobile_$g.log
+  grep -q -i "ERROR detected in\|Segmentation fault" ../logs/kor_mobile_$g.log && { echo "ERROR: $g 프로그램 오류 - ../logs/kor_mobile_$g.log 확인"; break; }
 done
 ```
 
@@ -641,7 +546,8 @@ done
 ```bash
 cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS/2023capss_cb6/scripts/nonpoint
 for g in 27KM 09KM 03KM 01KM; do
-  smoke_run_checked kor_sea '' "$g" ./Annual_kor_sea_2023capss_cb6.csh || break
+  GRID=$g ./Annual_kor_sea_2023capss_cb6.csh 2>&1 | tee ../logs/kor_sea_$g.log
+  grep -q -i "ERROR detected in\|Segmentation fault" ../logs/kor_sea_$g.log && { echo "ERROR: $g 프로그램 오류 - ../logs/kor_sea_$g.log 확인"; break; }
 done
 ```
 
@@ -710,7 +616,7 @@ done
 | 10-25 | 이동 4개 도메인·바다 27KM Smkreport `invgrid` `Segmentation fault` → Temporal·Smkmerge 미실행, 배출 파일 0개 | 처음 패치에서 `NMATX`(결과 파일에 기록되는 행렬 길이)까지 늘려 빈 항목(배출원 번호 0)이 기록됨 | 패치를 `MXSCEL`만 늘리도록 수정(`smoke_patch/sizgmat.f`), 재컴파일 후 이동·바다 결과를 지우고 재실행 (10-29 폐기: 아래 근본 원인 수정으로 대체) |
 | 10-26 | 6.2 생성기 `ModuleNotFoundError: No module named 'pandas'` | 6.1 파이썬 모듈 설치를 하지 않음 | 6.1 실행 (`pip3`가 없으면 `sudo dnf install -y python3-pip`) |
 | 10-29 | 바다 01KM Smkreport `Gridding matrix dimension is inconsistent with records count`, `NMATX`에 여유를 둔 패치에서는 바다 27KM Smkreport `Segmentation fault` | **근본 원인:** `genagmat.f`가 도메인 안에 대리자료가 없는 번호(5001·5002)에서 배출원 반복을 건너뛰지 않아, 앞 대리자료(902)의 격자 2,990칸에 `FRAC=1.0E-36` 항목을 기록 → `sizgmat.f`의 개수와 불일치. 행렬 길이에 여유를 두면 남는 칸(배출원 0번)을 읽다가 Smkreport가 죽음 | `sizgmat.f`는 원본으로 되돌리고 `genagmat.f`에 `CYCLE` 한 줄 추가(7.1). 10-24·10-25의 `sizgmat.f` 패치는 폐기. `1.0E-36` 항목의 질량 영향은 극히 작지만, 이전 합계 검증은 오류 없이 생성된 보고서에 한정하며 패치 후 재확인 |
-| 11-01 | 면 03KM 실행 후 `ERROR: 03KM 실행 실패`로 반복이 멈추고 01KM이 실행되지 않음 | 10-30 문서의 실행 반복이 실행 스크립트 종료 코드로 멈추게 되어 있었는데, 03·01KM은 정상 경고(영역 밖 SCC) 때문에 로그 분석기가 0이 아닌 종료 코드를 돌려줌 | 분석기 비영 종료만으로 중단하지 않도록 수정. 실제 프로그램 오류와 이번 실행 로그·출력 누락/미갱신은 중단하고, 정상 완료를 확인한 경고 종료는 계속 (4.1, 8.1~8.4). 01KM의 이전 파일 2개는 이번 실행 성공 근거가 아님 |
+| 11-01 | 면 03KM 실행 후 `ERROR: 03KM 실행 실패`로 반복이 멈추고 01KM이 실행되지 않음 | 종료 코드로 중단하던 반복이 영역 밖 SCC 경고에 따른 로그 분석기 비영 종료도 실행 실패로 처리함 | 종료 코드만으로 반복을 중단하지 않고, 실행 기록의 `ERROR detected in` 또는 `Segmentation fault` 발견 시 중단하는 단순 방식으로 변경(4장, 8.1~8.4). 정상 여부는 각 절의 확인 명령, 8.5 및 10장 기준으로 판단. 01KM의 이전 결과 파일은 이번 실행 성공 근거로 사용하지 않음 |
 
 ## 10. 검토 근거 및 관련 문서
 
