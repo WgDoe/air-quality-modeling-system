@@ -11,6 +11,13 @@ setenv INSTALL_DIR "/home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS"
 setenv MET_ROOT    "$INSTALL_DIR/met/$GRID"
 setenv MET_ROOT_3D $MET_ROOT
 
+## MCIP GRIDCRO2D of this domain (used by Grdmat for lat-lon gridded inventories such as HTAP;
+##   smoke5.2/assigns/ASSIGNS.emf keeps this value - Busan patch 2026-11-10)
+set _gc = ( `find -L $MET_ROOT/ -maxdepth 1 -name "GRIDCRO2D_${GRID}.*.nc" | sort` )
+if ( $#_gc > 0 ) then
+  setenv GRID_CRO_2D $_gc[1]
+endif
+
 setenv CASE "2023capss_cb6"
 
 setenv REGION                "Busan $GRID"
