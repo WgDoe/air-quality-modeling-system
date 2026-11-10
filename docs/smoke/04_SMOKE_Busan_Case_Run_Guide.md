@@ -860,6 +860,81 @@ done
 
 ### 11.5 검증 및 결과 보관
 
+#### 11.5.1 재현 결과 점검 명령 (2026-11-10 기준)
+
+**① 로그·파일 수** — 각 묶음의 정상 기준은 오류 0, `premerged` 일별 파일 2개(이번 시험 기간).
+
+```bash
+C=/home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS/2023capss_cb6
+for G in 27KM 09KM; do
+  for g in intship aviation energy industry transport resident waste agriculture; do
+    e=$(grep -c 'ERROR detected in\|Segmentation fault\|ERROR ABORT' "$C/scripts/logs/htap_${g}_$G.log" 2>/dev/null)
+    n=$(find "$C/premerged/htap_$g" -maxdepth 1 -name "emis_mole_htap_${g}_2026*_${G}_*.ncf" 2>/dev/null | wc -l)
+    printf '%-5s %-12s 오류 %s  파일 %s\n' "$G" "$g" "${e:-로그없음}" "$n"
+  done
+done
+```
+
+**② 부문별 배출종 확인** — 첫날 파일 25시간·전체 격자 합(가스 mol/s, 입자 g/s; 물질 간 합산 금지).
+
+```bash
+cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS/2023capss_cb6/premerged
+G=27KM python3 - <<'PY'
+import glob, os, netCDF4 as nc, numpy as np
+G=os.environ['G']
+for g in ['intship','aviation','energy','industry','transport','resident','waste','agriculture']:
+    fs=sorted(glob.glob(f'htap_{g}/emis_mole_htap_{g}_*_{G}_*.ncf'))
+    if not fs: print(g, '파일 없음'); continue
+    with nc.Dataset(fs[0]) as d:
+        z={v:float(np.asarray(d[v][:]).sum()) for v in ['NO','SO2','NH3','PEC','POC','TOL'] if v in d.variables}
+    print(f'{g:12s} 파일 {len(fs)}개  '+'  '.join(f'{k} {v:.3g}' for k,v in z.items()))
+PY
+```
+
+**27KM 2026-11-10 실측 기준값**(8월 31일 파일):
+
+| 묶음 | NO | SO2 | NH3 | PEC | POC | TOL |
+|---|---:|---:|---:|---:|---:|---:|
+| intship | 3.55e4 | 4.59e3 | 9.34 | 3.5e4 | 1.75e4 | 81.3 |
+| aviation | 5.69e3 | 428 | 247 | 1.01e3 | 505 | 1.27 |
+| energy | 6.32e4 | 2.26e4 | 2.26e3 | 2.59e3 | 1.85e3 | 42.8 |
+| industry | 1.49e5 | 7.49e4 | 1.38e4 | 1.98e5 | 2.12e5 | 7.98e3 |
+| transport | 1.18e5 | 2.42e3 | 3.13e3 | 2.03e5 | 8.44e4 | 1.42e3 |
+| resident | 1.11e4 | 1.56e4 | 8.12e3 | 2.26e5 | 6.46e5 | 1.57e3 |
+| waste | 940 | 408 | 1.91e3 | 4.82e3 | 1.17e4 | 0 |
+| agriculture | 1.7e4 | 669 | 4.23e5 | 6.35e4 | 4.55e5 | 199 |
+
+**③ 남한 중복 제거 검증** — ENERGY의 도시 주변 3×3 격자 NO 25시간 합.
+
+```bash
+cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS/2023capss_cb6/premerged/htap_energy
+python3 - <<'PY'
+import glob, netCDF4 as nc, numpy as np
+pts={'27KM':[('서울',90,62),('부산',97,52),('평양',86,68),('베이징',57,73),('상하이',71,37),('도쿄',131,58)],
+     '09KM':[('서울',29,59),('부산',50,30),('평양',17,77),('후쿠오카',64,12),('대마도',53,22)]}
+for G,cities in pts.items():
+    fs=sorted(glob.glob(f'emis_mole_htap_energy_*_{G}_*.ncf'))
+    if not fs: print(G,'파일 없음'); continue
+    with nc.Dataset(fs[0]) as d: no=np.asarray(d['NO'][:]).sum(axis=(0,1))
+    print(G,'  '.join(f'{n} {no[r-1:r+2,c-1:c+2].sum():.4g}' for n,c,r in cities))
+PY
+```
+
+27KM 참고값: 서울 0, 부산 0, 평양 55.81, 베이징 457.8, 상하이 961.2, 도쿄 357.9. 도메인 GRIDDESC에 대응하는 1-기준 열·행 좌표이므로 격자 설정 변경 시 다시 계산한다. 3×3 일부 확인만으로 전체 영역의 완전성을 단정하지 않는다.
+
+**정상 경고 사례:** 로그 분석기 수준 2 `No speciation profiles found for pollutant "PM10"`(PMC 처리 경로), Smkinven `Resetting negative value of annual "PMC"`(약 −3×10⁻⁶ t의 반올림 차이). 다른 입력·버전에서 동일 경고가 나와도 원인을 확인해야 하며 무조건 무시하지 않는다.
+
+#### 11.5.2 2026-11-10 문제 및 수정 이력
+
+| 증상 | 원인 | 해결·주의 |
+|---|---|---|
+| Smkinven CELLID 기록 직후 Segmentation fault | 격자 NetCDF 경로의 `NONPOINT` 비초기화와 할당되지 않은 `CMACT`/`CNAICS` 접근 | `smkinven.f` 초기값 `.FALSE.`, 재컴파일 (§11.3, 91) |
+| Grdmat에서 `GRID_CRO_2D` 파일 미발견 | 예제 ASSIGNS의 고정 형식과 실제 MCIP 파일명 불일치 | 디렉터리 설정에서 실제 파일 지정, ASSIGNS는 기존 값 유지 |
+| PEC·POC 출력 없음 | 예제 PM2.5용 종분배로 탄소 몫이 다른 성분에 반영 | BC→PEC/OC→POC 및 PM2.5 잔여분 분리·GSREF/INVTABLE 보완 |
+| PEC/POC INVTABLE keep flag 오류 | MOVES 전용 PEC 행을 먼저 선택 | 일반 `PEC PEC`, `POC POC` 행만 채택 |
+| 탄소 분리 후 PM2.5가 원자료보다 약 26만 t 큼 | 일부 부문의 BC+OC가 PM2.5 초과 | 두 성분 비례 축소. FUGITIVE 플레어링 BC 축소는 남는 과학적 한계 |
+
+
 - `premerged/htap_<묶음>/emis_mole_htap_<묶음>_<날짜>_<GRID>_cmaq_cb6ae7_2023capss_cb6.ncf` 출력 개수·시간·격자·변수·단위를 확인한다.
 - 남한(서울·부산) 대표 격자 배출량 0, 인접 국가 대표 격자 배출량 양수인 것을 확인한다(단일 지점 확인만으로 전체 마스크 완전성을 보장하지는 않음).
 - NOx·SO2 등 전체 배출량 합계 및 PM2.5 성분 질량 보존을 입력과 출력에서 각각 확인한다.
