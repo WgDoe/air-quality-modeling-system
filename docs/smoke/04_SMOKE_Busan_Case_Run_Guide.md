@@ -714,16 +714,22 @@ grep -nE 'South Korea mask|BC/OC read|list files|INVTABLE|WARNING|ERROR|done' "$
 
 국외의 `smkinven.f` 격자 인벤토리 경로에서는 `NONPOINT`가 정의되지 않은 채 `WRINVCHR`에 전달될 수 있어 GNU 컴파일에서 Segmentation fault를 일으킨다. [91 수정 기록](91_SMOKE_smkinven_Fix.md)에 따라 SMOKE 원본을 백업하고 `LOGICAL :: NONPOINT = .FALSE.` 초기화 및 컴파일을 진행한다.
 
-국외 Grdmat에는 MCIP `GRIDCRO2D_<GRID>.*.nc`를 가리키는 `GRID_CRO_2D`가 필요하다. 기존 예제 `ASSIGNS.emf`의 예제 파일명 지정이 실제 MCIP를 덮어쓰지 않도록 확인한다. 원본을 보관한 후 사용자 제공 패치 `directory_definitions.csh`와 `ASSIGNS.emf`를 설치하고, `Annual_htap_2023capss_cb6.csh` 실행 스크립트를 사례의 `EMIS/2023capss_cb6/scripts/htap/`에 둔다.
+국외 Grdmat에는 MCIP `GRIDCRO2D_<GRID>.*.nc`를 가리키는 `GRID_CRO_2D`가 필요하다. 기존 예제 `ASSIGNS.emf`의 예제 파일명 지정이 실제 MCIP를 덮어쓰지 않도록 확인한다. 원본을 보관한 후 저장소의 `apply_htap_v32_patches.py`로 설치된 SMOKE 소스와 `ASSIGNS.emf`에 기록된 한 줄 패치를 적용한다. 이어 `directory_definitions.csh`를 설치하고, `Annual_htap_2023capss_cb6.csh` 실행 스크립트를 사례의 `EMIS/2023capss_cb6/scripts/htap/`에 둔다.
 
 ```bash
 B="$HOME/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS"
 F="$HOME/busan_smoke_files/2023capss"
 C="$B/2023capss_cb6"
 mkdir -p "$C/scripts/htap" "$C/scripts/logs"
-cp -p "$B/smoke5.2/assigns/ASSIGNS.emf" "$B/smoke5.2/assigns/ASSIGNS.emf.before_htap"
+# 원본을 자동 백업(.before_htap_v32)하고 SMOKE/ASSIGNS 두 곳에 최소 패치 적용
+# SMKINVEN_SRC는 실제 SMOKE 5.3 소스 위치로 확인하여 지정
+SMKINVEN_SRC="$HOME/CMAQ_MODEL/SMOKEv5.3/subsys/smoke/src/smkinven/smkinven.f"
+test -f "$SMKINVEN_SRC" || { echo "smkinven.f 경로 확인 필요"; exit 1; }
+python3 "$F/smoke_patch/apply_htap_v32_patches.py" \
+  --smkinven "$SMKINVEN_SRC" \
+  --assigns "$B/smoke5.2/assigns/ASSIGNS.emf"
+# 패치 이후 01 설치 가이드에 따라 smkinven을 재컴파일해야 함
 cp -p "$C/scripts/directory_definitions.csh" "$C/scripts/directory_definitions.csh.before_htap"
-cp "$F/EMIS/smoke5.2/assigns/ASSIGNS.emf" "$B/smoke5.2/assigns/"
 cp "$F/EMIS/2023capss_cb6/scripts/directory_definitions.csh" "$C/scripts/"
 cp "$F/EMIS/2023capss_cb6/scripts/htap/Annual_htap_2023capss_cb6.csh" "$C/scripts/htap/"
 chmod +x "$C/scripts/htap/Annual_htap_2023capss_cb6.csh"
@@ -772,3 +778,6 @@ done
 - SMOKE 오류 0건, CMAQ-ready 병합 검증, 다른 시스템 전체 재현은 **서로 다른 성공 단계**로 기록한다.
 
 참고: FUGITIVE·SOLVENTS 부문에 INDUSTRY 프로파일을 대체한 매핑은 임시 기준이며, 현재 시간 프로파일 역시 예제의 기존 자료를 활용한다.
+
+
+> **소스 관리 갱신 (2026-11-10):** GitHub에 HTAP Python 생성기·연간 실행기·MCIP 디렉터리 설정 파일을 저장했으며, SMOKE 공식 소스를 직접 중복 저장하는 대신 `apply_htap_v32_patches.py`, `smkinven_htap_v32.patch`, `ASSIGNS_htap_v32.patch`로 동일한 수정점을 재현한다. SMOKE 5.3 원본 및 예제 ASSIGNS 파일은 [01 설치 가이드](01_SMOKE_Installation_Guide.md)에 따라 준비한다. 패치 후 컴파일은 필수이며 실제 호스트의 경로를 먼저 확인한다.
