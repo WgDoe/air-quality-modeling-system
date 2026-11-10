@@ -11,6 +11,35 @@
 3. [04 부산 사례 실행 가이드](04_SMOKE_Busan_Case_Run_Guide.md) — §3.4 원자료, §6.5 생성, §7.2·7.3 패치와 설치, §8.6 실행·검증
 4. [91 Smkinven 오류 수정](91_SMOKE_smkinven_Fix.md)
 
+### GitHub에 포함된 실제 실행 소스
+
+| 파일 | 역할 |
+|---|---|
+| [`make_busan_htap_v32_inputs.py`](files/busan/2023capss/generators/make_busan_htap_v32_inputs.py) | HTAP 9종 추출·남한 마스크·BC/OC 처리·프로파일/목록 생성 |
+| [`Annual_htap_2023capss_cb6.csh`](files/busan/2023capss/EMIS/2023capss_cb6/scripts/htap/Annual_htap_2023capss_cb6.csh) | HTAP 묶음별 SMOKE 실행 |
+| [`directory_definitions.csh`](files/busan/2023capss/EMIS/2023capss_cb6/scripts/directory_definitions.csh) | 도메인·MCIP·SMOKE 실행 경로 |
+| [`apply_htap_v32_patches.py`](files/busan/2023capss/smoke_patch/apply_htap_v32_patches.py) | 기존 `smkinven.f` 및 `ASSIGNS.emf`에 원본 백업 후 수정 적용 |
+| [`smkinven_htap_v32.patch`](files/busan/2023capss/smoke_patch/smkinven_htap_v32.patch) | Fortran 초기화 수정 내역 |
+| [`ASSIGNS_htap_v32.patch`](files/busan/2023capss/EMIS/smoke5.2/assigns/ASSIGNS_htap_v32.patch) | `GRID_CRO_2D` 우선 유지 수정 내역 |
+
+소스 패치 복원 예시(먼저 01 설치 가이드의 원본 프로그램 및 예제 파일 설치 필요):
+
+```bash
+F="$HOME/busan_smoke_files/2023capss"
+B="$HOME/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS"
+# 아래 Fortran 경로는 호스트마다 달라 실제 위치 확인 필요
+S="$HOME/CMAQ_MODEL/SMOKEv5.3/subsys/smoke/src/smkinven/smkinven.f"
+test -f "$S" && test -f "$B/smoke5.2/assigns/ASSIGNS.emf"
+python3 "$F/smoke_patch/apply_htap_v32_patches.py" \
+  --smkinven "$S" --assigns "$B/smoke5.2/assigns/ASSIGNS.emf"
+sha256sum "$S" "$B/smoke5.2/assigns/ASSIGNS.emf"
+# 원본 ZIP의 수정본과 일치해야 할 참고 SHA256:
+# smkinven.f : ff192e11ec8ed8bd0ae1a2b2f0106c785ab36c15e5e38c19ca3f8f48f65d8ef4
+# ASSIGNS.emf: 6d699f5b1597df37ed0ede98bbb6d8b5237b3ae3c132088fc2e0886fe52dbb43
+```
+
+해시가 다르면 소스 버전·기존 수정·줄바꿈 등을 확인한 다음 계속 진행한다. **패치 후 `smkinven` 재컴파일은 필수**다. Python·C-shell 실행 파일은 첨부 ZIP 원본과 동일한 Git blob SHA로 대조했다.
+
 ## 1. 실행 조건 고정
 
 - 기준 운영환경: Rocky Linux 9.8, SMOKE 5.3, CMAQ 5.5 환경, Python 3 + netCDF4·numpy·pandas·pyproj.
