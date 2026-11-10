@@ -803,6 +803,31 @@ echo "inputs/htap 파일 수: $(find "$C/inputs/htap" -maxdepth 1 -type f | wc -
 ```
 
 정상 기준: MD5 3개 일치, 컴파일 `Error:` 0건, 실행파일 갱신, HTAP 입력 19개. 해시가 다른 경우 기존 수정·소스 버전·줄바꿈부터 확인하고 억지로 덮어쓰지 않는다. `GRID_CRO_2D`가 해당 도메인의 실제 MCIP 파일을 가리키는지도 확인한다.
+#### 11.3.1 국외 부문 묶음과 필요한 입력 자료
+
+| HTAP_GROUP | SCC / 세부 부문 | 예제 종·시간 참조 |
+|---|---|---|
+| INTSHIP | INTSHIP | SHIPS |
+| AVIATION | DOMAVIA_LTO/CDS/CRS, INTAVIA_LTO/CDS/CRS | AIR_LTO, AIR_CDS, AIR_CRS |
+| ENERGY | ENERGY | 예제 그대로 |
+| INDUSTRY | INDUSTRY, FUGITIVE, SOLVENTS | INDUSTRY(후자 2개 잠정) |
+| TRANSPORT | TRANSPORT, BWTW, DOMSHIP, OTHTRANSPORT | TRANSPORT, TRANS_BWTW, SHIPS, TRANSPORT |
+| RESIDENT | RESIDENT | 예제 그대로 |
+| WASTE | WASTE | 예제 그대로 |
+| AGRICULTURE | AGRIBURN, LIVESTOCK, CROPS | AG_BURNING, AG, AG |
+
+| SMOKE 단계 | 필수 파일 (`EMIS/` 상대경로) | 출처 |
+|---|---|---|
+| Smkinven | `2023capss_cb6/inputs/htap/arinv.HTAPv32.<묶음>.lst`, `htap_v32_2020_<물질>_busan.nc` | 생성기: HTAP_v3.2 2020 연간 자료 |
+| Smkinven·Spcmat | `ge_dat/invtable_busan_htap_20261110.txt` | 국내 INVTABLE + 일반 PEC/POC 행 |
+| Grdmat | `ge_dat/gridding/griddesc_busan_4domains.txt`, `met/<GRID>/GRIDCRO2D_<GRID>.*.nc` | 기존 격자 및 MCIP |
+| Smkinven·Grdmat | `ge_dat/EDGAR/GRIDMASK_EDGAR_busan_window.ncf`, `geocode{1,2,3,4}_edgar.txt` | SMOKE 예제에서 영역 추출·복사 |
+| Spcmat | `ge_dat/EDGAR/HTAPv32_profiles/gsref_HTAPv32_busan_20261110.txt`, `gspro_HTAP_CB06_from_2011ei_corrected_20feb2024_nf_v1.txt`, `gscnv_edgar_HTAPv3_03Apr2024.txt` | 생성기·예제 |
+| Temporal | `ge_dat/EDGAR/HTAPv32_profiles/tref_HTAPv32_busan_20261110.txt`, `HTAP_2011_BaseA_tpro_{monthly,weekly,hourly}_24oct2022_nf_v1` | 생성기·예제 |
+| 실행 | `2023capss_cb6/scripts/htap/Annual_htap_2023capss_cb6.csh`, `smoke5.2/scripts/emf/smk_ar_gridded_annual_emf.csh`, `smoke5.2/assigns/ASSIGNS.emf` | 저장소·예제+패치 |
+
+최종 병합 전 출력은 `2023capss_cb6/premerged/htap_<묶음>/emis_mole_htap_<묶음>_<날짜>_<GRID>_cmaq_cb6ae7_2023capss_cb6.ncf`이며, 중간파일은 `2023capss_cb6/intermed/<GRID>/htap_<묶음>/`, 보고서는 `2023capss_cb6/reports/`에 생성된다. 기존 날짜 파일 및 공휴일 참조는 국내 처리와 공유한다.
+
 ### 11.4 SMOKE 실행
 
 먼저 27KM ENERGY 단일 묶음을 시험한다.
