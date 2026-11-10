@@ -2,6 +2,8 @@
 
 > 갱신: 2026-11-10. 원칙: 국내 CAPSS 처리에 사용한 SMOKE 5.3 환경을 유지하고, **국외 HTAP_v3.2 입력의 생성·설치·실행·검증**을 별도로 추적한다. 27KM 8개 묶음 완료는 사용자 제공 실행 기록에 근거하며, 이 문서 자체가 다른 시스템에서의 재실행 성공을 뜻하지 않는다.
 
+> **소스 파일 반영 상태(2026-11-10):** 이 GitHub 변경에는 설명 문서 및 재현 체크리스트를 먼저 반영하였다. 별도 전달된 `smoke_htap_docs_20261110.zip` 안의 `make_busan_htap_v32_inputs.py`, `Annual_htap_2023capss_cb6.csh`, `ASSIGNS.emf`, `directory_definitions.csh`, `smkinven.f` 및 `file_list.txt`는 이 커밋에 포함되지 않았다. 따라서 ZIP의 6개 파일을 기존 `docs/smoke/files/busan/2023capss/` 대응 경로에 반영하고 해시를 확인하기 전까지는 **저장소만으로 완전 재현 가능한 상태가 아니다**.
+
 ## 0. 먼저 읽을 문서
 
 1. [01 SMOKE 설치·공식 예제](01_SMOKE_Installation_Guide.md)
