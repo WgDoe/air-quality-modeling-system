@@ -43,9 +43,9 @@ patch(
 )
 patch(
     args.assigns,
-    "       setenv GRID_CRO_2D $MET_ROOT/GRIDCRO2D.${GRID}.35L.$locyr2$locmon$locday",
-    "       # Busan patch (2026-11-10): keep GRID_CRO_2D set in directory_definitions.csh (actual MCIP file name)\n"
-    "       if (! $?GRID_CRO_2D ) setenv GRID_CRO_2D $MET_ROOT/GRIDCRO2D.${GRID}.35L.$locyr2$locmon$locday",
+    "      setenv GRID_CRO_2D $MET_ROOT/GRIDCRO2D.${GRID}.35L.$locyr2$locmon$locday",
+    "      # Busan patch (2026-11-10): keep GRID_CRO_2D set in directory_definitions.csh (actual MCIP file name)\n"
+    "      if (! $?GRID_CRO_2D ) setenv GRID_CRO_2D $MET_ROOT/GRIDCRO2D.${GRID}.35L.$locyr2$locmon$locday",
     "if (! $?GRID_CRO_2D ) setenv GRID_CRO_2D",
     "ASSIGNS MCIP GRID_CRO_2D",
 )
