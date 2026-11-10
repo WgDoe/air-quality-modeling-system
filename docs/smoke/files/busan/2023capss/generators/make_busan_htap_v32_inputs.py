@@ -19,8 +19,8 @@ PMC = PM10 - PM2_5 unchanged); where BC+OC > PM2.5, BC and OC are scaled down to
 PEC + POC + PM2_5(other) = HTAP PM2.5 in every cell (carbon_adjust_t in the summary); South Korea removed by CAPSS 2023 coverage (GEOCODE alone cannot separate Korean coast/sea).
 
 Usage
-  python3 make_busan_htap_v32_inputs.py --htap <folder with edgar_HTAPv32_<year>_<pol>.zip> --year 2020 \
-      --capss <CAPSS 2023 original folder> --example <smoke_example_case_v3> --out <package folder> \
+  python3 make_busan_htap_v32_inputs.py --htap <folder with edgar_HTAPv32_<year>_<pol>.zip> --year 2020 \\
+      --capss <CAPSS 2023 original folder> --example <smoke_example_case_v3> --out <package folder> \\
       [--final <case EMIS folder, default /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS>]
   The package is then copied to the case:  cp -r <out>/EMIS/. <final>/
 Output (under <out>/EMIS, same layout as the case EMIS folder)
