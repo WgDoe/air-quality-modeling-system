@@ -671,6 +671,8 @@ done
 HTAP_v3.2의 2020년 0.1° 연간 flux 9종을 사용한다. 각 ZIP에는 전지구 NetCDF가 들어 있으며 Python 생성기가 ZIP에서 직접 읽는다.
 
 ```bash
+(
+set -euo pipefail
 ROOT="$HOME/CMAQ_MODEL"
 H="$ROOT/DATA/EMIS/HTAPv32/2020"
 mkdir -p "$H"
@@ -683,6 +685,7 @@ for p in CO NH3 NMVOC NOx PM10 PM2.5 SO2 BC OC; do
   unzip -t "edgar_HTAPv32_2020_${p}.zip" | tail -1
 done
 sha256sum edgar_HTAPv32_2020_*.zip > htap_v32_2020_sha256.txt
+)
 ```
 
 기준 생성 영역은 90~162°E / 18~56°N(720×380셀). 사용된 HTAP 부문 묶음은 INTSHIP, AVIATION, ENERGY, INDUSTRY, TRANSPORT, RESIDENT, WASTE, AGRICULTURE이다. CAPSS 2023 1km 셀이 닿는 0.1° 셀은 모든 부문과 물질에서 제거한다. 2026-11-10 생성 기록상 마스크 3,176셀, 남한 셀 잔여 배출량 0이다. 접경·해안에서 국외 배출량 일부가 같이 제거될 수 있으므로 '국외 원자료 전량 보존'으로 표현하지 않는다.
@@ -692,6 +695,8 @@ sha256sum edgar_HTAPv32_2020_*.zip > htap_v32_2020_sha256.txt
 필요: Python `netCDF4`, `numpy`, `pandas`, `pyproj` 및 기존 04 §3에 기재된 CAPSS 원자료·SMOKE 공식 예제. 생성기 이름은 `make_busan_htap_v32_inputs.py`. 원래 테스트에서는 `$HOME/busan_smoke_files/2023capss/generators/` 아래에 두었다.
 
 ```bash
+(
+set -euo pipefail
 set -o pipefail
 ROOT="$HOME/CMAQ_MODEL"
 F="$HOME/busan_smoke_files"
@@ -706,6 +711,7 @@ python3 "$F/2023capss/generators/make_busan_htap_v32_inputs.py" \
   --final "$B/EMIS" --out "$HPKG" \
   2>&1 | tee "$HOME/busan_htap_generate.log"
 grep -nE 'South Korea mask|BC/OC read|list files|INVTABLE|WARNING|ERROR|done' "$HOME/busan_htap_generate.log"
+)
 ```
 
 생성기 처리: 원자료 영역 추출 → CAPSS 셀 기반 남한 제거 → BC를 PEC, OC를 POC로 대응 → BC+OC를 뺀 PM2.5·PM10 잔여 성분 산정 → 가스/입자 단위 및 변수명 매핑 → 8개 부문별 `#LIST GRID` 목록 → 격자 국가코드/시간대 파일 → 종·시간 프로파일 → INVTABLE(PEC/POC) 생성. BC+OC가 PM2.5를 초과하면 성분을 비례 축소해 각 셀의 `PM2_5 + PEC + POC = 원본 PM2.5`를 만족시킨다.
@@ -763,18 +769,18 @@ GRID=27KM HTAP_GROUP=ENERGY ./Annual_htap_2023capss_cb6.csh \
 grep -nE 'ERROR detected in|Segmentation fault|ERROR ABORT' ../logs/htap_energy_27KM.log
 ```
 
-이후 아래 반복으로 전체 8개 묶음을 처리한다. 09KM 등의 도메인은 실제 MCIP·GRID 경로 검증 후 추가한다.
+이후 27·09KM의 8개 묶음을 실행한다. 09KM은 실행·확인 중이며 03·01KM은 국외 잔여배출이 작아 병합 제외를 검토한다(최종 확정 전). 종료 코드와 오류 로그를 모두 확인한다.
 
 ```bash
-set -e
-cd "$C/scripts/htap"
-for G in 27KM; do
+cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS/2023capss_cb6/scripts/htap
+for G in 27KM 09KM; do
   for g in INTSHIP AVIATION ENERGY INDUSTRY TRANSPORT RESIDENT WASTE AGRICULTURE; do
-    GRID="$G" HTAP_GROUP="$g" ./Annual_htap_2023capss_cb6.csh > "../logs/htap_${g,,}_$G.log" 2>&1
-    if grep -Eq 'ERROR detected in|Segmentation fault|ERROR ABORT' "../logs/htap_${g,,}_$G.log"; then
-      echo "ERROR: $G $g"; exit 1
+    GRID=$G HTAP_GROUP=$g ./Annual_htap_2023capss_cb6.csh > ../logs/htap_${g,,}_$G.log 2>&1
+    rc=$?
+    if [ "$rc" -ne 0 ] || grep -Eq 'ERROR detected in|Segmentation fault|ERROR ABORT' "../logs/htap_${g,,}_$G.log"; then
+      echo "ERROR: $G $g (exit=$rc) - 로그 확인"; break 2
     fi
-    echo "OK: $G $g"
+    echo "$(date +%H:%M) $G $g 완료"
   done
 done
 ```
