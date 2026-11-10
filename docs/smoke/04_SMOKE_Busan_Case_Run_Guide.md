@@ -843,7 +843,7 @@ GRID=27KM HTAP_GROUP=ENERGY ./Annual_htap_2023capss_cb6.csh \
 grep -nE 'ERROR detected in|Segmentation fault|ERROR ABORT' ../logs/htap_energy_27KM.log
 ```
 
-이후 27·09KM의 8개 묶음을 실행한다. 09KM은 실행·확인 중이며 03·01KM은 국외 잔여배출이 작아 병합 제외를 검토한다(최종 확정 전). 종료 코드와 오류 로그를 모두 확인한다.
+이후 27·09KM의 8개 묶음을 실행한다. 09KM은 실행·확인 중이며 03·01KM은 국외 잔여배출이 작아 병합 제외를 검토한다(최종 확정 전). **04 §4 및 부록 A의 기존 실행 규칙대로 반복 중단은 로그의 명시적인 오류 문구로만 판정한다.** 종료 코드는 함께 기록하지만, 이 환경에서는 정상 로그와 함께 0이 아닌 종료 코드가 나올 수 있으므로 종료 코드만으로 반복을 멈추지 않는다. 비정상 종료 코드가 나온 실행은 완료로 판정하지 않고 §11.5의 출력파일·수치 검증을 반드시 수행한다.
 
 ```bash
 cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS/2023capss_cb6/scripts/htap
@@ -851,10 +851,14 @@ for G in 27KM 09KM; do
   for g in INTSHIP AVIATION ENERGY INDUSTRY TRANSPORT RESIDENT WASTE AGRICULTURE; do
     GRID=$G HTAP_GROUP=$g ./Annual_htap_2023capss_cb6.csh > ../logs/htap_${g,,}_$G.log 2>&1
     rc=$?
-    if [ "$rc" -ne 0 ] || grep -Eq 'ERROR detected in|Segmentation fault|ERROR ABORT' "../logs/htap_${g,,}_$G.log"; then
+    if grep -Eq 'ERROR detected in|Segmentation fault|ERROR ABORT' "../logs/htap_${g,,}_$G.log"; then
       echo "ERROR: $G $g (exit=$rc) - 로그 확인"; break 2
     fi
-    echo "$(date +%H:%M) $G $g 완료"
+    if [ "$rc" -ne 0 ]; then
+      echo "WARNING: $G $g (exit=$rc) - 로그 오류 문구 없음, 출력 검증 필요"
+    else
+      echo "$(date +%H:%M) $G $g 실행 종료 (exit=$rc)"
+    fi
   done
 done
 ```
