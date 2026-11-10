@@ -14,6 +14,7 @@
 6. [SMOKE 5.3 소스·포인터 수정·컴파일·공식 예제 검증](docs/smoke/01_SMOKE_Installation_Guide.md)
 7. [부산 배출량 개선 계획: CAPSS 2023·HTAP v3.1·신규 시나리오](docs/smoke/03_SMOKE_Emission_Improvement_Plan.md)
 8. [부산 실제사례 실행 가이드 — 국내 CAPSS 2023 4부문·4도메인 완료 기록](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md)
+9. [국외 HTAP_v3.2 타 시스템 재현·검증 체크리스트](docs/smoke/05_HTAP_v32_Reproduction_Checklist.md) — 2020년 0.1° 자료, 남한 중복 제거·탄소 처리·8개 부문 묶음·27KM 결과 검증
 
 기존 CAPSS 2017 입력 준비 문서는 현행 목록에서 제외했다. 2023에도 필요한 공통 설정·검증 절차는 [부산 실행 가이드 §8](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md)에 통합했으며, 과거 원문은 Git 이력에서 확인할 수 있다.
 
