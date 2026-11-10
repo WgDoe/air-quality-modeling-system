@@ -8,7 +8,7 @@
 
 1. [01 SMOKE 설치·공식 예제](01_SMOKE_Installation_Guide.md)
 2. [03 배출량 개선 계획](03_SMOKE_Emission_Improvement_Plan.md) — HTAP_v3.2 선정 및 변환 원칙
-3. [04 부산 사례 실행 가이드](04_SMOKE_Busan_Case_Run_Guide.md) — §3.4 원자료, §6.5 생성, §7.2·7.3 패치와 설치, §8.6 실행·검증
+3. [04 부산 사례 실행 가이드](04_SMOKE_Busan_Case_Run_Guide.md) — §11.1 원자료, §11.2 생성, §11.3 패치·재컴파일·설치, §11.4 실행, §11.5 검증
 4. [91 Smkinven 오류 수정](91_SMOKE_smkinven_Fix.md)
 
 ### GitHub에 포함된 실제 실행 소스
@@ -38,7 +38,7 @@ sha256sum "$S" "$B/smoke5.2/assigns/ASSIGNS.emf"
 # ASSIGNS.emf: 6d699f5b1597df37ed0ede98bbb6d8b5237b3ae3c132088fc2e0886fe52dbb43
 ```
 
-해시가 다르면 소스 버전·기존 수정·줄바꿈 등을 확인한 다음 계속 진행한다. **패치 후 `smkinven` 재컴파일은 필수**다. Python·C-shell 실행 파일은 첨부 ZIP 원본과 동일한 Git blob SHA로 대조했다.
+해시가 다르면 소스 버전·기존 수정·줄바꿈 등을 확인한다. **패치 후 `smkinven` 재컴파일은 필수**이며, 재컴파일까지 포함한 정확한 명령은 04 §11.3을 사용한다. Python·C-shell 실행 파일은 첨부 ZIP 원본과 동일한 Git blob SHA로 대조했다.
 
 ## 1. 실행 조건 고정
 
@@ -61,12 +61,13 @@ which ncdump
 
 국내 CAPSS 사례와 일치하는 `SMK_HOME`, `SMKROOT`, `GRIDDESC`, `MCIP`, `ASSIGNS.emf`, `directory_definitions.csh` 경로를 먼저 확인한다.
 
-### B. 국외 입력 생성 (04 §6.5)
+### B. 국외 입력 생성 (04 §11.2)
 
 국외 입력 생성 스크립트 `make_busan_htap_v32_inputs.py`를 **04 §3.1에 기록한 저장소 경로**에서 준비한다. 아래 예의 `ROOT`, `F`, `--htap`, `--capss`, `--example`, `--invtable` 및 `--final`을 로컬 시스템에 맞게 고친다.
 
 ```bash
-set -o pipefail
+(
+set -euo pipefail
 ROOT="$HOME/CMAQ_MODEL"
 F="$HOME/busan_smoke_files"
 PKG="$HOME/busan_htap_pkg"
@@ -79,6 +80,7 @@ python3 "$F/2023capss/generators/make_busan_htap_v32_inputs.py" \
   --invtable "$F/invtable_busan_2017capss_20261021.txt" \
   --final "$CASE/EMIS" --out "$PKG" \
   2>&1 | tee "$HOME/busan_htap_generate.log"
+)
 ```
 
 **중요:** 파이프 앞의 Python 실행 실패를 놓치지 않으려면 `set -o pipefail`을 사용한다. `--final`은 목록 파일에 들어갈 **최종 설치 경로**이므로 설치 위치와 반드시 같아야 한다.
@@ -90,24 +92,24 @@ grep -nE 'South Korea mask|BC/OC read|list files|INVTABLE|WARNING|ERROR|done' "$
 find "$PKG" -type f | sort | tail -30
 ```
 
-2026-11-10 기록상의 생성 기준은 영역 90~162°E / 18~56°N, 720×380셀, 남한 마스크 3,176개 셀, 8개 묶음 목록, 탄소분리 `PEC`·`POC`, 마지막 로그 `done`이다. 이는 특정 원자료·입력의 참고값으로, 버전이 다르면 결과도 달라질 수 있다. 자세한 비교값과 물질별 질량표는 04 §6.5에 있다.
+2026-11-10 기록상의 생성 기준은 영역 90~162°E / 18~56°N, 720×380셀, 남한 마스크 3,176개 셀, 8개 묶음 목록, 탄소분리 `PEC`·`POC`, 마지막 로그 `done`이다. 이는 특정 원자료·입력의 참고값으로, 버전이 다르면 결과도 달라질 수 있다. 자세한 비교값과 물질별 질량표는 04 §11.2에 있다.
 
-### D. SMOKE 소스 수정 및 설치 (04 §7)
+### D. SMOKE 소스 수정 및 설치 (04 §7.1, §11.3)
 
 1. 기존 국내용 `genagmat.f` 수정 상태를 보존한다. **폐기한 `sizgmat.f` 여유 배열 패치를 다시 적용하지 않는다.**
-2. 국외용 `smkinven.f`의 NONPOINT 초기화 문제는 저장소의 `docs/smoke/files/busan/2023capss/smoke_patch/apply_htap_v32_patches.py`를 이용한다. [91](91_SMOKE_smkinven_Fix.md) 참고. 패치 후 반드시 재컴파일한다.
+2. 국외용 `smkinven.f`의 NONPOINT 초기화 문제는 저장소의 `docs/smoke/files/busan/2023capss/smoke_patch/apply_htap_v32_patches.py`를 이용한다. [91](91_SMOKE_smkinven_Fix.md) 참고. 패치·MD5 확인·재컴파일·설치를 04 §11.3 명령 블록으로 수행한다.
 3. `directory_definitions.csh`에 실제 MCIP `GRIDCRO2D_<GRID>.*.nc`를 가리키는 `GRID_CRO_2D` 설정이 적용되었는지 확인한다.
-4. `ASSIGNS.emf`의 참조 설정과 HTAP 입력·목록·프로파일을 04 §7.3의 명령대로 설치한다.
+4. `ASSIGNS.emf`의 참조 설정과 HTAP 입력·목록·프로파일을 04 §11.3의 명령대로 설치한다.
 5. 동일 사례 폴더에 덮어쓰기 전 스크립트·입력·로그를 백업한다.
 
-### E. 시험 실행 → 전체 실행 (04 §8.6)
+### E. 시험 실행 → 전체 실행 (04 §11.4)
 
 ```bash
 # 사례 EMIS 실행 스크립트 디렉터리에서 수행
 GRID=27KM HTAP_GROUP=ENERGY ./htap/Annual_htap_2023capss_cb6.csh
 ```
 
-한 묶음이 성공한 후 `04 §8.6`의 8개 묶음 반복문을 이용해 27KM 전체를 수행한다. 나머지 도메인의 처리는 같은 구조로 확장하되 각 도메인의 `GRIDCRO2D`, 격자명, 출력 경로가 실제 파일과 맞는지 확인한다.
+한 묶음이 성공한 후 `04 §11.4`의 8개 묶음 반복문을 이용해 27KM 전체를 수행한다. 나머지 도메인의 처리는 같은 구조로 확장하되 각 도메인의 `GRIDCRO2D`, 격자명, 출력 경로가 실제 파일과 맞는지 확인한다.
 
 ## 3. 필수 검증 (성공 조건 분리)
 
@@ -117,7 +119,7 @@ GRID=27KM HTAP_GROUP=ENERGY ./htap/Annual_htap_2023capss_cb6.csh
 | 마스크 | 남한 셀의 국외 배출량 0, 제거량 및 인접 지역 손실 확인 | 중복 제거 검증 |
 | 성분 | 모든 셀에서 PM2.5 = PM2_5 + PEC + POC, 음수/NaN 없음 | 질량 보존 검증 |
 | 실행 | 각 묶음 ERRLOG=0, 기대한 일별 파일 생성, 기간과 격자 일치 | SMOKE 실행 검증 |
-| 수치 | 04 §8.6의 격자 합계·대표 도시 격자·부문별 결과 비교 | 결과 검증 |
+| 수치 | 04 §11.5의 격자 합계·대표 도시 격자·부문별 결과 비교 | 결과 검증 |
 | 통합 | CAPSS·HTAP 공간 중복, 병합 후 물질·시간·단위, CMAQ species 확인 | **별도 미검증** |
 
 로그 오류 0건만으로 질량 보존이나 CMAQ 적용 성공을 선언하지 않는다. 27KM은 사용자 제공 2026-11-10 결과상 8개 묶음 완료; 나머지 도메인과 병합·CMAQ 연계는 이후 결과로 갱신한다.
