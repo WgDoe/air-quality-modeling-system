@@ -714,37 +714,43 @@ grep -nE 'South Korea mask|BC/OC read|list files|INVTABLE|WARNING|ERROR|done' "$
 
 생성 예상 파일: `$HPKG/EMIS/2023capss_cb6/inputs/htap/`에 9개 NetCDF + 8개 묶음 목록 + 전체 목록 1개 + 점검표 1개 = 19개 파일. `ge_dat/EDGAR/GRIDMASK_EDGAR_busan_window.ncf`, `geocode{1,2,3,4}_edgar.txt`, `HTAPv32_profiles/`, `ge_dat/invtable_busan_htap_20261110.txt`도 준비한다.
 
-### 11.3 SMOKE 소스 패치와 사례 설치
+### 11.3 SMOKE 소스 패치·재컴파일·사례 설치
 
-**먼저 7.1의 국내 Grdmat 근본 원인 수정(`genagmat.f`의 CYCLE) 상태를 유지한다. `sizgmat.f` 배열 확대 패치는 재적용 금지.**
-
-국외의 `smkinven.f` 격자 인벤토리 경로에서는 `NONPOINT`가 정의되지 않은 채 `WRINVCHR`에 전달될 수 있어 GNU 컴파일에서 Segmentation fault를 일으킨다. [91 수정 기록](91_SMOKE_smkinven_Fix.md)에 따라 SMOKE 원본을 백업하고 `LOGICAL :: NONPOINT = .FALSE.` 초기화 및 컴파일을 진행한다.
-
-국외 Grdmat에는 MCIP `GRIDCRO2D_<GRID>.*.nc`를 가리키는 `GRID_CRO_2D`가 필요하다. 기존 예제 `ASSIGNS.emf`의 예제 파일명 지정이 실제 MCIP를 덮어쓰지 않도록 확인한다. 원본을 보관한 후 저장소의 `apply_htap_v32_patches.py`로 설치된 SMOKE 소스와 `ASSIGNS.emf`에 기록된 한 줄 패치를 적용한다. 이어 `directory_definitions.csh`를 설치하고, `Annual_htap_2023capss_cb6.csh` 실행 스크립트를 사례의 `EMIS/2023capss_cb6/scripts/htap/`에 둔다.
+기존 국내 Grdmat `genagmat.f` CYCLE 패치는 유지하며, 폐기한 `sizgmat.f` 배열 확대 패치를 다시 적용하지 않는다. **아래 블록은 bash 서브셸**로 실행한다. 실패해도 상위 터미널은 종료되지 않는다. 경로와 기존 파일을 먼저 확인한다.
 
 ```bash
-B="$HOME/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS"
-F="$HOME/busan_smoke_files/2023capss"
-C="$B/2023capss_cb6"
-mkdir -p "$C/scripts/htap" "$C/scripts/logs"
-# 원본을 자동 백업(.before_htap_v32)하고 SMOKE/ASSIGNS 두 곳에 최소 패치 적용
-# SMKINVEN_SRC는 실제 SMOKE 5.3 소스 위치로 확인하여 지정
-SMKINVEN_SRC="$HOME/CMAQ_MODEL/SMOKEv5.3/subsys/smoke/src/smkinven/smkinven.f"
-test -f "$SMKINVEN_SRC" || { echo "smkinven.f 경로 확인 필요"; exit 1; }
-python3 "$F/smoke_patch/apply_htap_v32_patches.py" \
-  --smkinven "$SMKINVEN_SRC" \
-  --assigns "$B/smoke5.2/assigns/ASSIGNS.emf"
-# 패치 이후 01 설치 가이드에 따라 smkinven을 재컴파일해야 함
-cp -p "$C/scripts/directory_definitions.csh" "$C/scripts/directory_definitions.csh.before_htap"
+(
+set -euo pipefail
+export SMK_HOME=/home/woogon/CMAQ_MODEL/SMOKEv5.3
+export BIN=Linux2_x86_64gfort10
+F=$HOME/busan_smoke_files/2023capss
+B=/home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS
+C=$B/2023capss_cb6
+S=$SMK_HOME/subsys/smoke/src/smkinven/smkinven.f
+m() { md5sum "$1" | awk '{print $1}'; }
+test -f "$S"; test -f "$B/smoke5.2/assigns/ASSIGNS.emf"
+# 패치; 원본은 .before_htap_v32로 자동 백업, 재실행 시 이미 패치된 파일은 건너뜀
+python3 "$F/smoke_patch/apply_htap_v32_patches.py" --smkinven "$S" --assigns "$B/smoke5.2/assigns/ASSIGNS.emf"
+[ "$(m "$S")" = 23530fc0a55cd5dcdef6c3a314510dc9 ] || { echo 'ERROR: smkinven.f 해시'; exit 1; }
+[ "$(m "$B/smoke5.2/assigns/ASSIGNS.emf")" = 058cffcc054f4ad9440b28f24640494e ] || { echo 'ERROR: ASSIGNS.emf 해시'; exit 1; }
+# 수정 소스로 재컴파일
+cd "$SMK_HOME/subsys/smoke/src"
+LC_ALL=C make 2>&1 | tee "$SMK_HOME/subsys/smoke/$BIN/make_SMOKEv5.3_fix_smkinven.log"
+ls -l --time-style=long-iso "$SMK_HOME/subsys/smoke/$BIN/smkinven"
+# 사례 설정 및 생성 결과 설치
+[ -e "$C/scripts/directory_definitions.csh.before_htap" ] || cp -p "$C/scripts/directory_definitions.csh" "$C/scripts/directory_definitions.csh.before_htap"
 cp "$F/EMIS/2023capss_cb6/scripts/directory_definitions.csh" "$C/scripts/"
+[ "$(m "$C/scripts/directory_definitions.csh")" = 9a5c4c8a894661af75b6e815e77f676f ] || { echo 'ERROR: directory_definitions.csh 해시'; exit 1; }
+mkdir -p "$C/scripts/htap" "$C/scripts/logs"
 cp "$F/EMIS/2023capss_cb6/scripts/htap/Annual_htap_2023capss_cb6.csh" "$C/scripts/htap/"
 chmod +x "$C/scripts/htap/Annual_htap_2023capss_cb6.csh"
 cp -r "$HOME/busan_htap_pkg/EMIS/." "$B/"
-test -f "$C/inputs/htap/arinv.HTAPv32.ENERGY.lst"
+ls -l "$B/smoke5.2/scripts/emf/smk_ar_gridded_annual_emf.csh"
+echo "inputs/htap 파일 수: $(find "$C/inputs/htap" -maxdepth 1 -type f | wc -l) (19 정상)"
+)
 ```
 
-반드시 `$C/scripts/directory_definitions.csh`가 `GRID_CRO_2D`를 실제 MCIP 파일로 지정하는지 확인한다. 대상 파일명·기존 코드가 다르면 덮어쓰지 않고 비교 검토한다.
-
+정상 기준: MD5 3개 일치, 컴파일 `Error:` 0건, 실행파일 갱신, HTAP 입력 19개. 해시가 다른 경우 기존 수정·소스 버전·줄바꿈부터 확인하고 억지로 덮어쓰지 않는다. `GRID_CRO_2D`가 해당 도메인의 실제 MCIP 파일을 가리키는지도 확인한다.
 ### 11.4 SMOKE 실행
 
 먼저 27KM ENERGY 단일 묶음을 시험한다.
