@@ -6,17 +6,16 @@
 |---|---|---|
 | **01 필수(초기 구축)** | [SMOKE 5.3 설치·컴파일 및 공식 예제 검증](01_SMOKE_Installation_Guide.md) | 프로그램 설치 및 실행환경·공식 예제 검증 |
 | **02 배경자료** | [기존 SMOKE 2.7 배출량 처리체계 분석](02_Legacy_SMOKE27_Emission_Processing.md) | 과거 운영 입력과 CAPSS 2023 전환 원칙의 근거 |
-| **03 필수(배출량 기준)** | [CAPSS 2023 / HTAP v3.1 배출량 개선 계획](03_SMOKE_Emission_Improvement_Plan.md) | 자료 선정·단위·SCC·공간·시간·종분배 기준 |
-| **04 필수(현재 작업)** | [부산 실제사례 실행 가이드](04_SMOKE_Busan_Case_Run_Guide.md) | 국내 입력 생성·설치·4부문 4도메인 실행 기록 및 Grdmat 패치 |
+| **03 필수(배출량 기준)** | [CAPSS 2023 / HTAP 배출량 개선 계획 (국외 HTAP_v3.2 적용)](03_SMOKE_Emission_Improvement_Plan.md) | 자료 선정·단위·SCC·공간·시간·종분배 기준 |
+| **04 필수(현재 작업)** | [부산 실제사례 실행 가이드](04_SMOKE_Busan_Case_Run_Guide.md) | 국내 4부문·4도메인 실행 및 국외 HTAP_v3.2(11장), Grdmat·Smkinven 패치 |
 | **05 필수(국외 재현)** | [HTAP_v3.2 타 시스템 재현·검증 체크리스트](05_HTAP_v32_Reproduction_Checklist.md) | 새 컴퓨터에서 입력·설치·시험 실행·검증 순서 고정 |
 | **90 필요 시 참고** | [procar2pt.f 포인터 초기화 수정 기록](90_SMOKE_procar2pt_Fix.md) | 설치·컴파일 문제 발생 시 수정 이력 |
-
 | **91 필요 시 참고** | [smkinven.f 오류 수정](91_SMOKE_smkinven_Fix.md) | 국외 격자 인벤토리 NONPOINT 초기화 수정 |
 
 ## 현재 작업 재개 위치
 
 - **완료·다음:** 국내 CAPSS 2023 점·면·이동·바다 4부문 × 27·09·03·01KM 완료(기존 사용자 실행 기록). **2026-11-10 국외 HTAP_v3.2 2020년 0.1° 원자료 처리, 27KM 8개 묶음 완료**(사용자 제공 실행 기록 기준). 타 시스템 재현은 05 체크리스트를 따른다. 나머지 도메인·병합·CMAQ 연계는 검증 후 상태 갱신.
-- **재설치:** 04 §7.1의 검증된 원본 복구와 genagmat.f CYCLE 패치를 적용한다. 이전 sizgmat.f 여유 배열 패치는 폐기했다. 전체 신규 설치 재현은 별도 검증 대상이다.
+- **재설치:** 04 §7.1의 genagmat.f CYCLE 패치와 04 §11.3의 smkinven.f 초기화 패치·재컴파일을 적용한다. 이전 sizgmat.f 여유 배열 패치는 폐기했다. 전체 신규 설치 재현은 별도 검증 대상이다.
 - **설치·생성 파일:** [files/busan/2023capss/](files/busan/2023capss/)에 설치 스크립트·생성기·실행 스크립트를 보관. 대용량 FF10·대리자료는 저장소에 없으며 설치 ZIP 또는 생성기로 만든다.
 - **외부 참조파일:** 재현에는 CAPSS 코드리스트 2개 및 운영체계 참조 6개가 필요하다. 8개 파일 모두 [reference/](files/busan/2023capss/reference/)에 등록했다(2026-10-22).
 
