@@ -171,9 +171,21 @@ CAPSS 2023 1km 격자 배출량에서 **시군구 안의 SCC별(필요 시 SCC10
 | 처리 틀 | SMOKE 5.3 예제의 HTAP 부문(`2022he_cb6_22m/inputs/htap_12listos`, `ge_dat/EDGAR/HTAPv3_profiles`) |
 | 필수 처리 | **남한 격자 제외**(국내는 CAPSS 2023만 사용, 이중 계상 방지). 북한은 HTAP에 포함되므로 별도 파일 불필요 |
 | 적용 도메인 | 27·09km (기존과 같음) |
+| 버전 변경 근거 | JRC HTAP_v3.2는 v3.1 갱신판으로 중국 MEIC 1.4, EDGARv8.1 대리자료, 선박 SO2, 브레이크·타이어 마모 부문 반영. 파일 내 일부 속성은 EDGAR_HTAPv3.1 표기가 남아 있을 수 있어 파일명·원본 버전 기준을 함께 기록 |
 | 대안 | CAMS-GLOB-ANT v6.2 (0.1°, 2000~2026, 2023년 직접 사용 가능, 일부 지역 NOx·SO2 문제 보고) |
 
-참고: [HTAP_v3.2 데이터(Zenodo)](https://zenodo.org/records/14499440), [JRC EDGAR HTAP_v3.2](https://edgar.jrc.ec.europa.eu/dataset_htap_v31), [CAMS-GLOB-ANT (ESSD 2024)](https://doi.org/10.5194/essd-16-2261-2024)
+참고: HTAP_v3.2 — [JRC EDGAR](https://edgar.jrc.ec.europa.eu/dataset_htap_v32), [Zenodo](https://zenodo.org/records/17086684), [ESSD 17, 5915 (2025)](https://essd.copernicus.org/articles/17/5915/2025/). 계획 당시 v3.1 — [Zenodo](https://zenodo.org/records/14499440), [JRC](https://edgar.jrc.ec.europa.eu/dataset_htap_v31). 대안 [CAMS-GLOB-ANT](https://doi.org/10.5194/essd-16-2261-2024).
+
+**국외배출량 실제 처리 결정(2026-11-10)**
+
+| 항목 | 결정·한계 |
+|---|---|
+| 기간 | HTAP_v3.2 **2020년 연간 flux** + SMOKE 예제 HTAP 월·요일·시간 프로파일. 월별 flux 직접 적용은 추후 개선 후보 |
+| 영역 | 90~162°E, 18~56°N, 720×380개의 0.1° 셀 (27KM 도메인 + 여유) |
+| 남한 제외 | CAPSS 2023 1km 점·면·이동·바다 셀과 겹치는 HTAP 0.1° 전체 셀을 0으로 처리. 접경·해안 국외분도 일부 제거될 수 있음. 제거량 내 북한 코드 비율 0.1~1.3%, 일본 0%(이번 시험 기준) |
+| 입자 성분 | BC→PEC, OC→POC, PM2.5/PM10은 탄소 제외 잔여분. BC+OC가 PM2.5를 초과할 때 비례 축소하여 셀별 PM2.5 총량 보존(BC 약 21.7만 t/yr 감소, 98%가 FUGITIVE) |
+| 부문 | HTAP 세부 변수 19~20개를 SCC로 사용하고 8개 묶음 처리. FUGITIVE·SOLVENTS에 INDUSTRY 종·시간 프로파일 임시 대응 |
+| 도메인 상태 | 27KM 8개 묶음 완료, 09KM 실행·확인 중. 03·01KM은 국외 잔여량이 제한되어 병합 제외 검토 |
 
 ### 4.10 시간배분
 
@@ -274,6 +286,7 @@ SPECIATE 5.3을 현재 공개 최신판으로 간주하지 않는다. EPA는 [SP
 
 종분배 비율(`gspro`, `gscnv`)은 CMAQ 화학 메커니즘에 맞춰야 한다. 현재는 `CB6R3_AE7`이며, CMAQ 5.5는 CB6R5·CRACMM 등 더 새로운 메커니즘도 지원한다. **병합·CMAQ 기준 실행 전에 기준 메커니즘을 확정**한다. 메커니즘 변경 시 해당 메커니즘용 종분배 자료뿐 아니라 CMAQ 빌드 설정, 배출종 이름·단위·변환계수, 제어 파일과 입력 대응을 함께 확인한다. CMAQ 5.5 지원 메커니즘은 [공식 FAQ](https://github.com/USEPA/CMAQ/blob/main/DOCS/Release_FAQ/CMAQv5.5-Series-FAQ.md)를 참고한다.
 
+**CMAQ 5.5 소스·메커니즘 재현 기준(사용자 제공 점검 기록):** 설치된 소스 `src/CMAQ_REPO` 커밋 `e10d0a0`(2025-07-11), 태그 `CMAQv5.5.0.3_11Jul2025`를 기준으로 한다. 새 시스템에서 `main`을 그대로 받지 말고 해당 버전 태그를 고정한다. **화학 메커니즘은 `cb6r5_ae7_aq` 잠정 후보**이며 병합 전에 확정해야 한다. 제공된 DESID 파일 비교에서는 `cb6r3_ae7_aq` 108행, `cb6r5_ae7_aq` 109행으로 `DMS` 항목이 추가된 차이가 보고되었으나, 실제 SMOKE 출력 배출종과의 대조는 아직 수행하지 않았다.
 ### 7.4 진행 순서
 
 | 단계 | 할 일 |
