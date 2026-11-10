@@ -36,3 +36,7 @@ smk_dates/2026/smk_merge_dates_202612.txt
 temporal/tpro_hourly_busan_2020ver_UTC_20261021.csv
 temporal/tpro_monthly_busan_2020ver_20261021.csv
 temporal/tpro_weekly_busan_2020ver_20261021.csv
+2023capss/EMIS/2023capss_cb6/scripts/htap/Annual_htap_2023capss_cb6.csh
+2023capss/EMIS/smoke5.2/assigns/ASSIGNS.emf
+2023capss/generators/make_busan_htap_v32_inputs.py
+2023capss/smoke_patch/smkinven.f
