@@ -1,0 +1,8 @@
+--- a/smkinven.f
++++ b/smkinven.f
+@@
+-        LOGICAL         NONPOINT         ! true: importing nonpoint inventory
++C.........  Busan patch (2026-11-10): NONPOINT is set only by RDINVDATA (ASCII inventories).
++C           For gridded NetCDF/I-O API inventories it was left undefined; with gfortran it can
++C           be .TRUE. and WRINVCHR then reads unallocated CMACT/CNAICS (Segmentation fault).
++        LOGICAL      :: NONPOINT = .FALSE. ! true: importing nonpoint inventory
