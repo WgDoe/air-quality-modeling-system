@@ -720,6 +720,52 @@ grep -nE 'South Korea mask|BC/OC read|list files|INVTABLE|WARNING|ERROR|done' "$
 
 생성 예상 파일: `$HPKG/EMIS/2023capss_cb6/inputs/htap/`에 9개 NetCDF + 8개 묶음 목록 + 전체 목록 1개 + 점검표 1개 = 19개 파일. `ge_dat/EDGAR/GRIDMASK_EDGAR_busan_window.ncf`, `geocode{1,2,3,4}_edgar.txt`, `HTAPv32_profiles/`, `ge_dat/invtable_busan_htap_20261110.txt`도 준비한다.
 
+#### 11.2.1 생성기 처리 원칙과 시험 기준
+
+| 단계 | 처리 및 근거 |
+|---|---|
+| 영역 | HTAP 전지구 0.1° 자료에서 90~162°E, 18~56°N(720×380=273,600셀) 추출. 27KM 도메인에 여유 범위 확보 |
+| 남한 제거 | CAPSS 2023 점·면·이동·바다 1km 셀이 접하는 0.1° HTAP 셀 전체를 0으로 설정. 해안 격자는 국가 코드만으로 남한을 분리할 수 없음 |
+| 입자 | BC→PEC, OC→POC(프로파일 0); PM2_5·PM10에서 BC+OC 제거. 초과 셀은 BC·OC를 비례 축소하여 셀별 PM2.5 질량 보존 |
+| 변수·묶음 | 긴 HTAP 변수명을 16자 이하 이름으로 바꾸고 `#LIST GRID`를 8개 묶음+ALL로 작성 |
+| 공간·시간 | 예제 `GRIDMASK_EDGAR.ncf`의 국가코드·시간대를 같은 영역으로 자르고 기존 HTAP 시간분배 사용 |
+| 종·시간 참조 | 상세 부문을 부모 SCC에 연결한 GSREF/TREF를 생성; FUGITIVE·SOLVENTS→INDUSTRY는 잠정 적용 |
+| INVTABLE | 국내 파일은 유지하고 별도 복사본에 일반 `PEC PEC`, `POC POC` 줄만 추가(MOVES 배기 행 제외) |
+
+사용자 제공 **2026-11-10 실제 실행 로그의 참고값**:
+
+```text
+South Korea mask: 3176 of 273600 0.1 deg cells (GEOCODE 197000 cells: 979, of them outside mask: 0)
+BC/OC read; scaled down where BC+OC > PM2.5: BC 216,739 t/yr, OC 44,876 t/yr
+list files: INTSHIP=9, AVIATION=54, ENERGY=9, INDUSTRY=27, TRANSPORT=31, RESIDENT=9, WASTE=9, AGRICULTURE=27
+INVTABLE PEC: invtable_2022platform_MOVES_nonroad_15oct2024_nf_v2.txt line 659
+INVTABLE POC: invtable_2022platform_MOVES_nonroad_15oct2024_nf_v2.txt line 667
+done
+```
+
+| 물질 | 영역 합계(t/yr) | 남한 제거(t/yr) | 남한 셀 잔여 | 탄소 조정(t/yr) |
+|---|---:|---:|---:|---:|
+| CO | 159,059,631 | 736,683 | 0 | 0 |
+| NH3 | 11,700,586 | 304,792 | 0 | 0 |
+| NOX | 28,799,609 | 1,229,076 | 0 | 0 |
+| VOC | 35,412,553 | 1,206,219 | 0 | 0 |
+| SO2 | 12,357,628 | 265,959 | 0 | 0 |
+| PM2_5(탄소 제외) | 4,509,856 | 43,743 | 0 | 0 |
+| PM10(탄소 제외) | 7,752,766 | 128,518 | 0 | 0 |
+| PEC | 1,277,291 | 14,695 | 0 | 216,739 |
+| POC | 2,873,785 | 40,235 | 0 | 44,876 |
+
+`PM2_5 + PEC + POC = 8,660,932 t/yr`로 원래 PM2.5 질량을 보존한다. 단, 탄소 보정 중 BC 98%는 FUGITIVE 가스 플레어링 부문에서 발생하므로 BC 성분 배출량 자체는 보존되지 않는다. 제거된 셀 중 북한 코드 몫 0.1~1.3%, 일본 0%는 이 원자료 기준 참고값이다.
+
+생성 패키지(`~/busan_htap_pkg/EMIS/`)의 파일 구조:
+
+| 위치 | 파일·내용 |
+|---|---|
+| `2023capss_cb6/inputs/htap/` | 9개 배출 NetCDF + 8개 목록 + `ALL` 목록 + `htap_summary_20261110.csv` = **19개** |
+| `ge_dat/EDGAR/` | `GRIDMASK_EDGAR_busan_window.ncf`, `geocode1~4_edgar.txt` |
+| `ge_dat/EDGAR/HTAPv32_profiles/` | 예제 시간·종분배 5개 복사 + `gsref_HTAPv32_busan_20261110.txt`, `tref_HTAPv32_busan_20261110.txt` |
+| `ge_dat/` | `invtable_busan_htap_20261110.txt` |
+
 ### 11.3 SMOKE 소스 패치·재컴파일·사례 설치
 
 기존 국내 Grdmat `genagmat.f` CYCLE 패치는 유지하며, 폐기한 `sizgmat.f` 배열 확대 패치를 다시 적용하지 않는다. **아래 블록은 bash 서브셸**로 실행한다. 실패해도 상위 터미널은 종료되지 않는다. 경로와 기존 파일을 먼저 확인한다.
