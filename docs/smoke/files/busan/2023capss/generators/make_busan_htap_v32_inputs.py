@@ -176,3 +176,199 @@ T_LL = Transformer.from_crs(TMCRS, CRS.from_epsg(4326), always_xy=True)
 off = np.array([1 / 6, 0.5, 5 / 6])                       # 3 x 3 sub-points per 1km cell
 ox, oy = [g.ravel() for g in np.meshgrid(off, off)]
 KMASK = np.zeros((NR_, NC_), dtype=bool)
+for s in range(0, len(cx), 200_000):
+    X = ((cx[s:s + 200_000, None] + ox[None, :]) * 1000.0).ravel()
+    Y = ((cy[s:s + 200_000, None] + oy[None, :]) * 1000.0).ravel()
+    lo, la = T_LL.transform(X, Y)
+    c = np.floor((lo - LON0) / D).astype(np.int64); r = np.floor((la - LAT0) / D).astype(np.int64)
+    ok = (c >= 0) & (c < NC_) & (r >= 0) & (r < NR_)
+    KMASK[r[ok], c[ok]] = True
+log(f'South Korea mask: {KMASK.sum()} of {NC_*NR_} 0.1 deg cells (GEOCODE 197000 cells: {(GEO == 197000).sum()}, '
+    f'of them outside mask: {((GEO == 197000) & ~KMASK).sum()})')
+
+# =====================================================================================
+# 3. HTAP files: window, Korea removal, rename
+# =====================================================================================
+R = 6371.0e3
+lat_e = LAT0 + D * np.arange(NR_ + 1)
+AREA = (R ** 2 * np.deg2rad(D) * np.diff(np.sin(np.deg2rad(lat_e))))[:, None] * np.ones((1, NC_))   # m2
+SEC = 365.0 * 86400.0
+SUMMARY, LST = [], collections.defaultdict(list)
+codes = sorted(set(np.unique(GEO[KMASK]).tolist()))
+odir = f'{OUT}/{CASE}/inputs/htap'
+os.makedirs(a.out, exist_ok=True)
+tmp = tempfile.mkdtemp(prefix='htap_', dir=a.out)
+
+def read_window(hp):
+    """window of one HTAP pollutant file: {short: (scc, htap_variable, kg m-2 s-1 array, attrs)}, + source text"""
+    z = os.path.join(a.htap, f'edgar_HTAPv32_{a.year}_{hp}.zip')
+    if not os.path.isfile(z): raise SystemExit(f'ERROR: HTAP file not found: {z}')
+    with zipfile.ZipFile(z) as zz:
+        ncm = [n for n in zz.namelist() if n.endswith('.nc')][0]
+        zz.extract(ncm, tmp)
+    fin = os.path.join(tmp, ncm)
+    ds = nc.Dataset(fin)
+    lat = np.asarray(ds['lat'][:]); lon = np.asarray(ds['lon'][:]) % 360.0
+    ii = np.where((lat > LAT0) & (lat < LAT1))[0]; jj = np.where((lon > LON0) & (lon < LON1))[0]
+    if len(ii) != NR_ or len(jj) != NC_: raise SystemExit(f'ERROR: window size {len(jj)}x{len(ii)} in {ncm}')
+    i0, i1, j0, j1 = ii.min(), ii.max() + 1, jj.min(), jj.max() + 1
+    if i1 - i0 != NR_ or j1 - j0 != NC_: raise SystemExit(f'ERROR: window not contiguous in {ncm}')
+    oi, oj = np.argsort(lat[i0:i1]), np.argsort(lon[j0:j1])
+    if not (np.allclose(lat[i0:i1][oi], LAT0 + D * (np.arange(NR_) + 0.5)) and
+            np.allclose(lon[j0:j1][oj], LON0 + D * (np.arange(NC_) + 0.5))):
+        raise SystemExit(f'ERROR: unexpected cell centres in {ncm}')
+    out, unknown = {}, []
+    for vn, var in ds.variables.items():
+        if vn in ('lat', 'lon'): continue
+        m = lookup(vn)
+        if m is None: unknown.append(vn); continue
+        x = np.ma.filled(var[i0:i1, j0:j1].astype(np.float64), 0.0)[oi][:, oj]
+        x[~np.isfinite(x)] = 0.0; x[x > 1e30] = 0.0
+        out[m[1]] = (m[0], vn, x, {'long_name': getattr(var, 'long_name', m[1]),
+                                    'description': getattr(var, 'description', m[1])})
+    src = os.path.basename(z) + ':' + ncm + ' / original description: ' + str(getattr(ds, 'description', ''))
+    ds.close(); os.remove(fin)
+    if unknown: raise SystemExit(f'ERROR: unmapped variables in {ncm}: {unknown} (add them to VARS)')
+    return out, src
+
+# BC and OC first: PM2_5 and PM10 are written without carbon (EPA HTAP design: PM2_5_OTH profiles + PEC/POC
+# directly from the BC/OC inventories), so that PEC + POC + PM2_5(other) = original PM2.5 in every cell
+CARBON = {}
+for hp in ('BC', 'OC'):
+    CARBON[hp], _ = read_window(hp)
+PM25, PM25SRC = read_window('PM2.5')
+CLOSS = collections.defaultdict(float)          # carbon removed by the scaling, t/yr, per (pollutant, short)
+for short, (scc, vn, x, at) in PM25.items():
+    c = sum(CARBON[k][short][2] for k in ('BC', 'OC') if short in CARBON[k])
+    if np.isscalar(c): continue
+    f = np.where(c > x, x / np.maximum(c, 1e-30), 1.0)    # BC+OC > PM2.5: scale BC and OC down to PM2.5
+    for k in ('BC', 'OC'):
+        if short in CARBON[k]:
+            arr = CARBON[k][short][2]
+            CLOSS[(k, short)] = float(((1.0 - f) * arr * AREA * SEC / 1000.0).sum())
+            arr *= f
+log(f'BC/OC read; scaled down where BC+OC > PM2.5: BC {sum(v for (k, _), v in CLOSS.items() if k == "BC"):,.0f} t/yr, '
+    f'OC {sum(v for (k, _), v in CLOSS.items() if k == "OC"):,.0f} t/yr')
+
+def write_pol(ip, data, src, note):
+    fout = mk(f'{odir}/htap_v32_{a.year}_{ip}_busan.nc')
+    with nc.Dataset(fout, 'w', format='NETCDF4_CLASSIC') as o:
+        o.createDimension('lon', NC_); o.createDimension('lat', NR_)
+        for n, val, ax in (('lon', LON0 + D * (np.arange(NC_) + 0.5), 'X'), ('lat', LAT0 + D * (np.arange(NR_) + 0.5), 'Y')):
+            v = o.createVariable(n, 'f8', (n,)); v[:] = val
+            v.standard_name = v.long_name = {'lon': 'longitude', 'lat': 'latitude'}[n]
+            v.units = {'lon': 'degrees_east', 'lat': 'degrees_north'}[n]; v.axis = ax
+        for short, (scc, vn, x, at, extra) in data.items():
+            tot = x * AREA * SEC / 1000.0                               # t/yr (365 d)
+            rem = np.where(KMASK, tot, 0.0)
+            y = x.copy(); y[KMASK] = 0.0
+            v = o.createVariable(short, 'f4', ('lat', 'lon')); v[:] = y.astype(np.float32)
+            v.long_name = at['long_name']; v.description = at['description']
+            v.units = 'kg m-2 s-1'; v.htap_variable = vn
+            LST[scc].append(f'{scc},{ip},{short},0,{a.final.rstrip("/")}/{CASE}/inputs/htap/{os.path.basename(fout)}')
+            row = {'pollutant': ip, 'scc': scc, 'variable': vn, 'window_t': tot.sum(), 'removed_t': rem.sum(),
+                   'kept_t': tot.sum() - rem.sum(),
+                   'kept_in_GEOCODE_197000_t': np.where((GEO == 197000) & ~KMASK, tot, 0).sum(),
+                   'carbon_adjust_t': extra}
+            for cd in codes: row[f'removed_GEOCODE_{cd}_t'] = np.where(GEO == cd, rem, 0.0).sum()
+            SUMMARY.append(row)
+        o.description = (f'HTAP_v3.2 {a.year} annual flux, window {LON0}-{LON1}E {LAT0}-{LAT1}N, '
+                         f'South Korea (CAPSS 2023 coverage) set to 0{note}')
+        o.source = src
+        o.history = f'{TAG} make_busan_htap_v32_inputs.py'
+    s = [r for r in SUMMARY if r['pollutant'] == ip]
+    log(f'{ip}: {len(s)} sectors, window {sum(r["window_t"] for r in s):,.0f} t/yr, removed (Korea) '
+        f'{sum(r["removed_t"] for r in s):,.0f} t/yr -> {fout}')
+
+for hp, ip in POLS.items():
+    data, src = (PM25, PM25SRC) if hp == 'PM2.5' else read_window(hp)
+    note = ''
+    if hp in ('PM2.5', 'PM10'):
+        note = '; BC and OC subtracted (carbon enters as PEC/POC)'
+        for short, (scc, vn, x, at) in list(data.items()):
+            c = np.zeros_like(x)
+            for k in ('BC', 'OC'):
+                if short in CARBON[k]: c += CARBON[k][short][2]
+            y = x - c
+            clip = np.where(y < 0, -y, 0.0) * AREA * SEC / 1000.0
+            data[short] = (scc, vn, np.maximum(y, 0.0), at, clip.sum())
+    else:
+        data = {k: v + (0.0,) for k, v in data.items()}
+    write_pol(ip, data, src, note)
+for hp, ip in (('BC', 'PEC'), ('OC', 'POC')):
+    write_pol(ip, {k: v + (CLOSS[(hp, k)],) for k, v in CARBON[hp].items()}, f'edgar_HTAPv32_{a.year}_{hp}.zip',
+              f'; HTAP {hp} as {ip} (scaled down where BC+OC > PM2.5)')
+shutil.rmtree(tmp, ignore_errors=True)
+
+# list files
+hdr = ['#LIST GRID', '#SCC,InvPollName,HTAP_VarName,Month,FileName']
+for g, sccs in GROUPS.items():
+    lines = [l for s_ in sccs for l in LST.get(s_, [])]
+    if lines: open(mk(f'{odir}/arinv.HTAPv32.{g}.lst'), 'w').write('\n'.join(hdr + lines) + '\n')
+open(mk(f'{odir}/arinv.HTAPv32.ALL.lst'), 'w').write(
+    '\n'.join(hdr + [l for g in GROUPS for s_ in GROUPS[g] for l in LST.get(s_, [])]) + '\n')
+log('list files:', ', '.join(f'{g}={sum(len(LST.get(s_, [])) for s_ in GROUPS[g])}' for g in GROUPS))
+
+# =====================================================================================
+# 4. Profiles (example copies + rows for detailed sectors)
+# =====================================================================================
+pdir = f'{OUT}/ge_dat/EDGAR/HTAPv32_profiles'
+for k in ('gspro', 'gscnv', 'hourly', 'weekly', 'monthly'):
+    shutil.copy(PROF[k], mk(f'{pdir}/{os.path.basename(PROF[k])}'))
+used = sorted(LST)
+def extend(path, key_of, make, outname, label, more=()):
+    lines = open(path, encoding='latin-1').read().splitlines()
+    have = {key_of(l) for l in lines if l and not l.startswith('#')}
+    add = []
+    for s_ in used:
+        if s_ in have: continue
+        p = PARENT.get(s_)
+        par = [l for l in lines if l and not l.startswith('#') and key_of(l) == p]
+        if not par: raise SystemExit(f'ERROR: no {label} rows for {s_} (parent {p})')
+        add += [make(l, s_) for l in par]
+    out = lines + [f'# {TAG} Busan HTAP_v3.2: detailed sectors mapped to parent entries ({label})'] + add
+    more = [m for m in more if m not in lines]
+    if more: out += [f'# {TAG} Busan HTAP_v3.2: PEC/POC from the HTAP BC/OC inventories -> profile 0 (PEC->PEC, POC->POC)'] + more
+    open(mk(f'{pdir}/{outname}'), 'w').write('\n'.join(out) + '\n')
+    log(f'{label}: {len(add)} rows added -> {outname}')
+extend(PROF['gsref'], lambda l: l.split(';')[0].strip('"'), lambda l, s_: s_ + l[l.index(';'):],
+       f'gsref_HTAPv32_busan_{TAG}.txt', 'GSREF',
+       more=['0000000000;"0";"PEC";;;;;;;', '0000000000;"0";"POC";;;;;;;'])
+gsp = open(PROF['gspro'], encoding='latin-1').read()
+for sp in ('PEC', 'POC'):
+    if f'0;"{sp}";"{sp}";' not in gsp: raise SystemExit(f'ERROR: profile 0 {sp}->{sp} not in {PROF["gspro"]}')
+
+# INVTABLE for HTAP: domestic INVTABLE + PEC/POC lines copied unchanged from the example INVTABLE
+exinv = sorted(glob.glob(os.path.join(a.example, 'ge_dat', 'invtable_*.txt')))
+if not os.path.isfile(a.invtable): raise SystemExit(f'ERROR: domestic INVTABLE not found: {a.invtable}')
+if not exinv: raise SystemExit('ERROR: example INVTABLE (ge_dat/invtable_*.txt) not found')
+inv = open(a.invtable, encoding='latin-1').read().splitlines()
+add = []
+for sp in ('PEC', 'POC'):
+    if any(l.split()[:1] == [sp] for l in inv if l and not l.startswith('#')): continue
+    hit = [(f, i + 1, l) for f in exinv for i, l in enumerate(open(f, encoding='latin-1').read().splitlines())
+           if l.split()[:2] == [sp, sp]]                  # plain line only (not mode-specific 'PEC EXH EXH__PEC')
+    if not hit: raise SystemExit(f'ERROR: no plain "{sp} {sp}" line in example INVTABLE {exinv}')
+    f, n, l = hit[0]
+    if l.split()[2] != 'Y': raise SystemExit(f'ERROR: example INVTABLE {sp} line keep flag is not Y: {l}')
+    log(f'INVTABLE {sp}: {os.path.basename(f)} line {n}: {l.rstrip()[:60]}')
+    add.append((f, n, l))
+hdr2 = [f'# {TAG} Busan HTAP_v3.2: copy of {os.path.basename(a.invtable)}'] + \
+       [f'#   + {sp} line copied unchanged from {os.path.basename(f)} line {n}' for (f, n, l), sp in zip(add, ('PEC', 'POC'))]
+ip_ = mk(f'{OUT}/ge_dat/invtable_busan_htap_{TAG}.txt')
+cm = [l for l in inv if l.startswith('#')]; body = [l for l in inv if not l.startswith('#')]
+open(ip_, 'w').write('\n'.join(cm + hdr2 + body + [l for _, _, l in add]) + '\n')
+log(f'INVTABLE for HTAP: {len(add)} lines added -> {ip_}')
+extend(PROF['tref'], lambda l: l.split(',')[0].strip('"'), lambda l, s_: f'"{s_}"' + l[l.index(','):],
+       f'tref_HTAPv32_busan_{TAG}.txt', 'TREF')
+
+# summary
+df = pd.DataFrame(SUMMARY)
+df.to_csv(mk(f'{odir}/htap_summary_{TAG}.csv'), index=False, float_format='%.3f')
+t = df.groupby('pollutant')[['window_t', 'removed_t', 'kept_in_GEOCODE_197000_t', 'carbon_adjust_t']].sum()
+rc = df.groupby('pollutant')[[c for c in df.columns if c.startswith('removed_GEOCODE_')]].sum()
+print('\n=== pollutant totals in window (t/yr, 365 d) ===')
+print(t.round(0).to_string())
+print('\n=== removed by GEOCODE (share of removed, %) ===')
+print((rc.div(rc.sum(axis=1), axis=0) * 100).round(1).rename(columns=lambda c: c.replace('removed_GEOCODE_', '').replace('_t', '')).to_string())
+log('done')
