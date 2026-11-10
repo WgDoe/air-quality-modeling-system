@@ -2,7 +2,7 @@
 
 > 갱신: 2026-11-10. 원칙: 국내 CAPSS 처리에 사용한 SMOKE 5.3 환경을 유지하고, **국외 HTAP_v3.2 입력의 생성·설치·실행·검증**을 별도로 추적한다. 27KM 8개 묶음 완료는 사용자 제공 실행 기록에 근거하며, 이 문서 자체가 다른 시스템에서의 재실행 성공을 뜻하지 않는다.
 
-> **소스 파일 반영 상태(2026-11-10):** 이 GitHub 변경에는 설명 문서 및 재현 체크리스트를 먼저 반영하였다. 별도 전달된 `smoke_htap_docs_20261110.zip` 안의 `make_busan_htap_v32_inputs.py`, `Annual_htap_2023capss_cb6.csh`, `ASSIGNS.emf`, `directory_definitions.csh`, `smkinven.f` 및 `file_list.txt`는 이 커밋에 포함되지 않았다. 따라서 ZIP의 6개 파일을 기존 `docs/smoke/files/busan/2023capss/` 대응 경로에 반영하고 해시를 확인하기 전까지는 **저장소만으로 완전 재현 가능한 상태가 아니다**.
+> **소스 반영 상태(2026-11-10):** HTAP_v3.2 Python 생성기, 연간 실행 스크립트 및 `directory_definitions.csh`는 저장소에 반영했다. 큰 SMOKE 원본 파일 `smkinven.f`와 예제 `ASSIGNS.emf`의 **전체 사본은 저장하지 않고**, 공식 SMOKE 설치·예제 원본에 적용할 수 있는 `apply_htap_v32_patches.py`와 두 패치 파일을 반영했다. 기존 01 설치 가이드를 따라 원본을 준비해야 하며 패치 후 컴파일·검증이 필요하다. 원본 ZIP에서 제공된 수정본을 참고할 경우에는 `smkinven.f` 및 `ASSIGNS.emf`의 원본/패치 차이를 반드시 확인한다.
 
 ## 0. 먼저 읽을 문서
 
@@ -66,7 +66,7 @@ find "$PKG" -type f | sort | tail -30
 ### D. SMOKE 소스 수정 및 설치 (04 §7)
 
 1. 기존 국내용 `genagmat.f` 수정 상태를 보존한다. **폐기한 `sizgmat.f` 여유 배열 패치를 다시 적용하지 않는다.**
-2. 국외용 `smkinven.f`의 NONPOINT 초기화 문제는 [91](91_SMOKE_smkinven_Fix.md)에 따라 원본 보관·차이 확인·컴파일 검증 후 수정한다.
+2. 국외용 `smkinven.f`의 NONPOINT 초기화 문제는 저장소의 `docs/smoke/files/busan/2023capss/smoke_patch/apply_htap_v32_patches.py`를 이용한다. [91](91_SMOKE_smkinven_Fix.md) 참고. 패치 후 반드시 재컴파일한다.
 3. `directory_definitions.csh`에 실제 MCIP `GRIDCRO2D_<GRID>.*.nc`를 가리키는 `GRID_CRO_2D` 설정이 적용되었는지 확인한다.
 4. `ASSIGNS.emf`의 참조 설정과 HTAP 입력·목록·프로파일을 04 §7.3의 명령대로 설치한다.
 5. 동일 사례 폴더에 덮어쓰기 전 스크립트·입력·로그를 백업한다.
