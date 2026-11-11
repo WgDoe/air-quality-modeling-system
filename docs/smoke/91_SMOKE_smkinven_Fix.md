@@ -1,6 +1,6 @@
 # SMOKE 5.3 국외 격자 인벤토리 `smkinven.f` NONPOINT 초기화 오류 수정 (2026-11-10)
 
-> 사용자 제공 HTAP_v3.2 시험 기록에 기반한 수정 이력. 실행 및 설치 명령의 기준은 [04 §11.3](04_SMOKE_Busan_Case_Run_Guide.md), 다른 시스템 재현은 [05 체크리스트](05_HTAP_v32_Reproduction_Checklist.md) 참조.
+> 사용자 제공 HTAP_v3.2 시험 기록에 기반한 수정 이력. 실행 및 설치 명령의 기준은 [05 §6](05_HTAP_v32_Reproduction_Checklist.md), 다른 시스템 재현은 [05 체크리스트](05_HTAP_v32_Reproduction_Checklist.md) 참조.
 
 ## 증상과 환경
 
@@ -22,7 +22,7 @@
 
 공식 SMOKE 태그 원본의 `smkinven.f` MD5는 `0a1c220d886eb812c76ad028f44fbfe4`, 패치 후 MD5는 `23530fc0a55cd5dcdef6c3a314510dc9`(사용자 제공 2026-11-10 재현 시험). 해시가 다르면 다른 변경·소스 버전을 먼저 조사한다.
 
-**패치 → MD5 검사 → 재컴파일 → 사례 설치**의 전체 명령은 [04 §11.3](04_SMOKE_Busan_Case_Run_Guide.md)의 블록을 그대로 사용한다. 실제 소스 경로는 `$SMK_HOME/subsys/smoke/src/smkinven/smkinven.f`다.
+**패치 → MD5 검사 → 재컴파일 → 사례 설치**의 전체 명령은 [05 §6](05_HTAP_v32_Reproduction_Checklist.md)의 블록을 그대로 사용한다. 실제 소스 경로는 `$SMK_HOME/subsys/smoke/src/smkinven/smkinven.f`다.
 
 **컴파일러 차이(사용자 제공 분석):** EPA의 Intel `Linux2_x86_64ifx` 실행환경에는 Intel `Makeinclude`의 `-zero` 옵션이 적용되어 초기화되지 않은 지역 변수가 0으로 채워질 수 있지만, GNU 설정에는 해당 옵션이 없어 오류가 드러났다. 이 설명은 제공된 환경·설정에 대한 분석으로, 모든 Intel 빌드에서 문제없다는 의미는 아니다.
 ## 검증 경과
@@ -31,8 +31,10 @@
 |---|---|
 | 수정 후 컴파일 | Fortran `Error:` 0건, 실행파일 갱신 |
 | 27KM HTAP ENERGY | Smkinven 정상 종료, Spcmat까지 통과 |
-| 별도 Grdmat 오류 | `GRID_CRO_2D` MCIP 경로 수정으로 해결(04 §11.3) |
+| 별도 Grdmat 오류 | `GRID_CRO_2D` MCIP 경로 수정으로 해결(05 §6) |
 | 27KM 8개 묶음 | 오류 0건, 각 묶음에 결과 파일 2개 |
+| 09·03KM 국외 8개 묶음 | 2026-11-11 사용자 실행 기록상 각 도메인 8개 묶음 완료. 03KM 국외 항공 0 배출 경고 판정은 05 §8.5 참조 |
+| 01KM 국외 부문 | 시험 기록상 모든 국외 배출량 0으로 제외; 재현 시스템에서는 05 §8.4의 파일·전 배출종 확인 필요 |
 | 수정 후 국내 부문 재실행 | 아직 독립 확인하지 않음 |
 
 이 수정은 GNU Fortran의 비초기화 지역 변수 문제를 막기 위한 것으로, 국내 배출량 수치 또는 다른 컴파일러의 동일성을 별도로 검증했다는 뜻은 아니다. 이전의 `sizgmat.f` 배열 확장 패치는 폐기된 상태이며 [04 §7.1](04_SMOKE_Busan_Case_Run_Guide.md) 원인 해결 방법을 유지한다.
