@@ -2,7 +2,7 @@
 
 > **문서 순서:** 01 설치 → 02 기존 체계 분석 → 03 배출량 개선 계획 → 04 부산 사례 실행. [SMOKE 문서 목차](00_README_First.md)를 확인하세요.
 
-국외 HTAP_v3.2 처리의 **다른 시스템 재현 순서**는 [05 체크리스트](05_HTAP_v32_Reproduction_Checklist.md)로 고정한다. 원자료와 실제 생성·실행 값은 해당 절(11.1 원자료, 11.2 생성, 11.3 패치·재컴파일·설치, 11.4 실행, 11.5 검증)을 따르며, 새 시스템에서 독립 재현 완료로 오인하지 않는다.
+**국외 HTAP_v3.2의 정식 실행·검증 절차는 [05 국외 배출량 처리 가이드](05_HTAP_v32_Reproduction_Checklist.md)**를 따른다. 04 문서는 국내 CAPSS 2023 전용이며, 11장은 국외 문서 안내만 남긴다.
 
 ## 1. 목적
 
@@ -22,10 +22,10 @@
 8장  실행 (기간은 MCIP에서 자동 설정)
      8.1 국내 점 → 8.2 국내 면 → 8.3 국내 이동 → 8.4 바다   (각 4개 도메인)
   ↓
-11장 국외 HTAP_v3.2 (입력 생성 → 패치·재컴파일·설치 → 8개 묶음 × 27·09KM)
+05 국외 HTAP_v3.2 가이드 (27·09·03KM 각 8개 묶음 완료; 01KM 제외)
 ```
 
-현재 상태(2026-11-10): **국내 5~8장 4개 부문 × 4개 도메인 완료. 국외 HTAP_v3.2 27KM 8개 묶음 완료, 09KM 실행·확인 중**(사용자 제공 실행 기록). 다음은 생물성·병합.
+현재 상태(2026-11-10): **국내 5~8장 4개 부문 × 4개 도메인 완료. 국외 HTAP_v3.2 27·09·03KM 각 8개 묶음 완료, 01KM 제외**(사용자 제공 실행 기록). 다음은 생물성·병합.
 
 ## 2. 구축 환경
 
@@ -86,10 +86,10 @@ echo "Downloaded $count files (+ file_list.txt)"
 | `holidays_korea_2012_2026_20261021.txt` | 한국 공휴일 |
 | `temporal/tpro_{monthly,weekly,hourly}_busan_2020ver_*.csv` | 월·요일·시간 배분 프로파일 (시간은 UTC) |
 | `smk_dates/2026/` | 2026년 날짜 파일 12개 |
-| `2023capss/generators/make_busan_htap_v32_inputs.py` | 국외 HTAP_v3.2 생성기 (§11.2) |
-| `2023capss/EMIS/2023capss_cb6/scripts/htap/Annual_htap_2023capss_cb6.csh` | 국외 연간 실행기 (§11.4) |
-| `2023capss/smoke_patch/apply_htap_v32_patches.py`, `smkinven_htap_v32.patch` | 소스 패치 및 변경 내역 (§11.3) |
-| `2023capss/EMIS/smoke5.2/assigns/ASSIGNS_htap_v32.patch` | MCIP 입력 경로 패치 (§11.3) |
+| `2023capss/generators/make_busan_htap_v32_inputs.py` | 국외 HTAP_v3.2 생성기 (05 §5) |
+| `2023capss/EMIS/2023capss_cb6/scripts/htap/Annual_htap_2023capss_cb6.csh` | 국외 연간 실행기 (05 §7) |
+| `2023capss/smoke_patch/apply_htap_v32_patches.py`, `smkinven_htap_v32.patch` | 소스 패치 및 변경 내역 (05 §6) |
+| `2023capss/EMIS/smoke5.2/assigns/ASSIGNS_htap_v32.patch` | MCIP 입력 경로 패치 (05 §6) |
 | `2023capss/file_list.txt` | 위 파일 목록 (내려받기용) |
 
 
@@ -603,9 +603,9 @@ done
 | 8.5 격자 배분 합계 | 완료 (3개 부문 × 4개 도메인 기대값 일치) |
 | 입력 자료 최신화 (종분배 연결, 시간 프로파일 등) | 계획 수립 ([03 개선 계획 §7](03_SMOKE_Emission_Improvement_Plan.md)), 기준 메커니즘 확정 및 기준 결과 확보 후 진행 |
 | 다른 시스템의 국내 처리 재현 | 2026-11-05 사용자 보고. 설치부터 전체 재구축 여부와 날짜·도메인 범위는 실행 기록에 명시 필요 (§10) |
-| 11.1~11.3 국외 HTAP_v3.2 원자료·생성·패치·설치 | 완료 (2026-11-10 사용자 실행 기록) |
-| 11.4 국외 HTAP_v3.2 27KM | 8개 묶음 완료(오류 0, 남한 배출량 0, PEC·POC 포함) |
-| 11.4 국외 HTAP_v3.2 09KM (03·01KM 시험 포함) | 실행·확인 중 |
+| 05 §3~6 국외 HTAP_v3.2 원자료·생성·패치·설치 | 완료 (2026-11-10 사용자 실행 기록) |
+| 05 §7~8 국외 HTAP_v3.2 27KM | 8개 묶음 완료(오류 0, 남한 배출량 0, PEC·POC 포함) |
+| 국외 HTAP_v3.2 09·03KM | 8개 묶음씩 완료 (2026-11-11); 01KM 제외 (영역 내 국외배출량 0, 05 §8.4 재현 검증 조건 참고) |
 | 생물성·국내외 병합 | 미착수 ([03 개선 계획 §5](03_SMOKE_Emission_Improvement_Plan.md)) |
 
 ## 부록 A. 실행 중 발생한 문제 기록
@@ -665,290 +665,14 @@ done
 재설치 시 [05 재현 체크리스트](05_HTAP_v32_Reproduction_Checklist.md)에 따라 환경·원자료 SHA-256·생성 명령·소스 패치 diff·출력 파일/수치 확인 결과를 남긴다. 27KM 8개 묶음 완료는 사용자 실행 기록 기준이며 나머지 도메인은 추후 기록한다. 남한 마스크의 인접 지역 손실과 BC·OC 성분 조정을 별도 QA 항목으로 유지한다.
 
 
-## 11. 국외 HTAP_v3.2 배출량 실제 처리 절차 (2026-11-10 기록)
+## 11. 국외 HTAP_v3.2 배출량 안내 (2026-11-11)
 
-> 기존 1~10장의 국내 절차를 보존하면서 추가한 국외 처리 부분이다. 원자료/실행 검증은 사용자 제공 기록 기준이며, 재현 체크리스트는 [05](05_HTAP_v32_Reproduction_Checklist.md)를 따른다. 나머지 도메인 결과는 추후 갱신한다.
+국외 인위배출량의 **정식 실행·검증 가이드는 [05 국외 HTAP_v3.2 처리 가이드](05_HTAP_v32_Reproduction_Checklist.md)**로 통합하였다. 본 04 문서는 CAPSS 2023 국내 점·면·이동·바다 배출량 처리와 국내 Grdmat 패치의 기준 문서로 유지한다.
 
-### 11.1 원자료 다운로드 및 준비
+- **국외 범위:** HTAP_v3.2 2020년 0.1° 연간 자료, 8개 묶음, **27·09·03KM 각각 8개 실행 완료**(사용자 제공 2026-11-10~11 결과)
+- **01KM:** 제공된 시험 결과에서 국외 배출 0으로 확인되어 별도 국외배출 파일을 병합하지 않음. 새 시스템에서는 05 §8.4의 파일 존재·전 물질 0 검사로 제외 여부를 재확인한다.
+- **국외 실행 순서:** 05 §3 원자료 → §5 입력 생성 → §6 `smkinven.f`·`ASSIGNS.emf` 패치 및 재컴파일·설치 → §7 실행 → §8 수치 검증 → §9 완료현황
+- **별도 기록:** [91 Smkinven 오류 수정](91_SMOKE_smkinven_Fix.md). 기존 국내 [§7.1 Grdmat 패치](#71-smoke-grdmat-패치)는 보존한다.
+- **남은 작업:** 생물성, 국내외 병합, CMAQ 연계 검증. 국외 실행 완료를 CMAQ-ready 입력 검증 완료로 표현하지 않는다.
 
-HTAP_v3.2의 2020년 0.1° 연간 flux 9종을 사용한다. 각 ZIP에는 전지구 NetCDF가 들어 있으며 Python 생성기가 ZIP에서 직접 읽는다.
-
-```bash
-(
-set -euo pipefail
-ROOT="$HOME/CMAQ_MODEL"
-H="$ROOT/DATA/EMIS/HTAPv32/2020"
-mkdir -p "$H"
-cd "$H"
-for p in CO NH3 NMVOC NOx PM10 PM2.5 SO2 BC OC; do
-  wget -nc "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/EDGAR/datasets/htap_v32/gridmaps_01x01/fluxes/annual/${p}/edgar_HTAPv32_2020_${p}.zip"
-done
-for p in CO NH3 NMVOC NOx PM10 PM2.5 SO2 BC OC; do
-  test -s "edgar_HTAPv32_2020_${p}.zip" || { echo "Missing $p"; exit 1; }
-  unzip -t "edgar_HTAPv32_2020_${p}.zip" | tail -1
-done
-sha256sum edgar_HTAPv32_2020_*.zip > htap_v32_2020_sha256.txt
-)
-```
-
-기준 생성 영역은 90~162°E / 18~56°N(720×380셀). 사용된 HTAP 부문 묶음은 INTSHIP, AVIATION, ENERGY, INDUSTRY, TRANSPORT, RESIDENT, WASTE, AGRICULTURE이다. CAPSS 2023 1km 셀이 닿는 0.1° 셀은 모든 부문과 물질에서 제거한다. 2026-11-10 생성 기록상 마스크 3,176셀, 남한 셀 잔여 배출량 0이다. 접경·해안에서 국외 배출량 일부가 같이 제거될 수 있으므로 '국외 원자료 전량 보존'으로 표현하지 않는다.
-
-### 11.2 국외 입력 생성
-
-필요: Python `netCDF4`, `numpy`, `pandas`, `pyproj` 및 기존 04 §3에 기재된 CAPSS 원자료·SMOKE 공식 예제. 생성기 이름은 `make_busan_htap_v32_inputs.py`. 원래 테스트에서는 `$HOME/busan_smoke_files/2023capss/generators/` 아래에 두었다.
-
-```bash
-(
-set -euo pipefail
-set -o pipefail
-ROOT="$HOME/CMAQ_MODEL"
-F="$HOME/busan_smoke_files"
-B="$ROOT/CASES/BUSAN/TEST_20260901"
-HPKG="$HOME/busan_htap_pkg"
-test ! -e "$HPKG" || { echo "기존 생성 패키지 먼저 백업"; exit 1; }
-python3 "$F/2023capss/generators/make_busan_htap_v32_inputs.py" \
-  --htap "$ROOT/DATA/EMIS/HTAPv32/2020" --year 2020 \
-  --capss "$ROOT/DATA/EMIS/CAPSS2023" \
-  --example "$ROOT/CASES/SMOKE_TEST/smoke_example_case_v3" \
-  --invtable "$F/invtable_busan_2017capss_20261021.txt" \
-  --final "$B/EMIS" --out "$HPKG" \
-  2>&1 | tee "$HOME/busan_htap_generate.log"
-grep -nE 'South Korea mask|BC/OC read|list files|INVTABLE|WARNING|ERROR|done' "$HOME/busan_htap_generate.log"
-)
-```
-
-생성기 처리: 원자료 영역 추출 → CAPSS 셀 기반 남한 제거 → BC를 PEC, OC를 POC로 대응 → BC+OC를 뺀 PM2.5·PM10 잔여 성분 산정 → 가스/입자 단위 및 변수명 매핑 → 8개 부문별 `#LIST GRID` 목록 → 격자 국가코드/시간대 파일 → 종·시간 프로파일 → INVTABLE(PEC/POC) 생성. BC+OC가 PM2.5를 초과하면 성분을 비례 축소해 각 셀의 `PM2_5 + PEC + POC = 원본 PM2.5`를 만족시킨다.
-
-참조 생성값(2026-11-10): BC 감소 216,739 t/yr, OC 감소 44,876 t/yr. 이 두 값은 결측이나 오류 0건의 의미가 아니라 **성분을 조정한 양**이다. 탄소 성분의 과학적 타당성은 별도 검증할 것.
-
-생성 예상 파일: `$HPKG/EMIS/2023capss_cb6/inputs/htap/`에 9개 NetCDF + 8개 묶음 목록 + 전체 목록 1개 + 점검표 1개 = 19개 파일. `ge_dat/EDGAR/GRIDMASK_EDGAR_busan_window.ncf`, `geocode{1,2,3,4}_edgar.txt`, `HTAPv32_profiles/`, `ge_dat/invtable_busan_htap_20261110.txt`도 준비한다.
-
-#### 11.2.1 생성기 처리 원칙과 시험 기준
-
-| 단계 | 처리 및 근거 |
-|---|---|
-| 영역 | HTAP 전지구 0.1° 자료에서 90~162°E, 18~56°N(720×380=273,600셀) 추출. 27KM 도메인에 여유 범위 확보 |
-| 남한 제거 | CAPSS 2023 점·면·이동·바다 1km 셀이 접하는 0.1° HTAP 셀 전체를 0으로 설정. 해안 격자는 국가 코드만으로 남한을 분리할 수 없음 |
-| 입자 | BC→PEC, OC→POC(프로파일 0); PM2_5·PM10에서 BC+OC 제거. 초과 셀은 BC·OC를 비례 축소하여 셀별 PM2.5 질량 보존 |
-| 변수·묶음 | 긴 HTAP 변수명을 16자 이하 이름으로 바꾸고 `#LIST GRID`를 8개 묶음+ALL로 작성 |
-| 공간·시간 | 예제 `GRIDMASK_EDGAR.ncf`의 국가코드·시간대를 같은 영역으로 자르고 기존 HTAP 시간분배 사용 |
-| 종·시간 참조 | 상세 부문을 부모 SCC에 연결한 GSREF/TREF를 생성; FUGITIVE·SOLVENTS→INDUSTRY는 잠정 적용 |
-| INVTABLE | 국내 파일은 유지하고 별도 복사본에 일반 `PEC PEC`, `POC POC` 줄만 추가(MOVES 배기 행 제외) |
-
-사용자 제공 **2026-11-10 실제 실행 로그의 참고값**:
-
-```text
-South Korea mask: 3176 of 273600 0.1 deg cells (GEOCODE 197000 cells: 979, of them outside mask: 0)
-BC/OC read; scaled down where BC+OC > PM2.5: BC 216,739 t/yr, OC 44,876 t/yr
-list files: INTSHIP=9, AVIATION=54, ENERGY=9, INDUSTRY=27, TRANSPORT=31, RESIDENT=9, WASTE=9, AGRICULTURE=27
-INVTABLE PEC: invtable_2022platform_MOVES_nonroad_15oct2024_nf_v2.txt line 659
-INVTABLE POC: invtable_2022platform_MOVES_nonroad_15oct2024_nf_v2.txt line 667
-done
-```
-
-| 물질 | 영역 합계(t/yr) | 남한 제거(t/yr) | 남한 셀 잔여 | 탄소 조정(t/yr) |
-|---|---:|---:|---:|---:|
-| CO | 159,059,631 | 736,683 | 0 | 0 |
-| NH3 | 11,700,586 | 304,792 | 0 | 0 |
-| NOX | 28,799,609 | 1,229,076 | 0 | 0 |
-| VOC | 35,412,553 | 1,206,219 | 0 | 0 |
-| SO2 | 12,357,628 | 265,959 | 0 | 0 |
-| PM2_5(탄소 제외) | 4,509,856 | 43,743 | 0 | 0 |
-| PM10(탄소 제외) | 7,752,766 | 128,518 | 0 | 0 |
-| PEC | 1,277,291 | 14,695 | 0 | 216,739 |
-| POC | 2,873,785 | 40,235 | 0 | 44,876 |
-
-`PM2_5 + PEC + POC = 8,660,932 t/yr`로 원래 PM2.5 질량을 보존한다. 단, 탄소 보정 중 BC 98%는 FUGITIVE 가스 플레어링 부문에서 발생하므로 BC 성분 배출량 자체는 보존되지 않는다. 제거된 셀 중 북한 코드 몫 0.1~1.3%, 일본 0%는 이 원자료 기준 참고값이다.
-
-생성 패키지(`~/busan_htap_pkg/EMIS/`)의 파일 구조:
-
-| 위치 | 파일·내용 |
-|---|---|
-| `2023capss_cb6/inputs/htap/` | 9개 배출 NetCDF + 8개 목록 + `ALL` 목록 + `htap_summary_20261110.csv` = **19개** |
-| `ge_dat/EDGAR/` | `GRIDMASK_EDGAR_busan_window.ncf`, `geocode1~4_edgar.txt` |
-| `ge_dat/EDGAR/HTAPv32_profiles/` | 예제 시간·종분배 5개 복사 + `gsref_HTAPv32_busan_20261110.txt`, `tref_HTAPv32_busan_20261110.txt` |
-| `ge_dat/` | `invtable_busan_htap_20261110.txt` |
-
-### 11.3 SMOKE 소스 패치·재컴파일·사례 설치
-
-기존 국내 Grdmat `genagmat.f` CYCLE 패치는 유지하며, 폐기한 `sizgmat.f` 배열 확대 패치를 다시 적용하지 않는다. **아래 블록은 bash 서브셸**로 실행한다. 실패해도 상위 터미널은 종료되지 않는다. 경로와 기존 파일을 먼저 확인한다.
-
-```bash
-(
-set -euo pipefail
-export SMK_HOME=/home/woogon/CMAQ_MODEL/SMOKEv5.3
-export BIN=Linux2_x86_64gfort10
-F=$HOME/busan_smoke_files/2023capss
-B=/home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS
-C=$B/2023capss_cb6
-S=$SMK_HOME/subsys/smoke/src/smkinven/smkinven.f
-m() { md5sum "$1" | awk '{print $1}'; }
-test -f "$S"; test -f "$B/smoke5.2/assigns/ASSIGNS.emf"
-# 패치; 원본은 .before_htap_v32로 자동 백업, 재실행 시 이미 패치된 파일은 건너뜀
-python3 "$F/smoke_patch/apply_htap_v32_patches.py" --smkinven "$S" --assigns "$B/smoke5.2/assigns/ASSIGNS.emf"
-[ "$(m "$S")" = 23530fc0a55cd5dcdef6c3a314510dc9 ] || { echo 'ERROR: smkinven.f 해시'; exit 1; }
-[ "$(m "$B/smoke5.2/assigns/ASSIGNS.emf")" = 058cffcc054f4ad9440b28f24640494e ] || { echo 'ERROR: ASSIGNS.emf 해시'; exit 1; }
-# 수정 소스로 재컴파일
-cd "$SMK_HOME/subsys/smoke/src"
-LC_ALL=C make 2>&1 | tee "$SMK_HOME/subsys/smoke/$BIN/make_SMOKEv5.3_fix_smkinven.log"
-ls -l --time-style=long-iso "$SMK_HOME/subsys/smoke/$BIN/smkinven"
-# 사례 설정 및 생성 결과 설치
-[ -e "$C/scripts/directory_definitions.csh.before_htap" ] || cp -p "$C/scripts/directory_definitions.csh" "$C/scripts/directory_definitions.csh.before_htap"
-cp "$F/EMIS/2023capss_cb6/scripts/directory_definitions.csh" "$C/scripts/"
-[ "$(m "$C/scripts/directory_definitions.csh")" = 9a5c4c8a894661af75b6e815e77f676f ] || { echo 'ERROR: directory_definitions.csh 해시'; exit 1; }
-mkdir -p "$C/scripts/htap" "$C/scripts/logs"
-cp "$F/EMIS/2023capss_cb6/scripts/htap/Annual_htap_2023capss_cb6.csh" "$C/scripts/htap/"
-chmod +x "$C/scripts/htap/Annual_htap_2023capss_cb6.csh"
-cp -r "$HOME/busan_htap_pkg/EMIS/." "$B/"
-ls -l "$B/smoke5.2/scripts/emf/smk_ar_gridded_annual_emf.csh"
-echo "inputs/htap 파일 수: $(find "$C/inputs/htap" -maxdepth 1 -type f | wc -l) (19 정상)"
-)
-```
-
-정상 기준: MD5 3개 일치, 컴파일 `Error:` 0건, 실행파일 갱신, HTAP 입력 19개. 해시가 다른 경우 기존 수정·소스 버전·줄바꿈부터 확인하고 억지로 덮어쓰지 않는다. `GRID_CRO_2D`가 해당 도메인의 실제 MCIP 파일을 가리키는지도 확인한다.
-#### 11.3.1 국외 부문 묶음과 필요한 입력 자료
-
-| HTAP_GROUP | SCC / 세부 부문 | 예제 종·시간 참조 |
-|---|---|---|
-| INTSHIP | INTSHIP | SHIPS |
-| AVIATION | DOMAVIA_LTO/CDS/CRS, INTAVIA_LTO/CDS/CRS | AIR_LTO, AIR_CDS, AIR_CRS |
-| ENERGY | ENERGY | 예제 그대로 |
-| INDUSTRY | INDUSTRY, FUGITIVE, SOLVENTS | INDUSTRY(후자 2개 잠정) |
-| TRANSPORT | TRANSPORT, BWTW, DOMSHIP, OTHTRANSPORT | TRANSPORT, TRANS_BWTW, SHIPS, TRANSPORT |
-| RESIDENT | RESIDENT | 예제 그대로 |
-| WASTE | WASTE | 예제 그대로 |
-| AGRICULTURE | AGRIBURN, LIVESTOCK, CROPS | AG_BURNING, AG, AG |
-
-| SMOKE 단계 | 필수 파일 (`EMIS/` 상대경로) | 출처 |
-|---|---|---|
-| Smkinven | `2023capss_cb6/inputs/htap/arinv.HTAPv32.<묶음>.lst`, `htap_v32_2020_<물질>_busan.nc` | 생성기: HTAP_v3.2 2020 연간 자료 |
-| Smkinven·Spcmat | `ge_dat/invtable_busan_htap_20261110.txt` | 국내 INVTABLE + 일반 PEC/POC 행 |
-| Grdmat | `ge_dat/gridding/griddesc_busan_4domains.txt`, `met/<GRID>/GRIDCRO2D_<GRID>.*.nc` | 기존 격자 및 MCIP |
-| Smkinven·Grdmat | `ge_dat/EDGAR/GRIDMASK_EDGAR_busan_window.ncf`, `geocode{1,2,3,4}_edgar.txt` | SMOKE 예제에서 영역 추출·복사 |
-| Spcmat | `ge_dat/EDGAR/HTAPv32_profiles/gsref_HTAPv32_busan_20261110.txt`, `gspro_HTAP_CB06_from_2011ei_corrected_20feb2024_nf_v1.txt`, `gscnv_edgar_HTAPv3_03Apr2024.txt` | 생성기·예제 |
-| Temporal | `ge_dat/EDGAR/HTAPv32_profiles/tref_HTAPv32_busan_20261110.txt`, `HTAP_2011_BaseA_tpro_{monthly,weekly,hourly}_24oct2022_nf_v1` | 생성기·예제 |
-| 실행 | `2023capss_cb6/scripts/htap/Annual_htap_2023capss_cb6.csh`, `smoke5.2/scripts/emf/smk_ar_gridded_annual_emf.csh`, `smoke5.2/assigns/ASSIGNS.emf` | 저장소·예제+패치 |
-
-최종 병합 전 출력은 `2023capss_cb6/premerged/htap_<묶음>/emis_mole_htap_<묶음>_<날짜>_<GRID>_cmaq_cb6ae7_2023capss_cb6.ncf`이며, 중간파일은 `2023capss_cb6/intermed/<GRID>/htap_<묶음>/`, 보고서는 `2023capss_cb6/reports/`에 생성된다. 기존 날짜 파일 및 공휴일 참조는 국내 처리와 공유한다.
-
-### 11.4 SMOKE 실행
-
-먼저 27KM ENERGY 단일 묶음을 시험한다.
-
-```bash
-C="$HOME/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS/2023capss_cb6"
-cd "$C/scripts/htap"
-GRID=27KM HTAP_GROUP=ENERGY ./Annual_htap_2023capss_cb6.csh \
-  > ../logs/htap_energy_27KM.log 2>&1
-grep -nE 'ERROR detected in|Segmentation fault|ERROR ABORT' ../logs/htap_energy_27KM.log
-```
-
-이후 27·09KM의 8개 묶음을 실행한다. 09KM은 실행·확인 중이며 03·01KM은 국외 잔여배출이 작아 병합 제외를 검토한다(최종 확정 전). **04 §4 및 부록 A의 기존 실행 규칙대로 반복 중단은 로그의 명시적인 오류 문구로만 판정한다.** 종료 코드는 함께 기록하지만, 이 환경에서는 정상 로그와 함께 0이 아닌 종료 코드가 나올 수 있으므로 종료 코드만으로 반복을 멈추지 않는다. 비정상 종료 코드가 나온 실행은 완료로 판정하지 않고 §11.5의 출력파일·수치 검증을 반드시 수행한다.
-
-```bash
-cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS/2023capss_cb6/scripts/htap
-for G in 27KM 09KM; do
-  for g in INTSHIP AVIATION ENERGY INDUSTRY TRANSPORT RESIDENT WASTE AGRICULTURE; do
-    GRID=$G HTAP_GROUP=$g ./Annual_htap_2023capss_cb6.csh > ../logs/htap_${g,,}_$G.log 2>&1
-    rc=$?
-    if grep -Eq 'ERROR detected in|Segmentation fault|ERROR ABORT' "../logs/htap_${g,,}_$G.log"; then
-      echo "ERROR: $G $g (exit=$rc) - 로그 확인"; break 2
-    fi
-    if [ "$rc" -ne 0 ]; then
-      echo "WARNING: $G $g (exit=$rc) - 로그 오류 문구 없음, 출력 검증 필요"
-    else
-      echo "$(date +%H:%M) $G $g 실행 종료 (exit=$rc)"
-    fi
-  done
-done
-```
-
-2026-11-10 사용자 실행 기록: 27KM 8개 부문 묶음 오류 0건, 각 묶음 일별 결과 2개씩. 09KM은 진행 상태로, 03·01KM 및 병합·CMAQ 연계는 완료로 선언하지 않는다.
-
-### 11.5 검증 및 결과 보관
-
-#### 11.5.1 재현 결과 점검 명령 (2026-11-10 기준)
-
-**① 로그·파일 수** — 각 묶음의 정상 기준은 오류 0, `premerged` 일별 파일 2개(이번 시험 기간).
-
-```bash
-C=/home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS/2023capss_cb6
-for G in 27KM 09KM; do
-  for g in intship aviation energy industry transport resident waste agriculture; do
-    e=$(grep -c 'ERROR detected in\|Segmentation fault\|ERROR ABORT' "$C/scripts/logs/htap_${g}_$G.log" 2>/dev/null)
-    n=$(find "$C/premerged/htap_$g" -maxdepth 1 -name "emis_mole_htap_${g}_2026*_${G}_*.ncf" 2>/dev/null | wc -l)
-    printf '%-5s %-12s 오류 %s  파일 %s\n' "$G" "$g" "${e:-로그없음}" "$n"
-  done
-done
-```
-
-**② 부문별 배출종 확인** — 첫날 파일 25시간·전체 격자 합(가스 mol/s, 입자 g/s; 물질 간 합산 금지).
-
-```bash
-cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS/2023capss_cb6/premerged
-G=27KM python3 - <<'PY'
-import glob, os, netCDF4 as nc, numpy as np
-G=os.environ['G']
-for g in ['intship','aviation','energy','industry','transport','resident','waste','agriculture']:
-    fs=sorted(glob.glob(f'htap_{g}/emis_mole_htap_{g}_*_{G}_*.ncf'))
-    if not fs: print(g, '파일 없음'); continue
-    with nc.Dataset(fs[0]) as d:
-        z={v:float(np.asarray(d[v][:]).sum()) for v in ['NO','SO2','NH3','PEC','POC','TOL'] if v in d.variables}
-    print(f'{g:12s} 파일 {len(fs)}개  '+'  '.join(f'{k} {v:.3g}' for k,v in z.items()))
-PY
-```
-
-**27KM 2026-11-10 실측 기준값**(8월 31일 파일):
-
-| 묶음 | NO | SO2 | NH3 | PEC | POC | TOL |
-|---|---:|---:|---:|---:|---:|---:|
-| intship | 3.55e4 | 4.59e3 | 9.34 | 3.5e4 | 1.75e4 | 81.3 |
-| aviation | 5.69e3 | 428 | 247 | 1.01e3 | 505 | 1.27 |
-| energy | 6.32e4 | 2.26e4 | 2.26e3 | 2.59e3 | 1.85e3 | 42.8 |
-| industry | 1.49e5 | 7.49e4 | 1.38e4 | 1.98e5 | 2.12e5 | 7.98e3 |
-| transport | 1.18e5 | 2.42e3 | 3.13e3 | 2.03e5 | 8.44e4 | 1.42e3 |
-| resident | 1.11e4 | 1.56e4 | 8.12e3 | 2.26e5 | 6.46e5 | 1.57e3 |
-| waste | 940 | 408 | 1.91e3 | 4.82e3 | 1.17e4 | 0 |
-| agriculture | 1.7e4 | 669 | 4.23e5 | 6.35e4 | 4.55e5 | 199 |
-
-**③ 남한 중복 제거 검증** — ENERGY의 도시 주변 3×3 격자 NO 25시간 합.
-
-```bash
-cd /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS/2023capss_cb6/premerged/htap_energy
-python3 - <<'PY'
-import glob, netCDF4 as nc, numpy as np
-pts={'27KM':[('서울',90,62),('부산',97,52),('평양',86,68),('베이징',57,73),('상하이',71,37),('도쿄',131,58)],
-     '09KM':[('서울',29,59),('부산',50,30),('평양',17,77),('후쿠오카',64,12),('대마도',53,22)]}
-for G,cities in pts.items():
-    fs=sorted(glob.glob(f'emis_mole_htap_energy_*_{G}_*.ncf'))
-    if not fs: print(G,'파일 없음'); continue
-    with nc.Dataset(fs[0]) as d: no=np.asarray(d['NO'][:]).sum(axis=(0,1))
-    print(G,'  '.join(f'{n} {no[r-1:r+2,c-1:c+2].sum():.4g}' for n,c,r in cities))
-PY
-```
-
-27KM 참고값: 서울 0, 부산 0, 평양 55.81, 베이징 457.8, 상하이 961.2, 도쿄 357.9. 도메인 GRIDDESC에 대응하는 1-기준 열·행 좌표이므로 격자 설정 변경 시 다시 계산한다. 3×3 일부 확인만으로 전체 영역의 완전성을 단정하지 않는다.
-
-**정상 경고 사례:** 로그 분석기 수준 2 `No speciation profiles found for pollutant "PM10"`(PMC 처리 경로), Smkinven `Resetting negative value of annual "PMC"`(약 −3×10⁻⁶ t의 반올림 차이). 다른 입력·버전에서 동일 경고가 나와도 원인을 확인해야 하며 무조건 무시하지 않는다.
-
-#### 11.5.2 2026-11-10 문제 및 수정 이력
-
-| 증상 | 원인 | 해결·주의 |
-|---|---|---|
-| Smkinven CELLID 기록 직후 Segmentation fault | 격자 NetCDF 경로의 `NONPOINT` 비초기화와 할당되지 않은 `CMACT`/`CNAICS` 접근 | `smkinven.f` 초기값 `.FALSE.`, 재컴파일 (§11.3, 91) |
-| Grdmat에서 `GRID_CRO_2D` 파일 미발견 | 예제 ASSIGNS의 고정 형식과 실제 MCIP 파일명 불일치 | 디렉터리 설정에서 실제 파일 지정, ASSIGNS는 기존 값 유지 |
-| PEC·POC 출력 없음 | 예제 PM2.5용 종분배로 탄소 몫이 다른 성분에 반영 | BC→PEC/OC→POC 및 PM2.5 잔여분 분리·GSREF/INVTABLE 보완 |
-| PEC/POC INVTABLE keep flag 오류 | MOVES 전용 PEC 행을 먼저 선택 | 일반 `PEC PEC`, `POC POC` 행만 채택 |
-| 탄소 분리 후 PM2.5가 원자료보다 약 26만 t 큼 | 일부 부문의 BC+OC가 PM2.5 초과 | 두 성분 비례 축소. FUGITIVE 플레어링 BC 축소는 남는 과학적 한계 |
-
-
-- `premerged/htap_<묶음>/emis_mole_htap_<묶음>_<날짜>_<GRID>_cmaq_cb6ae7_2023capss_cb6.ncf` 출력 개수·시간·격자·변수·단위를 확인한다.
-- 남한(서울·부산) 대표 격자 배출량 0, 인접 국가 대표 격자 배출량 양수인 것을 확인한다(단일 지점 확인만으로 전체 마스크 완전성을 보장하지는 않음).
-- NOx·SO2 등 전체 배출량 합계 및 PM2.5 성분 질량 보존을 입력과 출력에서 각각 확인한다.
-- `sha256sum`으로 9개 원본과 사용한 소스/스크립트, 로그, NetCDF header(`ncdump -h`)를 같이 보관한다.
-- SMOKE 오류 0건, CMAQ-ready 병합 검증, 다른 시스템 전체 재현은 **서로 다른 성공 단계**로 기록한다.
-
-참고: FUGITIVE·SOLVENTS 부문에 INDUSTRY 프로파일을 대체한 매핑은 임시 기준이며, 현재 시간 프로파일 역시 예제의 기존 자료를 활용한다.
-
-
-> **소스 관리 갱신 (2026-11-10):** GitHub에 HTAP Python 생성기·연간 실행기·MCIP 디렉터리 설정 파일을 저장했으며, SMOKE 공식 소스를 직접 중복 저장하는 대신 `apply_htap_v32_patches.py`, `smkinven_htap_v32.patch`, `ASSIGNS_htap_v32.patch`로 동일한 수정점을 재현한다. SMOKE 5.3 원본 및 예제 ASSIGNS 파일은 [01 설치 가이드](01_SMOKE_Installation_Guide.md)에 따라 준비한다. 패치 후 컴파일은 필수이며 실제 호스트의 경로를 먼저 확인한다.
+이전 04 §11의 국외 상세 절차는 중복과 유지보수 충돌을 막기 위해 05로 이관했다. **기존 04 §3.1의 GitHub 파일 43개 다운로드, 국내 입력 생성·설치, 4개 도메인 재현 절차 및 원래 소스 파일은 그대로 유지**한다.
