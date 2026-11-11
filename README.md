@@ -12,9 +12,9 @@
 4. [WRF/WPS 설치·전체 namelist 생성·개별 프로그램 실행](docs/wrf/WRF_WPS_Installation_Guide.md#case-run)
 5. [CMAQ 5.5 소스·config_cmaq.csh·MCIP 컴파일, 격자 결정과 MCIP 사례 실행](docs/mcip/MCIP_Installation_Guide.md#case-run)
 6. [SMOKE 5.3 소스·포인터 수정·컴파일·공식 예제 검증](docs/smoke/01_SMOKE_Installation_Guide.md)
-7. [부산 배출량 개선 계획: CAPSS 2023·HTAP v3.1·신규 시나리오](docs/smoke/03_SMOKE_Emission_Improvement_Plan.md)
-8. [부산 실제사례 실행 가이드 — 국내 CAPSS 2023 4부문·4도메인 완료 기록](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md)
-9. [국외 HTAP_v3.2 타 시스템 재현·검증 체크리스트](docs/smoke/05_HTAP_v32_Reproduction_Checklist.md) — 2020년 0.1° 자료, 남한 중복 제거·탄소 처리·8개 부문 묶음·27KM 결과 검증
+7. [부산 배출량 개선 계획: CAPSS 2023·HTAP_v3.2·신규 시나리오](docs/smoke/03_SMOKE_Emission_Improvement_Plan.md)
+8. [부산 국내 CAPSS 2023 실행 가이드 — 4부문·4도메인 완료 기록](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md)
+9. [국외 HTAP_v3.2 처리·재현 가이드](docs/smoke/05_HTAP_v32_Reproduction_Checklist.md) — 2020년 0.1° 자료, 남한 제외·탄소 처리·8개 묶음, 27·09·03KM 완료 및 01KM 제외 기준
 
 기존 CAPSS 2017 입력 준비 문서는 현행 목록에서 제외했다. 2023에도 필요한 공통 설정·검증 절차는 [부산 실행 가이드 §8](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md)에 통합했으며, 과거 원문은 Git 이력에서 확인할 수 있다.
 
@@ -53,7 +53,7 @@
 - [SMOKE 5.3 설치·컴파일 및 공식 예제 실행 가이드](docs/smoke/01_SMOKE_Installation_Guide.md)
 - [procar2pt.f 포인터 초기화 수정 기록](docs/smoke/90_SMOKE_procar2pt_Fix.md)
 - [기존 SMOKE 2.7 배출량 산정체계 분석 (신규 5.3 전환 참고)](docs/smoke/02_Legacy_SMOKE27_Emission_Processing.md)
-- [SMOKE 부산 배출량 개선 계획: CAPSS 2023 / HTAP v3.1 전환 기준](docs/smoke/03_SMOKE_Emission_Improvement_Plan.md)
+- [SMOKE 부산 배출량 개선 계획: CAPSS 2023 / HTAP_v3.2 전환 기준](docs/smoke/03_SMOKE_Emission_Improvement_Plan.md)
 - [SMOKE 부산 실제사례 실행 가이드: 국내 CAPSS 2023 4부문·4도메인 완료 기록](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md)
 
 ### Master Plan과 현재 문서의 대응
@@ -102,7 +102,9 @@ SMOKE 하위 문서는 재작업 시 읽는 순서를 드러내기 위해 `00_` 
 
 현재 확인된 버전은 HDF5 1.14.6, netCDF-C 4.9.3, netCDF-Fortran 4.6.2, I/O API 3.2-20200828이다. I/O API 산출물은 `/home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/Linux2_x86_64gfort10`, include 파일은 같은 소스 루트의 `ioapi/fixed_src`에 있다.
 
-**2026-10-30 CAPSS 2023 실행 갱신:** 국내 CAPSS 2023 점·면·이동·바다 4개 부문 × 27·09·03·01KM 완료(사용자 제공 2026-10-23~29 Linux 실행 기록 기준). 점 인벤토리 보고서 합계와 면·이동·바다 NOx 격자 합계 일치. 다음은 국외(HTAP v3.1)·생물성·병합 및 CMAQ 연계 검증. [04 부산 실행 가이드](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md) §7.1의 genagmat.f 패치를 적용하며 기존 sizgmat.f 패치는 폐기한다. 입력·설치 스크립트는 [2023capss/](docs/smoke/files/busan/2023capss/)에 보관한다. 신규 환경의 전체 재현 검증은 별도이다.
+**2026-11-11 국외배출량 최종 갱신:** [05 국외 HTAP_v3.2 처리 가이드](docs/smoke/05_HTAP_v32_Reproduction_Checklist.md)에 원자료 준비부터 입력 생성·SMOKE 소스 패치·재컴파일·8개 부문 실행·검증까지 통합했다. 27·09·03KM 각 8개 묶음 완료, 01KM은 시험상 배출 0으로 제외한다. 다른 시스템에서는 05 §8.4의 출력파일 존재 및 전체 배출종 0 여부를 재확인한다. 국내 처리는 [04 국내 가이드](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md), `smkinven.f` 패치는 [91 수정 이력](docs/smoke/91_SMOKE_smkinven_Fix.md)을 따른다. 병합·CMAQ 연계는 미실행.
+
+**2026-10-30 CAPSS 2023 실행 갱신:** 국내 CAPSS 2023 점·면·이동·바다 4개 부문 × 27·09·03·01KM 완료(사용자 제공 2026-10-23~29 Linux 실행 기록 기준). 점 인벤토리 보고서 합계와 면·이동·바다 NOx 격자 합계 일치. 국외 HTAP_v3.2는 2026-11-11 현재 27·09·03KM에서 각 8개 묶음 완료, 01KM은 영역 내 국외 배출량 0으로 제외(사용자 시험 기록 기준). 다음은 생물성·병합 및 CMAQ 연계 검증. [04 부산 실행 가이드](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md) §7.1의 genagmat.f 패치를 적용하며 기존 sizgmat.f 패치는 폐기한다. 입력·설치 스크립트는 [2023capss/](docs/smoke/files/busan/2023capss/)에 보관한다. 신규 환경의 전체 재현 검증은 별도이다.
 
 ### 모델 버전 기준
 
