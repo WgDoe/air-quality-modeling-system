@@ -25,7 +25,7 @@
 05 국외 HTAP_v3.2 가이드 (27·09·03KM 각 8개 묶음 완료; 01KM 제외)
 ```
 
-현재 상태(2026-11-11): **국내 5~8장 4개 부문 × 4개 도메인 완료. 국외 HTAP_v3.2 27·09·03KM 각 8개 묶음 완료, 01KM 제외**(사용자 제공 실행 기록). 다음은 생물성·병합.
+현재 상태(2026-11-11): **국내 5~8장 4개 부문 × 4개 도메인 완료. 국외 HTAP_v3.2 27·09·03KM 각 8개 묶음 완료, 01KM 제외**(사용자 제공 실행 기록). 다음은 국내·국외 병합. 생물성은 SMOKE에서 처리하지 않고 CMAQ 인라인 MEGAN 3.2로 계산한다([03 §9](03_SMOKE_Emission_Improvement_Plan.md#busan-inline-megan)).
 
 ## 2. 구축 환경
 
@@ -279,6 +279,8 @@ bash ~/busan_2023capss_pkg/install_busan_2023capss.sh 2>&1 | tee ~/busan_install
 - 대리자료 폴더 4개 (01KM 32M, 03KM 43M, 09KM 24M, 27KM 7.0M)와 FF10 4개
 
 > **삭제 경고:** 기본 설치는 기존 결과를 보존한다. `BUSAN_REMOVE_OBSOLETE=YES`를 지정하면 `intermed/09KM/kor_point`, `inputs/kor_point/scc10_reference_map_20261022.csv`, `inputs/asia`가 삭제된다. 백업 후 의도적으로 정리할 때만 지정한다. 설치는 패키지의 입력·스크립트를 덮어쓰므로 재설치 전 이 파일들도 백업한다.
+
+<a id="busan-grdmat-patch"></a>
 
 ### 7.1 SMOKE Grdmat 패치 (한 번만)
 
@@ -606,7 +608,10 @@ done
 | 05 §3~6 국외 HTAP_v3.2 원자료·생성·패치·설치 | 완료 (2026-11-10 사용자 실행 기록) |
 | 05 §7~8 국외 HTAP_v3.2 27KM | 8개 묶음 완료(오류 0, 남한 배출량 0, PEC·POC 포함) |
 | 국외 HTAP_v3.2 09·03KM | 8개 묶음씩 완료 (2026-11-11); 01KM 제외 (영역 내 국외배출량 0, 05 §8.4 재현 검증 조건 참고) |
-| 생물성·국내외 병합 | 미착수 ([03 개선 계획 §5](03_SMOKE_Emission_Improvement_Plan.md)) |
+| 국내외 병합 | 미착수 ([03 개선 계획 §5](03_SMOKE_Emission_Improvement_Plan.md)) |
+| 생물성 | SMOKE 부문 없음. CMAQ 인라인 MEGAN 3.2로 결정(2026-11-11, [03 §9](03_SMOKE_Emission_Improvement_Plan.md#busan-inline-megan)), CCTM 단계에서 처리 |
+
+국내외 병합을 구성할 때 국내 4개 부문과 적용 대상 HTAP 부문만 입력 목록에 넣는다. 병합 파일을 CCTM에 연결하기 전에 [03 §9의 이중계상 확인 절차](03_SMOKE_Emission_Improvement_Plan.md#busan-inline-megan)를 따른다.
 
 ## 부록 A. 실행 중 발생한 문제 기록
 
@@ -672,7 +677,7 @@ done
 - **국외 범위:** HTAP_v3.2 2020년 0.1° 연간 자료, 8개 묶음, **27·09·03KM 각각 8개 실행 완료**(사용자 제공 2026-11-10~11 결과)
 - **01KM:** 제공된 시험 결과에서 국외 배출 0으로 확인되어 별도 국외배출 파일을 병합하지 않음. 새 시스템에서는 05 §8.4의 파일 존재·전 물질 0 검사로 제외 여부를 재확인한다.
 - **국외 실행 순서:** 05 §3 원자료 → §5 입력 생성 → §6 `smkinven.f`·`ASSIGNS.emf` 패치 및 재컴파일·설치 → §7 실행 → §8 수치 검증 → §9 완료현황
-- **별도 기록:** [91 Smkinven 오류 수정](91_SMOKE_smkinven_Fix.md). 기존 국내 [§7.1 Grdmat 패치](#71-smoke-grdmat-패치)는 보존한다.
-- **남은 작업:** 생물성, 국내외 병합, CMAQ 연계 검증. 국외 실행 완료를 CMAQ-ready 입력 검증 완료로 표현하지 않는다.
+- **별도 기록:** [91 Smkinven 오류 수정](91_SMOKE_smkinven_Fix.md). 기존 국내 [§7.1 Grdmat 패치](#busan-grdmat-patch)는 보존한다.
+- **남은 작업:** 국내외 병합, CMAQ 연계 검증(생물성은 CCTM 인라인 MEGAN 3.2, [03 §9](03_SMOKE_Emission_Improvement_Plan.md#busan-inline-megan)). 국외 실행 완료를 CMAQ-ready 입력 검증 완료로 표현하지 않는다.
 
 이전 04 §11의 국외 상세 절차는 중복과 유지보수 충돌을 막기 위해 05로 이관했다. **기존 04 §3.1의 GitHub 파일 43개 다운로드, 국내 입력 생성·설치, 4개 도메인 재현 절차 및 원래 소스 파일은 그대로 유지**한다.

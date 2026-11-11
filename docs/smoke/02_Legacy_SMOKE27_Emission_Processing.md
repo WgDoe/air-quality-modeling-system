@@ -20,7 +20,7 @@
 | 시간배분 | SCC별 월/요일/일변화; 시간대 및 공휴일 파일 |
 | 화학종 분배 | SCC별 변환계수·프로파일 참조·SPECIATE |
 | 공간배분 | 국내 시군구×SCC; 국외 국가×부문×오염물질 surrogate |
-| 생물성 | BEIS 3.12 (1 km 산출 흔적 확인) |
+| 생물성 | 27·9km MEGAN v2.04, 3·1km BEIS 3.12 (2026-11-11 확인, [03 §9.1](03_SMOKE_Emission_Improvement_Plan.md#legacy-biogenic)) |
 | 병합 | Mrggrid의 AREA + POINT + BIO |
 
 ```text
@@ -29,10 +29,14 @@ IDA 인벤토리(국내 면·이동/해상, 국내 점, 아시아, 북한)
        ├─ 종분배: VOC→TOG/NONHAPTOG, SPECIATE→CB05/AE5
        ├─ 시간배분: SCC별 월·요일·일변화, 공휴일
        ├─ 공간배분: surrogate
-       ├─ 점오염원 굴뚝 특성 보정 및 상승 처리
-       └─ BEIS 생물성
-            → Mrggrid: AREA + POINT + BIO
-            → CMAQ 배출파일
+       └─ 점오염원 굴뚝 특성 보정 및 상승 처리
+  → AREA 및 POINT
+
+생물성 BIO 공급 경로
+  ├─ 27·09KM: SMOKE 외부 MEGAN v2.04 → mg2mech (CB05) → BIO 파일 복사
+  └─ 03·01KM: SMOKE 2.7 내부 BEIS 3.12 → BIO 파일 생성
+
+AREA + POINT + BIO → Mrggrid → CMAQ 배출파일
 ```
 
 `filelist.mrggrid.txt`에 AREA·POINT·BIO만 기재되어 있어 국외 배출은 AREA에 사전 합쳐진 것으로 **추정**한다.
@@ -121,7 +125,9 @@ IDA 파일에서 입력되는 7종: **SO2, NOX, CO, PM10, VOC, NH3, PM2.5**.
 
 ### 생물성
 
-기존 `WRF_LandUse*` BELD3, `b3grd_BIO_nctox.ncf`(BEIS 3.12, 1km, 77개 변수), BEIS 계수 및 CB05 매핑 파일 확인. 다른 기록의 MEGAN v2.04 사용 영역과의 관계는 **실행 스크립트 확인 필요**. 신규 체계는 BEIS4(BELD5) 또는 MEGAN 3.x 입력을 별도 구축한다.
+기존 `WRF_LandUse*` BELD3, `b3grd_BIO_nctox.ncf`(BEIS 3.12, 1km, 77개 변수), BEIS 계수 및 CB05 매핑 파일 확인.
+
+**2026-11-11 확인:** 기존 체계는 **27·9km는 MEGAN v2.04, 3·1km는 BEIS 3.12**로 나눠 처리했다. MEGAN은 SMOKE 밖에서 `megan` → `mg2mech`(CB05)로 계산해 `b3gts_l…BIO…` 이름으로 SMOKE 출력 폴더에 넣었고, BEIS는 임상도·토지피복도로 만든 BELD3를 SMOKE 안에서 사용했다. 근거 자료와 특이사항은 [03 §9.1](03_SMOKE_Emission_Improvement_Plan.md#legacy-biogenic)에 정리했다. 신규 체계는 이 방식을 따르지 않고 **CMAQ 5.5 인라인 MEGAN 3.2**를 4개 도메인에 공통 적용한다([03 §9](03_SMOKE_Emission_Improvement_Plan.md#busan-inline-megan)).
 
 ## 8. 신규 SMOKE 5.3 전환 체크리스트
 
@@ -134,7 +140,7 @@ IDA 파일에서 입력되는 7종: **SO2, NOX, CO, PM10, VOC, NH3, PM2.5**.
 | 5 | surrogate 설명·매핑 | 동일 영역의 기존 자료 | 도메인·격자·비율합계, 해상 파일 실재 |
 | 6 | 점오염원 굴뚝 QA | 굴뚝 원자료 및 기본값 참고 | 32°F 결측·유량 0·inline 설정 |
 | 7 | 국외 배출 중복 제거 | 국가 코드 및 자료 구분 | **아시아 파일과 북한 별도 파일의 중복 방지** |
-| 8 | 생물성 신규 산정 | 기존 토지이용 자료 참고 | BEIS4/MEGAN 선택 및 CMAQ 매핑 |
+| 8 | 생물성 신규 산정 | 재사용하지 않음(비교 참고) | CMAQ 인라인 MEGAN 3.2로 결정(03 §9). MEGAN 입력·CMAQ 매핑은 CCTM 단계 |
 | 9 | 실행·병합 QA | 기존 총량 비교 | 로그, 시간·격자·화학종·부문별 총량 |
 
 **원자료에서 발견한 핵심 중복:** 아시아 파일과 북한 파일 모두에 북한 배출이 존재(원자료 예시 SO2 325,823 및 149,532 ton/yr). 중복 여부와 포함 범위를 재검토해 하나의 북한 배출만 반영한다.
@@ -142,7 +148,7 @@ IDA 파일에서 입력되는 7종: **SO2, NOX, CO, PM10, VOC, NH3, PM2.5**.
 ## 9. 검증 범위 및 문서 관계
 
 - **확인됨:** 입력·중간 파일 구조, 코드·프로파일 참조, 일부 단계의 레코드 수 및 총량, 기존 문서에 명시된 격자·자료 버전.
-- **추정·미확인:** 실제 최종 병합의 국외 처리 순서, 전체 점오염원 상승 설정, 해상 Grdmat 공간배분, 국외 VOC 기본 프로파일 대체 여부, MEGAN/BEIS 영역별 실행 관계.
+- **추정·미확인:** 실제 최종 병합의 국외 처리 순서, 전체 점오염원 상승 설정, 해상 Grdmat 공간배분, 국외 VOC 기본 프로파일 대체 여부. (MEGAN/BEIS 영역별 실행 관계는 2026-11-11 확인: 27·9km MEGAN, 3·1km BEIS, 03 §9.1)
 - **아직 미수행:** 기존 SMOKE 2.7 재실행/로그 확인, 신규 5.3 부산 사례 실험, CMAQ 입출력 일치 검증.
 
 관련 문서: [SMOKE 5.3 설치·공식 예제 가이드](01_SMOKE_Installation_Guide.md), [2023 CAPSS·HTAP 배출량 개선 계획](03_SMOKE_Emission_Improvement_Plan.md), [SMOKE 부산 실행 가이드](04_SMOKE_Busan_Case_Run_Guide.md), [SMOKE 포인터 수정 기록](90_SMOKE_procar2pt_Fix.md), [프로젝트 기본계획](../planning/00_CMAQ_Project_Master_Plan.md).
