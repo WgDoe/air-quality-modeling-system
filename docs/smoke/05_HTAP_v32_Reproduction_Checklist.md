@@ -423,7 +423,7 @@ from netCDF4 import Dataset
 groups = ['intship','aviation','energy','industry','transport','resident','waste','agriculture']
 missing, nonzero, checked = [], [], 0
 for g in groups:
-    fs = sorted(glob.glob(f'premerged/htap_{g}/emis_mole_htap_{g}_*_{ "01KM" }_*.ncf'))
+    fs = sorted(glob.glob(f'premerged/htap_{g}/emis_mole_htap_{g}_*_01KM_*.ncf'))
     if len(fs) != 2:
         missing.append((g, len(fs)))
         continue
