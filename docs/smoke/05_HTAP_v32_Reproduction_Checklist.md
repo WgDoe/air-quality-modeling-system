@@ -259,6 +259,9 @@ echo "inputs/htap 파일 수: $(find "$C/inputs/htap" -maxdepth 1 -type f | wc -
 **CASE별 경로 필수 수정:** 저장소의 `directory_definitions.csh`에는 `INSTALL_DIR`가 `TEST_20260901/EMIS`로 고정되어 있다. **새 CASE라면 복사 후 해당 CASE의 실제 EMIS 경로로 수정**하고 아래처럼 확인한다. `ASSIGNS.emf` MD5 3종 중 해당 파일·`directory_definitions.csh` MD5는 수정 *전* 기준이며, 경로를 변경한 후의 MD5가 달라지는 것은 정상이다. 나머지 스크립트 내 고정 경로도 §7 실행 전 검사한다.
 
 ```bash
+# 앞 블록은 서브셸이므로 이 점검 블록에서도 CASE 경로를 다시 지정한다.
+C=/home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS/2023capss_cb6
+# 새 CASE라면 위 C와 directory_definitions.csh 내부 INSTALL_DIR을 실제 경로로 수정한 뒤 검사한다.
 grep -n 'INSTALL_DIR' "$C/scripts/directory_definitions.csh"
 grep -n 'TEST_20260901' "$C/scripts/directory_definitions.csh" "$C/scripts/htap/Annual_htap_2023capss_cb6.csh" || true
 ```
