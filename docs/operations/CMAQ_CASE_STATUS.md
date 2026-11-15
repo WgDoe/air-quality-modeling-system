@@ -6,11 +6,11 @@
 - CMAQ 5.5 시험용 CCTM 빌드 확인 기록.
 - WRF/WPS 및 MCIP 4도메인 테스트 완료 기록.
 - 국내 CAPSS 2023, 국외 HTAP v3.2 개별 배출처리 완료 기록.
-- MEGAN 3.2 CT3·EFMAP·LDF 파일 생성 및 일부 재현 검증 기록.
+- MEGAN 3.2 CT3·EFMAP·LDF 파일 생성 기록; 수정 후 LDF의 4도메인 CSV/NetCDF 값 일치 및 운영 LDF 파일 동일성 확인(2026-11-16 사용자 제공 서버 출력).
 
 ## 아직 수행/검증되지 않은 항목
 1. SMOKE 국내·국외 부문 병합과 CCTM 입력 단위/종/시간/공간 정합성.
-2. CCTM 실행에 사용할 운영 LDF 교체, inline MEGAN 3.2 및 토양 NO 옵션 실제 연결.
+2. **운영 LDF의 수정본 일치 여부는 확인 완료**. 남은 일은 CCTM inline MEGAN 3.2 및 토양 NO 옵션 실제 연결·실행 검증.
 3. MCIP 수직층과 배출량/IC/BC 수직층 정합성, CCTM IC/BC 준비.
 4. 공식 CMAQ benchmark 및 실제 부산 CCTM 성공 실행, 로그·출력 QA.
 5. CMAQ-ISAM benchmark, 기여지역/배출원 태그 입력 및 실제 실행.
