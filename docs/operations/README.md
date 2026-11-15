@@ -42,7 +42,7 @@
 | WRF 물리 설정·입력기상 변경 | WRF, 필요 시 WPS → MCIP → 기상 의존 배출 전처리 → CCTM | physics 옵션에 따라 추가 runtime 테이블 필요 |
 | 도메인·격자 변경 | WPS geogrid부터 재검토 → WRF/MCIP → 공간할당·MEGAN 입력 → CCTM | 모든 GRIDDESC 일치 확인 |
 | CAPSS 원자료·배출계수 변경 | 국내 입력 생성/SMOKE 해당 부문부터 | 다른 부문은 입력 불변이면 유지 |
-| HTAP 원자료·마스킹·프로파일 변경 | 국외 생성기/해당 8묶음부터 | SMOKE 패치는 최초 설치 또는 소스 교체 때만 |
+| HTAP 원자료·마스킹·프로파일 변경 | 국외 생성기/해당 8묶음부터 | smkinven 재컴파일([§6.1](../smoke/05_HTAP_v32_Reproduction_Checklist.md#htap-install-once))은 설치·소스 교체 때만; 새 CASE 폴더에는 [§6.2](../smoke/05_HTAP_v32_Reproduction_Checklist.md#htap-case-install) 필수 |
 | MEGAN CT3·EFMAP·LDF 변경 | MEGAN 입력 생성부터 | CCTM 연계는 아직 미검증 |
 | 후처리 코드만 변경 | 후처리만 | 모델 산출물 불변 전제 |
 
