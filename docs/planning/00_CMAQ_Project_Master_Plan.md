@@ -1,7 +1,7 @@
 # CMAQ 통합 대기질 모델링 시스템 구축 기본계획 및 요구사항
 
 작성일: 2026-09-23  
-수정일: 2026-11-11 (부산 국내·국외 처리 현황 및 CMAQ 인라인 MEGAN 방침 반영)
+수정일: 2026-11-15 (MEGAN 설치·공용 입력·부산 전처리 경로 반영)
 문서 성격: 프로젝트 기본계획 / 요구사항 정의 / 공식 참고자료 인덱스  
 적용 대상: Linux Desktop 기반 CMAQ 독립 운영환경 구축
 
@@ -290,7 +290,9 @@ git clone -b CMAQv5.5.0.3_11Jul2025 https://github.com/USEPA/CMAQ.git CMAQ_REPO
 ├── WRFV4.5.1/               # 컴파일된 WRF 본체
 ├── WPS-4.5/                 # 컴파일된 WPS 본체
 ├── CMAQv5.5/                # MCIP 빌드·실행 프로젝트; CCTM 미컴파일
+├── MEGAN/                   # MEGAN 3.2 전처리기, MEGEFP, txt2ioapi
 ├── DATA/
+│   ├── EMIS/MEGAN/          # 공용 식생·배출계수 원자료
 │   ├── WPS_GEOG/            # 정적 지형자료
 │   └── MET/FNL/YYYY/MM/     # ds083.2 1도 GRIB2, 6시간 간격
 ├── CASES/BUSAN/TEST_20260901/
@@ -298,6 +300,7 @@ git clone -b CMAQv5.5.0.3_11Jul2025 https://github.com/USEPA/CMAQ.git CMAQ_REPO
 │   ├── WRF/
 │   ├── MCIP/
 │   ├── EMIS/
+│   │   └── MEGAN/           # 도메인별 전처리 설정·스크립트·산출물
 │   ├── CMAQ/
 │   ├── POST/
 │   └── LOG/
@@ -305,7 +308,11 @@ git clone -b CMAQv5.5.0.3_11Jul2025 https://github.com/USEPA/CMAQ.git CMAQ_REPO
     └── download_fnl.sh
 ```
 
-위 구조는 2026-10-08 사용자 제공 실제 경로를 반영한다. `src/`는 원본 보관, 모델 본체는 프로젝트 루트, 라이브러리는 `libs/`, 공유 자료는 `DATA/`, 실행 결과는 CASE별로 분리한다. 자세한 역할과 현재/계획 구조는 [WRF/WPS 가이드 §2](../wrf/WRF_WPS_Installation_Guide.md)를 따른다.
+위 구조는 2026-10-08 사용자 제공 경로와 2026-11-15 서버에서 확인한 MEGAN 배치를 반영한다. `src/`는 원본 보관, 모델 본체는 프로젝트 루트, 라이브러리는 `libs/`, 공유 자료는 `DATA/`, 실행 결과는 CASE별로 분리한다. 자세한 역할과 현재/계획 구조는 [WRF/WPS 가이드 §2](../wrf/WRF_WPS_Installation_Guide.md)를 따른다.
+
+부산 MEGAN 전처리의 기준 경로는 사례의 `EMIS/MEGAN/`이다. `run_remaining_grids.sh`와 `run_remaining_grids_lowmem.sh`는 프로젝트 루트의 `MEGAN/MEGAN32_Prep_Code_Jan_2022/`에서 실행 파일을 찾고, 공용 입력은 `DATA/EMIS/MEGAN/`, 기상 입력은 사례의 `WRF/`에서 읽는다. 도메인별 중간 산출물은 사례의 `EMIS/MEGAN/`, 수행 로그는 사례의 `LOG/`에 저장한다.
+
+기존 경로 호환을 위해 프로젝트의 `EMIS/MEGAN`은 `../DATA/EMIS/MEGAN`으로, 사례 바로 아래의 `MEGAN`은 `EMIS/MEGAN`으로 연결하는 심볼릭 링크를 둔다. 새 설정과 문서에는 이동 후 경로를 사용한다.
 ---
 
 ## 4.3 새 시스템 프로젝트 폴더 생성
@@ -313,8 +320,8 @@ git clone -b CMAQv5.5.0.3_11Jul2025 https://github.com/USEPA/CMAQ.git CMAQ_REPO
 OS 설치 및 일반 사용자 woogon 로그인 후 실행한다. 모델 설치·자료·CASE는 같은 루트 아래에서 역할을 분리한다.
 
 ```bash
-mkdir -p /home/woogon/CMAQ_MODEL/{libs,src,DATA/WPS_GEOG,DATA/MET/FNL,SCRIPTS,logs/system,logs/ioapi,tests/compiler_mpi}
-mkdir -p /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/{WPS,WRF,MCIP,EMIS,CMAQ,POST,LOG}
+mkdir -p /home/woogon/CMAQ_MODEL/{libs,src,DATA/WPS_GEOG,DATA/MET/FNL,DATA/EMIS/MEGAN,SCRIPTS,logs/system,logs/ioapi,tests/compiler_mpi}
+mkdir -p /home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/{WPS,WRF,MCIP,EMIS/MEGAN,CMAQ,POST,LOG}
 find /home/woogon/CMAQ_MODEL -maxdepth 3 -type d | sort
 df -h /home/woogon/CMAQ_MODEL
 ```
@@ -702,7 +709,7 @@ REAS 원자료
 
 ## 13.1 식생배출
 
-**결정(2026-11-11):** 기존 운영방식(27·9km MEGAN v2.04, 3·1km BEIS 3.12)을 확인했고, 새 체계는 **CMAQ 5.5 CCTM 인라인 MEGAN 3.2를 4개 도메인에 공통 적용**한다. 토양 NO는 YL95를 쓰며(현재 WRF 지표모델 Noah), SMOKE에서는 생물성 부문을 처리하지 않는다. 근거·설정·후속 결정 사항은 [배출량 개선 계획 §9](../smoke/03_SMOKE_Emission_Improvement_Plan.md#busan-inline-megan)를 따른다. MEGAN 입력 생성과 CCTM 실행은 미실행이다.
+**결정(2026-11-11):** 기존 운영방식(27·9km MEGAN v2.04, 3·1km BEIS 3.12)을 확인했고, 새 체계는 **CMAQ 5.5 CCTM 인라인 MEGAN 3.2를 4개 도메인에 공통 적용**한다. 토양 NO는 YL95를 쓰며(현재 WRF 지표모델 Noah), SMOKE에서는 생물성 부문을 처리하지 않는다. 근거·설정·후속 결정 사항은 [배출량 개선 계획 §9](../smoke/03_SMOKE_Emission_Improvement_Plan.md#busan-inline-megan)를 따른다. 부산 4개 도메인의 생태유형·생육형 전처리 CSV를 생성했다. 식생 셀의 생태유형 결측 처리와 전체 도메인의 최종 CMAQ용 MEGAN 입력 생성 및 CCTM 실행이 남아 있다. 전처리 경로는 §4.2를 따른다.
 
 후보(검토 당시):
 
