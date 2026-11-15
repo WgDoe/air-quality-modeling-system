@@ -88,8 +88,8 @@ echo "Downloaded $count files (+ file_list.txt)"
 | `smk_dates/2026/` | 2026년 날짜 파일 12개 |
 | `2023capss/generators/make_busan_htap_v32_inputs.py` | 국외 HTAP_v3.2 생성기 (05 §5) |
 | `2023capss/EMIS/2023capss_cb6/scripts/htap/Annual_htap_2023capss_cb6.csh` | 국외 연간 실행기 (05 §7) |
-| `2023capss/smoke_patch/apply_htap_v32_patches.py`, `smkinven_htap_v32.patch` | 소스 패치 및 변경 내역 (05 §6) |
-| `2023capss/EMIS/smoke5.2/assigns/ASSIGNS_htap_v32.patch` | MCIP 입력 경로 패치 (05 §6) |
+| `2023capss/smoke_patch/apply_htap_v32_patches.py`, `smkinven_htap_v32.patch` | 소스 패치 및 변경 내역 (05 §6.1) |
+| `2023capss/EMIS/smoke5.2/assigns/ASSIGNS_htap_v32.patch` | CASE별 MCIP 입력 경로 패치 (05 §6.2) |
 | `2023capss/file_list.txt` | 위 파일 목록 (내려받기용) |
 
 
@@ -676,7 +676,7 @@ done
 
 - **국외 범위:** HTAP_v3.2 2020년 0.1° 연간 자료, 8개 묶음, **27·09·03KM 각각 8개 실행 완료**(사용자 제공 2026-11-10~11 결과)
 - **01KM:** 제공된 시험 결과에서 국외 배출 0으로 확인되어 별도 국외배출 파일을 병합하지 않음. 새 시스템에서는 05 §8.4의 파일 존재·전 물질 0 검사로 제외 여부를 재확인한다.
-- **국외 실행 순서:** 05 §3 원자료 → §5 입력 생성 → §6 `smkinven.f`·`ASSIGNS.emf` 패치 및 재컴파일·설치 → §7 실행 → §8 수치 검증 → §9 완료현황
+- **국외 실행 순서:** 05 §3 원자료 → §5 입력 생성 → **최초 설치/소스 교체 때만 §6.1 smkinven.f 패치·재컴파일** → **새 CASE마다 §6.2 ASSIGNS.emf·스크립트·입력 설치(재컴파일 없음)** → §7 실행 → §8 수치 검증 → §9 완료현황
 - **별도 기록:** [91 Smkinven 오류 수정](91_SMOKE_smkinven_Fix.md). 기존 국내 [§7.1 Grdmat 패치](#busan-grdmat-patch)는 보존한다.
 - **남은 작업:** 국내외 병합, CMAQ 연계 검증(생물성은 CCTM 인라인 MEGAN 3.2, [03 §9](03_SMOKE_Emission_Improvement_Plan.md#busan-inline-megan)). 국외 실행 완료를 CMAQ-ready 입력 검증 완료로 표현하지 않는다.
 
