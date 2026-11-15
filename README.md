@@ -1,5 +1,18 @@
 # Air Quality Modeling System
 
+## 운영 문서 바로가기 — 설치와 Case 실행 분리 (2026-11-16)
+
+> **새 컴퓨터에 재설치하는 경우**와 **설치된 모델에서 Case를 다시 수행하는 경우**를 분리했습니다. 기존 상세 매뉴얼·실행 스크립트는 보존하고, 실행에 필요한 변경값과 원문 명령 위치를 별도 운영 목차로 안내합니다. 이번 문서 정리는 모델 재실행/추가 검증을 의미하지 않습니다.
+
+- **Case별 반복 실행 시작:** [CMAQ 운영 문서 목차](docs/operations/README.md)
+- **신규 시스템 설치·컴파일:** [설치 전용 목차](docs/operations/INSTALLATION_INDEX.md)
+- **기상장 생성:** [WRF/WPS Case](docs/operations/WRF_WPS_CASE_RUN.md) → [MCIP Case](docs/operations/MCIP_CASE_RUN.md)
+- **배출량 생성:** [CAPSS·HTAP·MEGAN Case 실행](docs/operations/EMISSIONS_CASE_RUN.md)
+- **아직 미검증된 최종 단계:** [CMAQ CCTM·ISAM 실행 준비 상태](docs/operations/CMAQ_CASE_STATUS.md)
+
+---
+
+
 대기질 모델링 시스템의 설치, 환경 구성, 실행 스크립트 및 기술 문서를 관리하는 저장소입니다.
 
 ## 다음 구축·실행 때 따라 할 문서

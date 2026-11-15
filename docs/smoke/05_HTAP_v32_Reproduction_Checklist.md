@@ -13,7 +13,9 @@
   ↓
 5장  입력 생성 (HTAP 원자료 + CAPSS 원본 → 생성기 → 패키지)
   ↓
-6장  SMOKE 패치·재컴파일·설치 (smkinven.f, ASSIGNS.emf, 사례 설치)
+6.1  설치·소스 변경 시 smkinven.f 패치·재컴파일 (최초 1회)
+  ↓
+6.2  새 CASE마다 ASSIGNS.emf·실행 스크립트·입력 설치 (컴파일 없음)
   ↓
 7장  실행 (27·09·03KM × 8개 부문 묶음)
   ↓
@@ -186,11 +188,20 @@ done
 | `ge_dat/EDGAR/HTAPv32_profiles/` | 예제 종분배·시간 프로파일 5개, `gsref_HTAPv32_busan_20261110.txt`, `tref_HTAPv32_busan_20261110.txt` | 프로파일과 세부 부문 연결 |
 | `ge_dat/` | `invtable_busan_htap_20261110.txt` | 국내 INVTABLE + PEC·POC |
 
-## 6. SMOKE 패치·재컴파일·설치
+## 6. SMOKE 공통 소스 패치와 CASE별 설치 분리
 
-격자 NetCDF 인벤토리를 읽을 때 `smkinven.f`의 변수 `NONPOINT`가 초기화되지 않아 Smkinven이 `Segmentation fault`로 멈춘다([91](91_SMOKE_smkinven_Fix.md)). 예제 `ASSIGNS.emf`는 MCIP `GRIDCRO2D` 파일 이름을 고정 형식으로 지정해 실제 파일을 찾지 못하므로 `directory_definitions.csh`의 값을 우선 쓰게 고친다. 국내 Grdmat 패치(04 §7.1 `genagmat.f`)는 그대로 둔다.
+격자 NetCDF 인벤토리용 `smkinven.f`의 `NONPOINT` 비초기화 오류([91](91_SMOKE_smkinven_Fix.md))와 CASE `ASSIGNS.emf`의 `GRID_CRO_2D` 지정 문제를 해결한다. 국내 Grdmat 패치(04 §7.1 `genagmat.f`)도 유지한다.
 
-아래 블록은 bash 서브셸로 실행한다(실패해도 터미널은 닫히지 않음).
+- **§6.1: 최초 SMOKE 설치 또는 소스 변경 때만** `smkinven.f` 패치·검사·재컴파일.
+- **§6.2: 새 CASE의 EMIS 폴더마다** `ASSIGNS.emf` 수정, 디렉터리 정의·실행 스크립트·HTAP 입력 설치. **재컴파일하지 않는다.**
+- `apply_htap_v32_patches.py`는 `--smkinven`과 `--assigns` 두 인자가 모두 필수다. §6.1에서는 **기존에 준비한 기준 CASE의 ASSIGNS.emf**를 함께 지정한다. 이미 패치된 파일은 `Already patched`로 건너뛰므로 §6.2의 재호출은 소스 재컴파일을 의미하지 않는다.
+- 아래 블록은 각각 bash 서브셸이므로 실패해도 호출한 셸을 닫지 않는다. 경로 및 기존 결과를 확인하고 실행한다.
+
+<a id="htap-install-once"></a>
+
+### 6.1 설치 또는 소스 교체 시 1회: smkinven.f 패치 및 재컴파일
+
+> 선행조건: SMOKE 5.3 설치 및 **기준 CASE의 `EMIS/smoke5.2/assigns/ASSIGNS.emf` 준비**. 이 패치 생성기는 CASE ASSIGNS 인자가 필수이므로 이 블록은 그 기준 CASE도 패치한다. 새로운 CASE는 별도로 §6.2를 수행한다.
 
 ```bash
 (
@@ -199,19 +210,40 @@ export SMK_HOME=/home/woogon/CMAQ_MODEL/SMOKEv5.3
 export BIN=Linux2_x86_64gfort10
 F=$HOME/busan_smoke_files/2023capss
 B=/home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS
+S=$SMK_HOME/subsys/smoke/src/smkinven/smkinven.f
+m() { md5sum "$1" | awk '{print $1}'; }
+test -f "$S"; test -f "$B/smoke5.2/assigns/ASSIGNS.emf"
+python3 "$F/smoke_patch/apply_htap_v32_patches.py" --smkinven "$S" --assigns "$B/smoke5.2/assigns/ASSIGNS.emf"
+[ "$(m "$S")" = 23530fc0a55cd5dcdef6c3a314510dc9 ] || { echo 'ERROR: smkinven.f 해시'; exit 1; }
+[ "$(m "$B/smoke5.2/assigns/ASSIGNS.emf")" = 058cffcc054f4ad9440b28f24640494e ] || { echo 'ERROR: ASSIGNS.emf 해시'; exit 1; }
+cd "$SMK_HOME/subsys/smoke/src"
+LC_ALL=C make 2>&1 | tee "$SMK_HOME/subsys/smoke/$BIN/make_SMOKEv5.3_fix_smkinven.log"
+ls -l --time-style=long-iso "$SMK_HOME/subsys/smoke/$BIN/smkinven"
+)
+```
+
+정상 기준: `smkinven.f` MD5 `23530fc0a55cd5dcdef6c3a314510dc9`, 기준 CASE `ASSIGNS.emf` MD5 `058cffcc054f4ad9440b28f24640494e`, 컴파일 로그 `Error:` 0건, `smkinven` 실행파일 갱신 확인. 원본 `smkinven.f` MD5는 `0a1c220d886eb812c76ad028f44fbfe4`. **주의:** `tee`로 저장한 컴파일 로그의 오류뿐 아니라 `make` 종료 상태와 실행파일 갱신을 확인한다. 다른 소스 버전·해시이면 강제 적용하지 않는다.
+
+<a id="htap-case-install"></a>
+
+### 6.2 새 CASE마다: ASSIGNS.emf 패치·스크립트·입력 설치 (재컴파일 없음)
+
+> 선행조건: §5 입력 생성, 국내 가이드의 CASE 폴더·기본 파일 설치, §6.1을 통해 설치된 `smkinven` 바이너리. 아래의 `B`와 `C`는 **새 CASE의 EMIS 폴더**로 변경한다. 새 CASE별 `ASSIGNS.emf`를 반드시 준비한다.
+
+```bash
+(
+set -euo pipefail
+export SMK_HOME=/home/woogon/CMAQ_MODEL/SMOKEv5.3
+F=$HOME/busan_smoke_files/2023capss
+B=/home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS
 C=$B/2023capss_cb6
 S=$SMK_HOME/subsys/smoke/src/smkinven/smkinven.f
 m() { md5sum "$1" | awk '{print $1}'; }
 test -f "$S"; test -f "$B/smoke5.2/assigns/ASSIGNS.emf"
-# 패치 (원본은 .before_htap_v32로 자동 백업, 이미 패치된 파일은 건너뜀)
+[ "$(m "$S")" = 23530fc0a55cd5dcdef6c3a314510dc9 ] || { echo 'ERROR: smkinven.f 해시; 6.1 먼저 실행'; exit 1; }
+# 패치 적용기는 이미 패치된 smkinven.f를 건너뛴다(재컴파일 없음).
 python3 "$F/smoke_patch/apply_htap_v32_patches.py" --smkinven "$S" --assigns "$B/smoke5.2/assigns/ASSIGNS.emf"
-[ "$(m "$S")" = 23530fc0a55cd5dcdef6c3a314510dc9 ] || { echo 'ERROR: smkinven.f 해시'; exit 1; }
 [ "$(m "$B/smoke5.2/assigns/ASSIGNS.emf")" = 058cffcc054f4ad9440b28f24640494e ] || { echo 'ERROR: ASSIGNS.emf 해시'; exit 1; }
-# 재컴파일
-cd "$SMK_HOME/subsys/smoke/src"
-LC_ALL=C make 2>&1 | tee "$SMK_HOME/subsys/smoke/$BIN/make_SMOKEv5.3_fix_smkinven.log"
-ls -l --time-style=long-iso "$SMK_HOME/subsys/smoke/$BIN/smkinven"
-# 사례 설정·생성 결과 설치
 [ -e "$C/scripts/directory_definitions.csh.before_htap" ] || cp -p "$C/scripts/directory_definitions.csh" "$C/scripts/directory_definitions.csh.before_htap"
 cp "$F/EMIS/2023capss_cb6/scripts/directory_definitions.csh" "$C/scripts/"
 [ "$(m "$C/scripts/directory_definitions.csh")" = 9a5c4c8a894661af75b6e815e77f676f ] || { echo 'ERROR: directory_definitions.csh 해시'; exit 1; }
@@ -224,7 +256,17 @@ echo "inputs/htap 파일 수: $(find "$C/inputs/htap" -maxdepth 1 -type f | wc -
 )
 ```
 
-정상 기준: MD5 3개 일치(원본 `smkinven.f`는 `0a1c220d886eb812c76ad028f44fbfe4`), 컴파일 `Error:` 0건, `smkinven` 실행파일 시각 갱신, HTAP 입력 19개. 해시가 다르면 소스 버전·기존 수정·줄바꿈을 먼저 확인하고 억지로 덮어쓰지 않는다. 컴파일에는 `SMK_HOME`, `BIN`이 반드시 필요하다.
+**CASE별 경로 필수 수정:** 저장소의 `directory_definitions.csh`에는 `INSTALL_DIR`가 `TEST_20260901/EMIS`로 고정되어 있다. **새 CASE라면 복사 후 해당 CASE의 실제 EMIS 경로로 수정**하고 아래처럼 확인한다. `ASSIGNS.emf` MD5 3종 중 해당 파일·`directory_definitions.csh` MD5는 수정 *전* 기준이며, 경로를 변경한 후의 MD5가 달라지는 것은 정상이다. 나머지 스크립트 내 고정 경로도 §7 실행 전 검사한다.
+
+```bash
+# 앞 블록은 서브셸이므로 이 점검 블록에서도 CASE 경로를 다시 지정한다.
+C=/home/woogon/CMAQ_MODEL/CASES/BUSAN/TEST_20260901/EMIS/2023capss_cb6
+# 새 CASE라면 위 C와 directory_definitions.csh 내부 INSTALL_DIR을 실제 경로로 수정한 뒤 검사한다.
+grep -n 'INSTALL_DIR' "$C/scripts/directory_definitions.csh"
+grep -n 'TEST_20260901' "$C/scripts/directory_definitions.csh" "$C/scripts/htap/Annual_htap_2023capss_cb6.csh" || true
+```
+
+정상 기준: CASE `ASSIGNS.emf`와 복사 직후 `directory_definitions.csh`의 MD5 일치, HTAP 입력 19개, `INSTALL_DIR`가 **실제 CASE를 가리킴**. `--final`과 패키지의 경로도 새 CASE와 일치해야 한다. 기존 출력물의 덮어쓰기·혼합을 방지하도록 사전 백업한다. 이 단계는 성공한 테스트의 절차를 분리한 것으로, **새 CASE 경로에서의 독립 재현은 미검증**이다.
 
 ## 7. 실행
 
@@ -248,7 +290,7 @@ echo "inputs/htap 파일 수: $(find "$C/inputs/htap" -maxdepth 1 -type f | wc -
 | 실행 설정 | `2023capss_cb6/scripts/htap/Annual_htap_2023capss_cb6.csh` | 묶음별 입력·설정 (`IMPORT_GRDNETCDF_YN Y`, `NETCDF_POL_UNIT 'kg m-2 s-1'`, `NETCDF_INV_YEAR 2020`, `WEST_HSPHERE N`) | 예제 `Annual_htap_12LISTOS.csh`를 부산용으로 작성 (저장소) | — |
 | | `2023capss_cb6/scripts/directory_definitions.csh`, `utils/mcip_period.py` | 경로, MCIP 기간, `GRID_CRO_2D` | 저장소 (국내와 공용) | — |
 | | `smoke5.2/scripts/emf/smk_ar_gridded_annual_emf.csh`, `smoke5.2/assigns/ASSIGNS.emf` | 격자 인벤토리 실행 체계 | 예제 (`ASSIGNS.emf`는 패치본) | — |
-| 프로그램 | `smkinven`, `grdmat` | | SMOKE 5.3 + `smkinven.f`(6장)·`genagmat.f`(04 §7.1) 패치 | |
+| 프로그램 | `smkinven`, `grdmat` | | SMOKE 5.3 + `smkinven.f`(§6.1)·`genagmat.f`(04 §7.1) 패치 | |
 
 **생성 파일**
 
@@ -458,7 +500,7 @@ PY
 
 | 단계 | 상태 |
 |---|---|
-| 3.2 원자료, 5장 생성, 6장 패치·설치 | 완료 (2026-11-10) |
+| 3.2 원자료, 5장 생성, §6.1 소스 패치·§6.2 CASE 설치 | 완료 (2026-11-10) |
 | 27KM 8개 묶음 | 완료 (2026-11-10, 오류 0, 남한 0, PEC·POC 포함) |
 | 09KM 8개 묶음 | 완료 (2026-11-11, 오류 0, 서울·부산 0, 평양·대마도·후쿠오카 양수) |
 | 03KM 8개 묶음 | 완료 (2026-11-11, 국외/국내 NO 1.00% → 포함) |
@@ -469,7 +511,7 @@ PY
 
 | 날짜 | 증상 | 원인 | 조치 |
 |---|---|---|---|
-| 11-10 | Smkinven `CELLID` 기록 직후 `Segmentation fault` | 격자 NetCDF 경로에서 `NONPOINT` 비초기화, 할당되지 않은 `CMACT`/`CNAICS` 접근 | `smkinven.f` 초기값 `.FALSE.` 패치 후 재컴파일 (6장, [91](91_SMOKE_smkinven_Fix.md)) |
+| 11-10 | Smkinven `CELLID` 기록 직후 `Segmentation fault` | 격자 NetCDF 경로에서 `NONPOINT` 비초기화, 할당되지 않은 `CMACT`/`CNAICS` 접근 | `smkinven.f` 초기값 `.FALSE.` 패치 후 재컴파일 (§6.1, [91](91_SMOKE_smkinven_Fix.md)) |
 | 11-10 | Grdmat `GRID_CRO_2D` 파일 미발견 | 예제 ASSIGNS의 고정 파일 이름과 실제 MCIP 파일 이름 불일치 | `directory_definitions.csh`에서 실제 파일 지정, `ASSIGNS.emf`는 그 값을 유지하도록 패치 |
 | 11-10 | PEC·POC 출력 없음 | 예제 PM2.5 종분배로 탄소가 다른 성분에 섞임 | BC→PEC, OC→POC, PM2.5 잔여분 분리, GSREF·INVTABLE 보완 |
 | 11-10 | PEC/POC INVTABLE keep flag 오류 | MOVES 전용 PEC 행을 먼저 선택 | 일반 `PEC PEC`, `POC POC` 행만 채택 |
