@@ -609,7 +609,7 @@ done
 | 05 §7~8 국외 HTAP_v3.2 27KM | 8개 묶음 완료(오류 0, 남한 배출량 0, PEC·POC 포함) |
 | 국외 HTAP_v3.2 09·03KM | 8개 묶음씩 완료 (2026-11-11); 01KM 제외 (영역 내 국외배출량 0, 05 §8.4 재현 검증 조건 참고) |
 | 국내외 병합 | 미착수 ([03 개선 계획 §5](03_SMOKE_Emission_Improvement_Plan.md)) |
-| 생물성 | SMOKE 부문 없음. CMAQ 인라인 MEGAN 3.2로 결정(2026-11-11, [03 §9](03_SMOKE_Emission_Improvement_Plan.md#busan-inline-megan)), CCTM 단계에서 처리 |
+| 생물성 | CMAQ 인라인 MEGAN 3.2로 처리한다. 전처리는 [MEGAN 3.2 입력 전처리 가이드](../megan/01_MEGAN32_Input_Preprocessing_Guide.md)를 따르며, 운영 LDF 교체 후 CCTM에서 시험한다. |
 
 국내외 병합을 구성할 때 국내 4개 부문과 적용 대상 HTAP 부문만 입력 목록에 넣는다. 병합 파일을 CCTM에 연결하기 전에 [03 §9의 이중계상 확인 절차](03_SMOKE_Emission_Improvement_Plan.md#busan-inline-megan)를 따른다.
 

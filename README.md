@@ -85,7 +85,7 @@ Master Plan §22의 구축 단계는 그대로 적용한다. §23의 산출물�
 | Phase 3 | WRF 4.5.1 / WPS 4.5 | 반복 사례 `TEST_20260901_REPEAT`에서 WPS, `real.exe`, WRF dmpar 4코어 실행 완료 | 실제 대기질 사례의 입력·출력 QA |
 | Phase 4 | MCIP 5.5 | `TEST_20260901` d01~d04 변환 및 격자 일치 확인 완료 | CCTM 기상 입력 및 수직층 정합성 검증 |
 | Phase 5 | SMOKE 5.3 | 공식 예제 및 국내 CAPSS 2023 4부문·4도메인 완료(사용자 기록 기준) | 국내·국외 병합 및 CMAQ 연계 검증 |
-| Phase 6 | CMAQ CCTM | 컴파일·benchmark 미완료 | 기준 태그 확정, 컴파일 및 benchmark, 인라인 MEGAN 운영 LDF 교체 후 CCTM 연결·검증 |
+| Phase 6 | CMAQ CCTM | 부산 시험용 CCTM 빌드 확인, benchmark 및 사례 실행 미완료 | 인라인 MEGAN 운영 LDF 교체 후 CCTM 연결·검증 |
 | Phase 7 | CMAQ-ISAM | 미수행 | benchmark 및 배출원 기여도 분석 |
 
 WRF 반복 검증에서는 `rsl.error.0000`의 `SUCCESS COMPLETE WRF` 메시지와 d01~d04의 요청 종료시각(`2026-09-02_00:00:00`) 도달을 확인했다. MCIP는 네 영역 모두 `NORMAL TERMINATION`으로 종료되었고, GRIDDESC(27KM/09KM/03KM/01KM)가 기존 운영체계 격자와 일치했다.
@@ -121,7 +121,7 @@ SMOKE 하위 문서는 재작업 시 읽는 순서를 드러내기 위해 `00_` 
 
 | 구성요소 | 버전 | 상태 |
 |---|---|---|
-| CMAQ | 5.5 (`CMAQv5.5.0.3_11Jul2025`) | 기존 기준 태그 유지. 5.5.0.4 공개로 Phase 6 전 재검토 필요. CCTM 컴파일·benchmark 미완료 |
+| CMAQ | 5.5 (`CMAQv5.5.0.3_11Jul2025`) | 기존 기준 태그 유지. 5.5.0.4 공개로 Phase 6 전 재검토 필요. 부산 시험용 CCTM 빌드 확인, benchmark 미완료 |
 | MCIP | 5.5 (CMAQ 저장소 `PREP/mcip`) | **Phase 4 완료.** `TEST_20260901` d01~d04 정상 변환, 이전 운영체계 GRIDDESC와 격자 일치. 제공 기록의 설치 커밋은 `9bd3734`이며 `PREP/mcip` 소스는 5.5.0.3·5.5.0.4 태그와 동일함을 확인. CCTM 전 태그 전환 필요([MCIP 가이드 §3, §5.2](docs/mcip/MCIP_Installation_Guide.md)) |
 | WRF / WPS | 4.5.1 / 4.5 | **Phase 3 완료.** `TEST_20260901_REPEAT`에서 WPS, `real.exe`, WRF dmpar 4코어 정상 완료. `SUCCESS COMPLETE WRF` 및 d01~d04 종료시각 `2026-09-02_00:00:00` 확인 |
 | I/O API | 3.2-20200828 | 설치 완료 |
