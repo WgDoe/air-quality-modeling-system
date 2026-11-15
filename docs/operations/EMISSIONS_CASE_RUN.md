@@ -13,6 +13,12 @@
 | 부문 실행 | `kor_point`, `kor_area`, `kor_mobile`, `kor_sea` | [§8.1–8.4](../smoke/04_SMOKE_Busan_Case_Run_Guide.md) |
 | QA | 그리드별 합계·로그·종·시간·단위 | [§8.5, §9](../smoke/04_SMOKE_Busan_Case_Run_Guide.md) |
 
+### 새 CASE에서 바꾸는 값 (같은 도메인·CAPSS 원자료)
+
+- 날짜는 [`mcip_period.py`](../smoke/files/busan/2023capss/EMIS/2023capss_cb6/scripts/utils/mcip_period.py)가 해당 CASE의 MCIP 파일에서 읽는다. 기간을 직접 여러 스크립트에 일괄 하드코딩하지 않는다.
+- CASE 경로: [국내 가이드 §5](../smoke/04_SMOKE_Busan_Case_Run_Guide.md)의 `B=`, §8.0의 `C=`·`expected=`, §8.1–8.5의 경로 및 `directory_definitions.csh`의 `INSTALL_DIR`를 새 CASE로 변경·검사한다.
+- 2026년 이외 기간의 CASE라면 `smk_dates/<연도>` 파일과 공휴일 참조파일을 먼저 준비하고 실제 연도 범위를 검사한다. **다른 연도의 실행은 아직 검증되지 않았다.**
+
 **주의:** §7.1 genagmat.f 패치는 설치/소스 교체 시 작업이지 Case마다 재컴파일하는 단계가 아니다. §8.0 삭제·초기화 명령은 기존 산출물 보존 후 실제 Case 위치를 검증한다.
 
 ## 2. 국외 HTAP v3.2 — SMOKE 5.3
@@ -22,9 +28,11 @@
 |---|---|---|
 | 원자료/체크섬 | 9종 HTAP ZIP, 버전·기준연도·sha256 | [국외 가이드 §3.2](../smoke/05_HTAP_v32_Reproduction_Checklist.md) |
 | 전처리 | `make_busan_htap_v32_inputs.py`: `--htap`, `--year`, `--capss`, `--example`, `--invtable`, `--final`, `--out` | [§5.2](../smoke/05_HTAP_v32_Reproduction_Checklist.md) |
-| 설치된 실행환경 확인 | `smkinven.f`/ASSIGNS 패치 이미 적용됐는지 확인; 수정 필요할 때만 재컴파일 | [§6](../smoke/05_HTAP_v32_Reproduction_Checklist.md) |
+| CASE별 파일 설치(새 CASE마다 필수) | 설치된 `smkinven` 패치 확인, CASE `ASSIGNS.emf`, `directory_definitions.csh`의 `INSTALL_DIR`, HTAP 실행 스크립트·입력 19개 | [§6.2](../smoke/05_HTAP_v32_Reproduction_Checklist.md#htap-case-install) |
 | 국외 8묶음 | INTSHIP, AVIATION, ENERGY, INDUSTRY, TRANSPORT, RESIDENT, WASTE, AGRICULTURE | [§7](../smoke/05_HTAP_v32_Reproduction_Checklist.md) |
 | 출력 검사 | 27·09·03KM 파일/로그/배출종, 남한 마스크, 01KM 0 여부, 국내·국외 비율 | [§8](../smoke/05_HTAP_v32_Reproduction_Checklist.md) |
+
+**SMOKE 소스 수정·재컴파일은 최초 설치 또는 소스 교체 때 [§6.1](../smoke/05_HTAP_v32_Reproduction_Checklist.md#htap-install-once)에서만 수행한다.**
 
 **기존 처리 결정과 한계:** FUGITIVE·SOLVENTS의 INDUSTRY 프로파일 대응은 잠정이며, 남한 제거 마스크는 해안·접경 국외 배출도 제거할 수 있다. BC/OC 질량 조정은 국외 문서 §4–5의 원칙을 그대로 따르며 변경 시 검증값을 다시 산정한다. 새로운 CAPSS 원본, 0.1° 격자, grid 또는 HTAP 원자료로 바꾸면 마스크·입력 생성부터 재검토한다.
 
@@ -33,6 +41,7 @@
 
 - 최초 준비: [MEGAN §5 설치·컴파일](../megan/01_MEGAN32_Input_Preprocessing_Guide.md) — 새 시스템이나 도구 변경 시.
 - Case별 재생성: [§6 도메인별 `run_megan_domain.sh` 절차](../megan/01_MEGAN32_Input_Preprocessing_Guide.md) — grid·식생자료·변환 설정 변경 시.
+- §6.2 실행 명령의 변경값: `C`(CASE 경로), `WRF_START`(기준값 `2026-08-31_00:00:00`), `MCIP_STAMP`(기준값 `2026083100`). 새 CASE의 WRF/MCIP 시간과 맞추어 수정한다. CT3·EFMAP·LDF는 시간 불변형 입력이므로 **기간만 변경하고 도메인·식생자료·설정이 동일**하면 재사용 여부를 먼저 검토한다(새 CASE 재사용은 미검증).
 - 파일·격자 검증: [§7](../megan/01_MEGAN32_Input_Preprocessing_Guide.md).
 - **아직 검증되지 않음:** [§8 CCTM inline 연결 및 MEGAN_SOILOUT/MEGAN_SOILINP](../megan/01_MEGAN32_Input_Preprocessing_Guide.md).
 
