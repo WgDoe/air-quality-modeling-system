@@ -37,7 +37,7 @@
 **기존 처리 결정과 한계:** FUGITIVE·SOLVENTS의 INDUSTRY 프로파일 대응은 잠정이며, 남한 제거 마스크는 해안·접경 국외 배출도 제거할 수 있다. BC/OC 질량 조정은 국외 문서 §4–5의 원칙을 그대로 따르며 변경 시 검증값을 다시 산정한다. 새로운 CAPSS 원본, 0.1° 격자, grid 또는 HTAP 원자료로 바꾸면 마스크·입력 생성부터 재검토한다.
 
 ## 3. MEGAN 3.2 — CMAQ inline 입력
-**기존 상태:** 4도메인 CT3·EFMAP·LDF 생성/재현 기록. 운영 LDF 교체 및 CCTM 연결은 미완료.
+**현재 상태(2026-11-16):** 4도메인 CT3·EFMAP 생성 기록이 있고, 수정된 LDF는 CSV/NetCDF 값 일치 및 운영 파일 MD5·`cmp` 동일성이 사용자 제공 서버 출력에서 확인됐다. **CCTM 연결·식생배출량 계산 검증은 미완료.**
 
 - 최초 준비: [MEGAN §5 설치·컴파일](../megan/01_MEGAN32_Input_Preprocessing_Guide.md) — 새 시스템이나 도구 변경 시.
 - Case별 재생성: [§6 도메인별 `run_megan_domain.sh` 절차](../megan/01_MEGAN32_Input_Preprocessing_Guide.md) — grid·식생자료·변환 설정 변경 시.
