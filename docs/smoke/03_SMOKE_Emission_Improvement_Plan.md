@@ -361,7 +361,11 @@ SPECIATE 5.3을 현재 공개 최신판으로 간주하지 않는다. EPA는 [SP
 
 **이중계상 확인.** SMOKE 병합 목록에는 국내 점·면·이동·바다와 해당 도메인의 HTAP 부문만 넣는다. HTAP은 27·09·03KM에 적용한다. 기존 `b3gts*BIO*`, 오프라인 MEGAN 산출물, 생물성이 포함된 예제 또는 과거 병합 파일이 병합 목록과 CCTM 입력 스트림에 없는지 파일의 생성 이력까지 확인한다. CCTM 시작 로그와 DESID 스트림 진단에서 인라인 MEGAN만 생물성 배출을 공급하는지 확인한다.
 
-### 9.4 입력 준비 (예정, 미실행)
+### 9.4 입력 준비 및 전처리 현황
+
+2026-11-15 서버 확인 기준으로 MEGAN 3.2 전처리기는 프로젝트 루트의 `MEGAN/`, 공용 식생·배출계수 원자료는 `DATA/EMIS/MEGAN/`에 있다. 부산 사례에서는 `CASES/BUSAN/TEST_20260901/EMIS/MEGAN/`에 실행 스크립트, 도메인별 설정과 전처리 결과를 두고, 로그는 사례의 `LOG/`에 저장한다. 상세 경로와 기존 경로의 호환 링크는 [Master Plan §4.2](../planning/00_CMAQ_Project_Master_Plan.md#42-현재-구축-디렉터리와-자료-분리-원칙)를 따른다.
+
+27·09·03·01KM의 생태유형·생육형 CSV가 준비되었다. `LOG/megan_ecotype_gap_summary.tsv` 기준으로 식생이 있으나 생태유형이 결측인 셀은 각각 1,482·901·866·628개다. 01KM 배출계수 CSV는 생태유형이 확인된 셀의 시험 결과다. 결측 처리 기준 확정과 전체 도메인의 `MEGAN_CTS`, `MEGAN_EFS`, `MEGAN_LDF` 생성은 후속 작업이다.
 
 [UCI MEGAN 자료·코드 페이지](https://bai.ess.uci.edu/megan/data-and-code)의 MEGAN 전처리기로 4개 도메인(GRIDDESC `EASTASIA`의 27KM·09KM·03KM·01KM) 입력 파일을 만든다. 설치·생성 명령과 입력 자료 연도는 실제 실행으로 확인한 뒤 CCTM 단계 문서(기본계획의 생물성 산출물)에 기록한다.
 
