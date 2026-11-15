@@ -1,6 +1,6 @@
 # SMOKE 5.3 국외 격자 인벤토리 `smkinven.f` NONPOINT 초기화 오류 수정 (2026-11-10)
 
-> 사용자 제공 HTAP_v3.2 시험 기록에 기반한 수정 이력. 실행 및 설치 명령의 기준은 [05 §6](05_HTAP_v32_Reproduction_Checklist.md), 다른 시스템 재현은 [05 체크리스트](05_HTAP_v32_Reproduction_Checklist.md) 참조.
+> 사용자 제공 HTAP_v3.2 시험 기록에 기반한 수정 이력. 실행 및 설치 명령의 기준은 [05 §6.1](05_HTAP_v32_Reproduction_Checklist.md#htap-install-once) 및 [§6.2](05_HTAP_v32_Reproduction_Checklist.md#htap-case-install), 다른 시스템 재현은 [05 체크리스트](05_HTAP_v32_Reproduction_Checklist.md) 참조.
 
 ## 증상과 환경
 
@@ -22,7 +22,7 @@
 
 공식 SMOKE 태그 원본의 `smkinven.f` MD5는 `0a1c220d886eb812c76ad028f44fbfe4`, 패치 후 MD5는 `23530fc0a55cd5dcdef6c3a314510dc9`(사용자 제공 2026-11-10 재현 시험). 해시가 다르면 다른 변경·소스 버전을 먼저 조사한다.
 
-**패치 → MD5 검사 → 재컴파일 → 사례 설치**의 전체 명령은 [05 §6](05_HTAP_v32_Reproduction_Checklist.md)의 블록을 그대로 사용한다. 실제 소스 경로는 `$SMK_HOME/subsys/smoke/src/smkinven/smkinven.f`다.
+**공통 소스 패치 → MD5 검사 → 재컴파일**은 [05 §6.1](05_HTAP_v32_Reproduction_Checklist.md#htap-install-once), **새 CASE의 ASSIGNS 패치·파일 설치**는 [05 §6.2](05_HTAP_v32_Reproduction_Checklist.md#htap-case-install)를 사용한다. 실제 소스 경로는 `$SMK_HOME/subsys/smoke/src/smkinven/smkinven.f`다.
 
 **컴파일러 차이(사용자 제공 분석):** EPA의 Intel `Linux2_x86_64ifx` 실행환경에는 Intel `Makeinclude`의 `-zero` 옵션이 적용되어 초기화되지 않은 지역 변수가 0으로 채워질 수 있지만, GNU 설정에는 해당 옵션이 없어 오류가 드러났다. 이 설명은 제공된 환경·설정에 대한 분석으로, 모든 Intel 빌드에서 문제없다는 의미는 아니다.
 ## 검증 경과
