@@ -1,0 +1,52 @@
+--- prepmegan4cmaq_grwform.f90
++++ prepmegan4cmaq_grwform_lowmem.f90
+@@ -210,18 +210,22 @@
+       !missing_value = -1.
+       read(treefillvalue,"(f7.0)") missing_value
+       CALL  megan2_bioemiss
++      CALL clear_grid_cache
+       inpname       = trim(shrubfilename)
+       varname       = trim(shrubvarname)
+       read(shrubfillvalue,"(f7.0)") missing_value
+       CALL  megan2_bioemiss
++      CALL clear_grid_cache
+       inpname       = trim(cropfilename)
+       varname       = trim(cropvarname)
+       read(cropfillvalue,"(f7.0)") missing_value
+       CALL  megan2_bioemiss
++      CALL clear_grid_cache
+       inpname       = trim(grassfilename)
+       varname       = trim(grassvarname)
+       read(grassfillvalue,"(f7.0)") missing_value
+       CALL  megan2_bioemiss
++      CALL clear_grid_cache
+ 
+ !     endif
+ 
+@@ -244,6 +248,14 @@
+       if( allocated( xlat ) ) then
+         deallocate( xlat )
+       endif
++
++!--sw
++!   end do domain_loop
++
++   CONTAINS
++
++   subroutine clear_grid_cache
++      integer :: n, i, j
+       do n = 1,grid_cnt
+         if( associated( grid_specs(n)%lon ) ) then
+           deallocate( grid_specs(n)%lon )
+@@ -270,10 +282,7 @@
+       end do
+ !++sw
+       grid_cnt = 0
+-!--sw
+-!   end do domain_loop
+-
+-   CONTAINS
++   end subroutine clear_grid_cache
+ 
+    subroutine wrf_file
+ !---------------------------------------------------------------------

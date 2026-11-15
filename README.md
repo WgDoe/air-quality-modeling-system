@@ -15,6 +15,7 @@
 7. [부산 배출량 개선 계획: CAPSS 2023·HTAP_v3.2·신규 시나리오](docs/smoke/03_SMOKE_Emission_Improvement_Plan.md)
 8. [부산 국내 CAPSS 2023 실행 가이드 — 4부문·4도메인 완료 기록](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md)
 9. [국외 HTAP_v3.2 처리·재현 가이드](docs/smoke/05_HTAP_v32_Reproduction_Checklist.md) — 2020년 0.1° 자료, 남한 제외·탄소 처리·8개 묶음, 27·09·03KM 완료 및 01KM 제외 기준
+10. [MEGAN 3.2 입력 전처리 가이드](docs/megan/01_MEGAN32_Input_Preprocessing_Guide.md) — 부산 4개 도메인의 CCTM 인라인 MEGAN 입력 생성·검증
 
 기존 CAPSS 2017 입력 준비 문서는 현행 목록에서 제외했다. 2023에도 필요한 공통 설정·검증 절차는 [부산 실행 가이드 §8](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md)에 통합했으며, 과거 원문은 Git 이력에서 확인할 수 있다.
 
@@ -56,6 +57,11 @@
 - [SMOKE 부산 배출량 개선 계획: CAPSS 2023 / HTAP_v3.2 전환 기준](docs/smoke/03_SMOKE_Emission_Improvement_Plan.md)
 - [SMOKE 부산 실제사례 실행 가이드: 국내 CAPSS 2023 4부문·4도메인 완료 기록](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md)
 
+### MEGAN
+
+- [MEGAN 문서 읽는 순서](docs/megan/00_README_First.md)
+- [MEGAN 3.2 입력 전처리 가이드](docs/megan/01_MEGAN32_Input_Preprocessing_Guide.md)
+
 ### Master Plan과 현재 문서의 대응
 
 Master Plan §22의 구축 단계는 그대로 적용한다. §23의 산출물명은 계획 당시 명칭이며, 현재 저장소에서는 아래 경로를 사용한다.
@@ -68,6 +74,7 @@ Master Plan §22의 구축 단계는 그대로 적용한다. §23의 산출물�
 | Phase 3. WRF/WPS | `04_WRF_WPS_Install.md` | [WRF/WPS 설치](docs/wrf/WRF_WPS_Installation_Guide.md) |
 | Phase 4. MCIP | `06_MCIP_Install_Run.md` | [MCIP 구축](docs/mcip/MCIP_Installation_Guide.md) |
 | Phase 5. SMOKE | `07_SMOKE_Install.md` | [SMOKE 5.3 구축](docs/smoke/01_SMOKE_Installation_Guide.md) |
+| Phase 6. CMAQ CCTM 생물성 입력 | MEGAN 전처리 | [MEGAN 3.2 입력 전처리 가이드](docs/megan/01_MEGAN32_Input_Preprocessing_Guide.md) |
 
 ### 구축 진행 현황 (2026-10-22 기준)
 
@@ -78,7 +85,7 @@ Master Plan §22의 구축 단계는 그대로 적용한다. §23의 산출물�
 | Phase 3 | WRF 4.5.1 / WPS 4.5 | 반복 사례 `TEST_20260901_REPEAT`에서 WPS, `real.exe`, WRF dmpar 4코어 실행 완료 | 실제 대기질 사례의 입력·출력 QA |
 | Phase 4 | MCIP 5.5 | `TEST_20260901` d01~d04 변환 및 격자 일치 확인 완료 | CCTM 기상 입력 및 수직층 정합성 검증 |
 | Phase 5 | SMOKE 5.3 | 공식 예제 및 국내 CAPSS 2023 4부문·4도메인 완료(사용자 기록 기준) | 국내·국외 병합 및 CMAQ 연계 검증 |
-| Phase 6 | CMAQ CCTM | 컴파일·benchmark 미완료 | 기준 태그 확정, 컴파일 및 benchmark, 인라인 MEGAN 3.2 입력 준비(생물성) |
+| Phase 6 | CMAQ CCTM | 컴파일·benchmark 미완료 | 기준 태그 확정, 컴파일 및 benchmark, 인라인 MEGAN 운영 LDF 교체 후 CCTM 연결·검증 |
 | Phase 7 | CMAQ-ISAM | 미수행 | benchmark 및 배출원 기여도 분석 |
 
 WRF 반복 검증에서는 `rsl.error.0000`의 `SUCCESS COMPLETE WRF` 메시지와 d01~d04의 요청 종료시각(`2026-09-02_00:00:00`) 도달을 확인했다. MCIP는 네 영역 모두 `NORMAL TERMINATION`으로 종료되었고, GRIDDESC(27KM/09KM/03KM/01KM)가 기존 운영체계 격자와 일치했다.
@@ -102,7 +109,7 @@ SMOKE 하위 문서는 재작업 시 읽는 순서를 드러내기 위해 `00_` 
 
 현재 확인된 버전은 HDF5 1.14.6, netCDF-C 4.9.3, netCDF-Fortran 4.6.2, I/O API 3.2-20200828이다. I/O API 산출물은 `/home/woogon/CMAQ_MODEL/libs/ioapi-3.2-20200828/Linux2_x86_64gfort10`, include 파일은 같은 소스 루트의 `ioapi/fixed_src`에 있다.
 
-**2026-11-11 생물성 배출량 결정:** 기존 운영체계는 27·9km MEGAN v2.04, 3·1km BEIS 3.12로 처리했음을 확인했다. 새 체계는 SMOKE 생물성 부문 없이 **CMAQ 5.5 CCTM 인라인 MEGAN 3.2를 4개 도메인에 공통 적용**하고, 토양 NO는 YL95를 쓴다(현재 WRF 지표모델 Noah). 근거·CCTM 설정·후속 결정 사항은 [03 배출량 개선 계획 §9](docs/smoke/03_SMOKE_Emission_Improvement_Plan.md#busan-inline-megan)에 있다. MEGAN 입력 생성과 CCTM 실행은 미실행.
+**2026-11-11 생물성 배출량 결정:** 기존 운영체계는 27·9km MEGAN v2.04, 3·1km BEIS 3.12로 처리했음을 확인했다. 새 체계는 SMOKE 생물성 부문 없이 **CMAQ 5.5 CCTM 인라인 MEGAN 3.2를 4개 도메인에 공통 적용**하고, 토양 NO는 YL95를 쓴다(현재 WRF 지표모델 Noah). 근거·CCTM 설정·후속 결정 사항은 [03 배출량 개선 계획 §9](docs/smoke/03_SMOKE_Emission_Improvement_Plan.md#busan-inline-megan)에 있다. 부산 4개 도메인의 CT3·EFMAP·LDF를 생성했다. 수정한 변환기로 별도 시험에서 4개 도메인의 LDF가 원본 EFP CSV와 일치함을 확인했다. 운영 LDF 교체와 CCTM 실행은 남아 있다. 절차는 [MEGAN 3.2 입력 전처리 가이드](docs/megan/01_MEGAN32_Input_Preprocessing_Guide.md)에서 확인할 수 있다.
 
 **2026-11-11 국외배출량 최종 갱신:** [05 국외 HTAP_v3.2 처리 가이드](docs/smoke/05_HTAP_v32_Reproduction_Checklist.md)에 원자료 준비부터 입력 생성·SMOKE 소스 패치·재컴파일·8개 부문 실행·검증까지 통합했다. 27·09·03KM 각 8개 묶음 완료, 01KM은 시험상 배출 0으로 제외한다. 다른 시스템에서는 05 §8.4의 출력파일 존재 및 전체 배출종 0 여부를 재확인한다. 국내 처리는 [04 국내 가이드](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md), `smkinven.f` 패치는 [91 수정 이력](docs/smoke/91_SMOKE_smkinven_Fix.md)을 따른다. 병합·CMAQ 연계는 미실행.
 
@@ -167,6 +174,7 @@ docs/
   wrf/        # 설치·실행·GHG 오류를 하나의 문서에 통합
   mcip/       # CMAQ 소스·config_cmaq.csh·MCIP 컴파일·격자 결정·사례 실행
   smoke/      # SMOKE 5.3 설치·예제 검증, 기존 2.7 분석, CAPSS 2023 개선 계획, 부산 사례 실행 기록
+  megan/      # CCTM 인라인 MEGAN 3.2 입력 전처리
 ```
 
 `scripts/`, `config/`, `examples/`, `tests/`는 향후 저장소 구성 계획이다. 서버의 `SCRIPTS/download_fnl.sh`와 GitHub에 등록된 파일을 구분한다.

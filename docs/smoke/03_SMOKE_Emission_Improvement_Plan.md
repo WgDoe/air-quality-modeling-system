@@ -306,13 +306,13 @@ SPECIATE 5.3을 현재 공개 최신판으로 간주하지 않는다. EPA는 [SP
 - 남한 중복 제거는 CAPSS 1km 셀이 닿는 HTAP 0.1° 셀 전체를 0으로 만들기 때문에 해안·접경의 국외 배출량 일부도 손실될 수 있다.
 - BC·OC가 PM2.5를 초과한 셀의 성분 비례 축소는 PM2.5 질량을 보존하지만 BC·OC의 원자료 성분 질량을 변경한다.
 - 일부 하위 부문 프로파일은 기존 상위 부문을 대체 적용한 잠정 매핑이다.
-- 국내·국외 병합, CMAQ-ready 최종 입력, MEGAN 입력 생성 및 CCTM 실행은 미완료다.
+- 국내·국외 병합, CMAQ-ready 최종 입력, MEGAN 운영 LDF 교체 및 CCTM 실행은 미완료다.
 
 <a id="busan-inline-megan"></a>
 
 ## 9. 생물성(식생) 배출량 처리 방식 결정 (2026-11-11)
 
-> **상태:** 방식 결정 완료. MEGAN 전처리기 설치·입력 생성과 CCTM 실행은 **미실행**(CCTM 단계에서 진행). 아래 기존 체계 내용은 사용자 제공 자료를 작성 환경에서 직접 열어 확인한 범위이며, 기존 모델을 재실행하지 않았다.
+> **상태:** 방식 결정 완료. MEGAN 입력 생성 및 수정 LDF 변환 시험을 완료했다. **운영 LDF 교체와 CCTM 실행은 남아 있다.** [MEGAN 3.2 입력 전처리 가이드](../megan/01_MEGAN32_Input_Preprocessing_Guide.md) 참고. 아래 기존 체계 내용은 사용자 제공 자료를 작성 환경에서 직접 열어 확인한 범위이며, 기존 모델을 재실행하지 않았다.
 
 <a id="legacy-biogenic"></a>
 
@@ -365,9 +365,7 @@ SPECIATE 5.3을 현재 공개 최신판으로 간주하지 않는다. EPA는 [SP
 
 2026-11-15 서버 확인 기준으로 MEGAN 3.2 전처리기는 프로젝트 루트의 `MEGAN/`, 공용 식생·배출계수 원자료는 `DATA/EMIS/MEGAN/`에 있다. 부산 사례에서는 `CASES/BUSAN/TEST_20260901/EMIS/MEGAN/`에 실행 스크립트, 도메인별 설정과 전처리 결과를 두고, 로그는 사례의 `LOG/`에 저장한다. 상세 경로와 기존 경로의 호환 링크는 [Master Plan §4.2](../planning/00_CMAQ_Project_Master_Plan.md#42-현재-구축-디렉터리와-자료-분리-원칙)를 따른다.
 
-27·09·03·01KM의 생태유형·생육형 CSV가 준비되었다. `LOG/megan_ecotype_gap_summary.tsv` 기준으로 식생이 있으나 생태유형이 결측인 셀은 각각 1,482·901·866·628개다. 01KM 배출계수 CSV는 생태유형이 확인된 셀의 시험 결과다. 결측 처리 기준 확정과 전체 도메인의 `MEGAN_CTS`, `MEGAN_EFS`, `MEGAN_LDF` 생성은 후속 작업이다.
-
-[UCI MEGAN 자료·코드 페이지](https://bai.ess.uci.edu/megan/data-and-code)의 MEGAN 전처리기로 4개 도메인(GRIDDESC `EASTASIA`의 27KM·09KM·03KM·01KM) 입력 파일을 만든다. 설치·생성 명령과 입력 자료 연도는 실제 실행으로 확인한 뒤 CCTM 단계 문서(기본계획의 생물성 산출물)에 기록한다.
+부산 4개 도메인의 CT3·EFMAP·LDF를 생성했다. 수정한 변환기로 별도 시험에서 4개 도메인의 LDF가 원본 EFP CSV와 일치함을 확인했다. 운영 LDF 교체와 CCTM 실행은 남아 있다. 입력 원자료, 생태유형 결측 처리, 도메인별 스크립트, 변환기 열 매핑 수정과 CSV 대조 절차는 [MEGAN 3.2 입력 전처리 가이드](../megan/01_MEGAN32_Input_Preprocessing_Guide.md)에서 확인한다.
 
 생성 후 각 파일의 투영·원점·격자 간격·행열을 해당 MCIP `GRIDDESC`와 대조한다. Noah 기반 MCIP의 토양수분·토양온도·토양 유형·강수·LAI를 해당 CCTM 빌드가 읽는지 확인한다. 화학 메커니즘을 확정한 뒤 SMOKE 배출종·단위·DESID와 MEGAN의 메커니즘별 `.EXT` 매핑을 대조한다. 도메인별 이틀 연속 시험에서 초기화, 전날 `MEGAN_SOILOUT`을 사용한 재시작, 이소프렌과 토양 NO 배출 진단을 확인하고 로그·파일 목록을 기록한다.
 
@@ -376,7 +374,7 @@ SPECIATE 5.3을 현재 공개 최신판으로 간주하지 않는다. EPA는 [SP
 | 항목 | 내용 | 시점 |
 |---|---|---|
 | 화학 메커니즘 확정 | `cb6r5_ae7_aq` 잠정 후보(§7.3). MEGAN 출력 물질도 이 메커니즘에 맞춰 대응됨 | 병합·CCTM 전 |
-| MEGAN 입력 자료 | 전처리기 버전, 식생·LAI·배출계수 원자료 연도 | MEGAN 입력 생성 시 |
+| MEGAN 입력 자료 | 전처리기 버전과 식생·배출계수 원자료는 MEGAN 가이드 §3.2에 기록. LAI는 MCIP 사용 | 운영 LDF 교체 후 검증 |
 | LAI 자료 | MCIP LAI(기본) 또는 MEGAN 전용 LAI(`USE_MEGAN_LAI`) | CCTM 기준 설정 시 |
 | MCIP 토양 변수 | Noah 기준 `METCRO2D`의 토양수분·온도·유형 필드와 CCTM 읽기 확인. WRF의 `ISLTYP`는 MCIP에서 `SLTYP`로 출력 | CCTM 기준 설정 시 |
 | 기타 자연배출 | 해염(`CTM_OCEAN_CHEM`, OCEAN 파일), 번개 NOx(`CTM_LTNG_NO` 기본 `Y`, 매개변수 파일의 영역 적합성), 산불. 바람 날림 먼지(`CTM_WB_DUST`)는 `PX_VERSION=Y`가 필요하므로 현재 WRF(Noah)로는 사용하지 않음 | CCTM 기준 설정 시 |

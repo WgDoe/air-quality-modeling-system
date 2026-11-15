@@ -1,0 +1,7 @@
+setup_megan32.sh
+run_megan_domain.sh
+megan_fix_sc30s7.py
+make_megan_cantype_inputs.py
+fill_megan_ecotype.py
+make_efp_inputs.py
+patches/prepmegan4cmaq_grwform_lowmem.patch
