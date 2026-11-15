@@ -10,8 +10,8 @@
 | 4 | [WRF/WPS §5–13](../wrf/WRF_WPS_Installation_Guide.md) | WRF 4.5.1 / WPS 4.5 설치·컴파일·검증 |
 | 5 | [MCIP §5–9](../mcip/MCIP_Installation_Guide.md) | CMAQ 프로젝트, config_cmaq.csh, MCIP 컴파일 |
 | 6 | [SMOKE 5.3 설치](../smoke/01_SMOKE_Installation_Guide.md) | 공식 예제·빌드 검증 |
-| 7 | [SMOKE Grdmat 최초 패치](../smoke/04_SMOKE_Busan_Case_Run_Guide.md) | 국내 입력 실행 전에 적용한 genagmat.f 수정 |
-| 8 | [HTAP용 smkinven/ASSIGNS 패치](../smoke/05_HTAP_v32_Reproduction_Checklist.md) | **§6만** 설치/소스 교체 시 적용; 기존 패치 여부 확인 |
+| 7 | [SMOKE Grdmat 최초 패치 §7.1](../smoke/04_SMOKE_Busan_Case_Run_Guide.md#busan-grdmat-patch) | 국내 입력 실행 전에 적용한 genagmat.f 수정 |
+| 8 | [HTAP용 smkinven 패치 §6.1](../smoke/05_HTAP_v32_Reproduction_Checklist.md#htap-install-once) | **§6.1만** 최초 설치/소스 교체 시 패치·재컴파일; [§6.2](../smoke/05_HTAP_v32_Reproduction_Checklist.md#htap-case-install)는 새 CASE마다 필수 |
 | 9 | [MEGAN §5](../megan/01_MEGAN32_Input_Preprocessing_Guide.md) | 전처리 도구 설치·컴파일과 공용 자료 준비 |
 
 주의: SMOKE 소스 수정 사항은 [procar2pt 기록](../smoke/90_SMOKE_procar2pt_Fix.md), [smkinven 기록](../smoke/91_SMOKE_smkinven_Fix.md)도 참조한다. **예전 sizgmat.f 패치는 폐기**되었다는 원문 기록을 따른다.
