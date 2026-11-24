@@ -41,3 +41,8 @@ temporal/tpro_weekly_busan_2020ver_20261021.csv
 2023capss/generators/make_busan_htap_v32_inputs.py
 2023capss/smoke_patch/smkinven_htap_v32.patch
 2023capss/smoke_patch/apply_htap_v32_patches.py
+2023capss/EMIS/2023capss_cb6/scripts/sectorlist_2023capss_cb6
+2023capss/EMIS/2023capss_cb6/scripts/sectorlist_2023capss_cb6_01KM
+2023capss/EMIS/2023capss_cb6/scripts/merge/Sector_merge_2023capss_cb6.csh
+2023capss/EMIS/2023capss_cb6/scripts/utils/check_merge_totals.py
+2023capss/EMIS/smoke5.2/scripts/emf/smk_sectormerge_emf_busan.patch

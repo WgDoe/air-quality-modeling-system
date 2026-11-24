@@ -26,7 +26,8 @@
 | 국외 HTAP_v3.2 | 2020 연간 flux, 27·09·03KM에서 각 8묶음 실행 완료(기존 사용자 기록); 01KM 제외 | [SMOKE 05](../smoke/05_HTAP_v32_Reproduction_Checklist.md) |
 | MEGAN 3.2 | 부산 4도메인 CT3·EFMAP·LDF 입력 생성 및 재현 확인 기록; CCTM 연결 미완료 | [MEGAN §7–9](../megan/01_MEGAN32_Input_Preprocessing_Guide.md) |
 | CMAQ 5.5 CCTM | 시험용 빌드 확인; 실제 Case·benchmark 미완료 | [저장소 README](../../README.md) |
-| ISAM, 국내외 배출량 병합 | 미완료/미검증 | [저장소 README](../../README.md) |
+| 국내외 배출량 병합 | SMOKE 5.3 공식 병합(`mrggrid`) 4도메인 × 2일 완료, 부문 합계 일치(2026-11-24~25). CCTM 메커니즘 `cb6r5_ae7_aq` 확정 | [SMOKE 06](../smoke/06_SMOKE_Busan_Sector_Merge_Guide.md), [03 §7.3](../smoke/03_SMOKE_Emission_Improvement_Plan.md#busan-mechanism) |
+| ISAM | 미완료/미검증 | [저장소 README](../../README.md) |
 
 '완료'는 **기존 문서와 제공된 실행기록의 상태 표시**이며 이번 개편에서 실행 서버의 로그나 netCDF를 독립 재검증한 뜻이 아니다.
 
@@ -43,7 +44,8 @@
 | 분석 날짜만 바뀜 | 필요한 FNL/WPS/WRF 데이터 확보부터; 기존 기상파일이 해당 기간을 완전히 포함하면 재사용 검토 | 기간만 바뀌었다고 무조건 WRF 재실행하지 않음 |
 | WRF 물리 설정·입력기상 변경 | WRF, 필요 시 WPS → MCIP → 기상 의존 배출 전처리 → CCTM | physics 옵션에 따라 추가 runtime 테이블 필요 |
 | 도메인·격자 변경 | WPS geogrid부터 재검토 → WRF/MCIP → 공간할당·MEGAN 입력 → CCTM | 모든 GRIDDESC 일치 확인 |
-| CAPSS 원자료·배출계수 변경 | 국내 입력 생성/SMOKE 해당 부문부터 | 다른 부문은 입력 불변이면 유지 |
+| CAPSS 원자료·배출계수 변경 | 국내 입력 생성/SMOKE 해당 부문부터 → 병합(06 §6) | 다른 부문은 입력 불변이면 유지 |
+| 종분배 프로파일 변경 | 해당 부문 SMOKE 전체 재실행 → 병합 | 예: 2026-11-25 국내 `SOAALK` tracer 추가 후 국내 4부문 × 4도메인 재실행(04 부록 A) |
 | HTAP 원자료·마스킹·프로파일 변경 | 국외 생성기/해당 8묶음부터 | smkinven 재컴파일([§6.1](../smoke/05_HTAP_v32_Reproduction_Checklist.md#htap-install-once))은 설치·소스 교체 때만; 새 CASE 폴더에는 [§6.2](../smoke/05_HTAP_v32_Reproduction_Checklist.md#htap-case-install) 필수 |
 | MEGAN CT3·EFMAP·LDF 변경 | MEGAN 입력 생성부터 | CCTM 연계는 아직 미검증 |
 | 후처리 코드만 변경 | 후처리만 | 모델 산출물 불변 전제 |

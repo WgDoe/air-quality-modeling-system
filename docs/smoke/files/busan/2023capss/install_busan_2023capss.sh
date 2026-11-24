@@ -5,6 +5,7 @@
 #   * copies SMOKE example run system (smoke5.2) if missing
 #   * installs all package files (common + CAPSS 2023 domestic inputs + scripts)
 #   * copies required example files (speciation, point, report)
+#   * applies the Busan date patch to the sector merge script (06 guide, Mrggrid)
 #   * removes obsolete files from the 2026-10-22 format test
 #   * checks that every file referenced by the sector scripts exists (4 domains)
 # Usage:  unzip busan_2023capss_full_setup_20261022.zip -d ~/busan_setup
@@ -36,6 +37,7 @@ else cp -a $EX/smoke5.2/. $B/smoke5.2/ && echo "   copied from example"; fi
 say "3. package files"
 cp -r $PKG/EMIS/. $B/
 chmod +x $C/scripts/point/*.csh $C/scripts/nonpoint/*.csh
+[ -d $C/scripts/merge ] && chmod +x $C/scripts/merge/*.csh
 echo "   $(cd $PKG && find EMIS -type f | wc -l) files installed"
 
 say "4. example files (unchanged)"
@@ -50,7 +52,8 @@ copy_example() {
 }
 for f in gscnv_SPECIATE_5_3_fromS2S_20230911_16jun2025_v1.txt gspro_static_cmaq_21feb2012_v13.txt \
          gspro_PM2_5_AE6_Spec_5_3_S2S_20230911_01nov2023_v0.txt \
-         gspro_CB6R3_AE7_criteria_Spec_5_3_S2S_20230911_01nov2023_v0.txt gspro_nox_hono_pf4_06aug2008_v0.txt; do
+         gspro_CB6R3_AE7_criteria_Spec_5_3_S2S_20230911_01nov2023_v0.txt gspro_nox_hono_pf4_06aug2008_v0.txt \
+         gspro_CB6R3_AE7_criteria_tracer_Spec_5_3_S2S_20230911_01nov2023_v1.txt; do
   copy_example "$EX/ge_dat/speciation/$f" "$B/ge_dat/speciation/$f"
 done
 for f in pelvconfig_elevate_everything_17apr2020_v0.txt pstk_13nov2018_v1.txt; do
@@ -61,6 +64,21 @@ for f in orisdesc_04dec2006_v0.txt naicsdesc_20220222_29feb2024_nf_v1.txt; do
 done
 [ -d $B/ge_dat/smkreport/repconfig ] || cp -r $EX/ge_dat/smkreport/repconfig $B/ge_dat/smkreport/
 echo "   done"
+
+say "4b. sector merge date patch (06 guide 5.2)"
+MRG=$B/smoke5.2/scripts/emf/smk_sectormerge_emf.csh
+MPATCH=$PKG/EMIS/smoke5.2/scripts/emf/smk_sectormerge_emf_busan.patch
+if [ ! -f "$MPATCH" ]; then
+  echo "   SKIP: merge patch not in package (download the 06 guide files to add it)"
+elif grep -q 'Busan patch (2026-11-24)' "$MRG"; then
+  echo "   already patched"
+else
+  [ -e "$MRG.orig" ] || cp -p "$MRG" "$MRG.orig"
+  ( cd "$(dirname "$MRG")" && patch -p1 --dry-run --quiet < "$MPATCH" && patch -p1 --quiet < "$MPATCH" ) \
+    || { echo "ERROR: merge patch failed on $MRG (see 06 guide 5.2)"; exit 1; }
+  grep -q 'Busan patch (2026-11-24)' "$MRG" || { echo "ERROR: merge patch not found after patching"; exit 1; }
+  echo "   patched (original kept as $(basename "$MRG").orig)"
+fi
 
 say "5. remove obsolete files (format test 2026-10-22, East Asia 2010)"
 # Preserve existing results unless cleanup is explicitly requested.
@@ -104,6 +122,14 @@ for f in $B/smoke5.2/scripts/emf/smk_pt_annual_onetime_emf.csh $B/smoke5.2/scrip
   [ -e "$f" ] || { echo "ERROR: MISSING $f"; exit 1; }
   echo "   ok  $(basename "$f")"
 done
+if [ -f "$MPATCH" ]; then
+  for f in $C/scripts/sectorlist_2023capss_cb6 $C/scripts/sectorlist_2023capss_cb6_01KM \
+           $C/scripts/merge/Sector_merge_2023capss_cb6.csh $C/scripts/utils/check_merge_totals.py; do
+    [ -e "$f" ] || { echo "ERROR: MISSING $f"; exit 1; }
+    echo "   ok  $(basename "$f")"
+  done
+  grep -q 'Busan patch (2026-11-24)' "$MRG" && echo "   ok  smk_sectormerge_emf.csh (Busan date patch)"
+fi
 
 say "7. summary"
 du -sh $B/ge_dat/gridding/surrogates/kor_2023capss_* 2>/dev/null

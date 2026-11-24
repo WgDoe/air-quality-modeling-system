@@ -25,7 +25,7 @@
 05 국외 HTAP_v3.2 가이드 (27·09·03KM 각 8개 묶음 완료; 01KM 제외)
 ```
 
-현재 상태(2026-11-11): **국내 5~8장 4개 부문 × 4개 도메인 완료. 국외 HTAP_v3.2 27·09·03KM 각 8개 묶음 완료, 01KM 제외**(사용자 제공 실행 기록). 다음은 국내·국외 병합. 생물성은 SMOKE에서 처리하지 않고 CMAQ 인라인 MEGAN 3.2로 계산한다([03 §9](03_SMOKE_Emission_Improvement_Plan.md#busan-inline-megan)).
+현재 상태(2026-11-25): **국내 5~8장 4개 부문 × 4개 도메인 완료. 국외 HTAP_v3.2 27·09·03KM 각 8개 묶음 완료, 01KM 제외**(사용자 제공 실행 기록). [06 공식 병합](06_SMOKE_Busan_Sector_Merge_Guide.md) 4개 도메인 × 2일 완료(부문 합계 일치). CCTM 연결 미실행. 생물성은 SMOKE에서 처리하지 않고 CMAQ 인라인 MEGAN 3.2로 계산한다([03 §9](03_SMOKE_Emission_Improvement_Plan.md#busan-inline-megan)).
 
 ## 2. 구축 환경
 
@@ -44,7 +44,7 @@
 
 ### 3.1 저장소에서 필요한 파일만 받기
 
-저장소 전체를 받지 않고, 이 절차에 필요한 43개 파일만 GitHub에서 내려받아 `~/busan_smoke_files`에 저장소와 같은 폴더 구조로 둔다. 받을 파일 목록은 저장소의 `docs/smoke/files/busan/2023capss/file_list.txt`에 있다.
+저장소 전체를 받지 않고, 이 절차에 필요한 48개 파일만 GitHub에서 내려받아 `~/busan_smoke_files`에 저장소와 같은 폴더 구조로 둔다. 받을 파일 목록은 저장소의 `docs/smoke/files/busan/2023capss/file_list.txt`에 있다.
 
 ```bash
 (
@@ -63,12 +63,12 @@ while IFS= read -r p || [ -n "$p" ]; do
   mv -- "$F/$p.part" "$F/$p"
   count=$((count + 1))
 done < "$F/file_list.txt"
-[ "$count" -eq 43 ] || { echo "ERROR: expected 43 files, got $count"; exit 1; }
+[ "$count" -eq 48 ] || { echo "ERROR: expected 48 files, got $count"; exit 1; }
 echo "Downloaded $count files (+ file_list.txt)"
 )
 ```
 
-정상 기준: `Downloaded 43 files (+ file_list.txt)`가 나온다. curl 실패 시 블록은 즉시 중단하며 `.part` 파일은 정상 파일로 교체하지 않는다. 파일이 바뀌었을 때는 같은 명령을 다시 실행하면 최신 파일로 덮어쓴다.
+정상 기준: `Downloaded 48 files (+ file_list.txt)`가 나온다. curl 실패 시 블록은 즉시 중단하며 `.part` 파일은 정상 파일로 교체하지 않는다. 파일이 바뀌었을 때는 같은 명령을 다시 실행하면 최신 파일로 덮어쓴다.
 
 받는 파일 (`~/busan_smoke_files/` 기준, 저장소의 `docs/smoke/files/busan/`과 같은 구조):
 
@@ -90,6 +90,7 @@ echo "Downloaded $count files (+ file_list.txt)"
 | `2023capss/EMIS/2023capss_cb6/scripts/htap/Annual_htap_2023capss_cb6.csh` | 국외 연간 실행기 (05 §7) |
 | `2023capss/smoke_patch/apply_htap_v32_patches.py`, `smkinven_htap_v32.patch` | 소스 패치 및 변경 내역 (05 §6.1) |
 | `2023capss/EMIS/smoke5.2/assigns/ASSIGNS_htap_v32.patch` | CASE별 MCIP 입력 경로 패치 (05 §6.2) |
+| `2023capss/EMIS/2023capss_cb6/scripts/sectorlist_2023capss_cb6`, `…_01KM`, `merge/Sector_merge_2023capss_cb6.csh`, `utils/check_merge_totals.py`, `EMIS/smoke5.2/scripts/emf/smk_sectormerge_emf_busan.patch` | 부문 병합 파일 5개 ([06 병합 가이드](06_SMOKE_Busan_Sector_Merge_Guide.md), 2026-11-25 추가). 설치 스크립트가 함께 설치하고 병합 날짜 패치를 적용 |
 | `2023capss/file_list.txt` | 위 파일 목록 (내려받기용) |
 
 
@@ -125,7 +126,7 @@ ls -l "$CAPSS"
 
 ### 3.3 SMOKE 공식 예제에서 가져오는 파일
 
-설치 스크립트(7장)가 `CASES/SMOKE_TEST/smoke_example_case_v3`에서 자동으로 복사한다: 실행 체계 `smoke5.2/`, 종분배 5개(`gscnv_SPECIATE_5_3_fromS2S_20230911_16jun2025_v1.txt`, `gspro_static_cmaq_21feb2012_v13.txt`, `gspro_PM2_5_AE6_Spec_5_3_S2S_20230911_01nov2023_v0.txt`, `gspro_CB6R3_AE7_criteria_Spec_5_3_S2S_20230911_01nov2023_v0.txt`, `gspro_nox_hono_pf4_06aug2008_v0.txt`), 굴뚝 2개(`pelvconfig_elevate_everything_17apr2020_v0.txt`, `pstk_13nov2018_v1.txt`), 보고서(`repconfig/`, `orisdesc_04dec2006_v0.txt`, `naicsdesc_20220222_29feb2024_nf_v1.txt`).
+설치 스크립트(7장)가 `CASES/SMOKE_TEST/smoke_example_case_v3`에서 자동으로 복사한다: 실행 체계 `smoke5.2/`, 종분배 6개(`gscnv_SPECIATE_5_3_fromS2S_20230911_16jun2025_v1.txt`, `gspro_static_cmaq_21feb2012_v13.txt`, `gspro_PM2_5_AE6_Spec_5_3_S2S_20230911_01nov2023_v0.txt`, `gspro_CB6R3_AE7_criteria_Spec_5_3_S2S_20230911_01nov2023_v0.txt`, `gspro_nox_hono_pf4_06aug2008_v0.txt`, `gspro_CB6R3_AE7_criteria_tracer_Spec_5_3_S2S_20230911_01nov2023_v1.txt` — 2026-11-25 추가), 굴뚝 2개(`pelvconfig_elevate_everything_17apr2020_v0.txt`, `pstk_13nov2018_v1.txt`), 보고서(`repconfig/`, `orisdesc_04dec2006_v0.txt`, `naicsdesc_20220222_29feb2024_nf_v1.txt`).
 
 ## 4. 공통 실행 규칙
 
@@ -259,7 +260,7 @@ cp "$F"/2023capss/install_busan_2023capss.sh "$PKG"/
 ls "$PKG"/EMIS/2023capss_cb6/scripts "$PKG"/EMIS/smoke5.2/scripts/run
 ```
 
-정상 기준: `scripts`에 `directory_definitions.csh nonpoint point run_settings.txt utils`, `run`에 `set_days_v5.csh`.
+정상 기준: `scripts`에 `directory_definitions.csh merge nonpoint point run_settings.txt sectorlist_2023capss_cb6 sectorlist_2023capss_cb6_01KM utils`, `run`에 `set_days_v5.csh`.
 
 ## 7. 입력 설치
 
@@ -269,13 +270,14 @@ bash ~/busan_2023capss_pkg/install_busan_2023capss.sh 2>&1 | tee ~/busan_install
 )
 ```
 
-설치 스크립트가 하는 일: 폴더·`met` 링크 확인 → 예제 `smoke5.2/` 복사(없을 때만) → 패키지 `EMIS/` 설치(패치한 `set_days_v5.csh` 포함) → 예제 종분배·굴뚝·보고서 파일 복사 → 이전 결과 보존(명시적 정리 옵션에서만 삭제) → MCIP 기간 표시 → 실행 스크립트가 참조하는 파일 점검.
+설치 스크립트가 하는 일: 폴더·`met` 링크 확인 → 예제 `smoke5.2/` 복사(없을 때만) → 패키지 `EMIS/` 설치(패치한 `set_days_v5.csh` 포함) → 예제 종분배·굴뚝·보고서 파일 복사 → 부문 병합 스크립트 `smk_sectormerge_emf.csh`에 날짜 패치 적용(4b, 이미 패치됐으면 건너뜀, 원본은 `.orig`) → 이전 결과 보존(명시적 정리 옵션에서만 삭제) → MCIP 기간 표시 → 실행 스크립트가 참조하는 파일 점검.
 
 정상 기준:
 
 - `run period from MCIP: 2026243 2026244 2026 8 9`
 - `all referenced files exist (5 scripts x 4 domains)`
-- `ok` 5줄 (`smk_pt_annual_onetime_emf.csh`, `smk_pt_annual_byday_emf.csh`, `smk_ar_annual_emf.csh`, `directory_definitions.csh`, `run_settings.txt`)
+- 4b에서 `patched (original kept as smk_sectormerge_emf.csh.orig)`(처음 설치) 또는 `already patched`(재설치)
+- `ok` 10줄 (`smk_pt_annual_onetime_emf.csh`, `smk_pt_annual_byday_emf.csh`, `smk_ar_annual_emf.csh`, `directory_definitions.csh`, `run_settings.txt`, `sectorlist_2023capss_cb6`, `sectorlist_2023capss_cb6_01KM`, `Sector_merge_2023capss_cb6.csh`, `check_merge_totals.py`, `smk_sectormerge_emf.csh (Busan date patch)`)
 - 대리자료 폴더 4개 (01KM 32M, 03KM 43M, 09KM 24M, 27KM 7.0M)와 FF10 4개
 
 > **삭제 경고:** 기본 설치는 기존 결과를 보존한다. `BUSAN_REMOVE_OBSOLETE=YES`를 지정하면 `intermed/09KM/kor_point`, `inputs/kor_point/scc10_reference_map_20261022.csv`, `inputs/asia`가 삭제된다. 백업 후 의도적으로 정리할 때만 지정한다. 설치는 패키지의 입력·스크립트를 덮어쓰므로 재설치 전 이 파일들도 백업한다.
@@ -385,6 +387,7 @@ mkdir -p "$C"/intermed "$C"/reports "$C"/logs "$C"/scripts/logs
 | 종분배 | `ge_dat/speciation/gsref_kor_point_2023capss_20261022.csv` | SCC10 → 종분배 프로파일 번호 (VOC·PM2.5·NOX, 기본값 포함) | 생성기: 기존 운영체계 `5_Point_Speciation_Reference_Profile.txt`(2020년 버전)를 SCC10에 연결(정확 일치 → 연료 차용 → 같은 연료 계열 → 같은 SCC → 상위 분류 → 기본값) | Spcmat |
 | | `ge_dat/speciation/gscnv_SPECIATE_5_3_fromS2S_20230911_16jun2025_v1.txt` | 프로파일별 VOC → TOG 변환계수 | 예제 (EPA SPECIATE 5.3) | Spcmat |
 | | `ge_dat/speciation/gspro_CB6R3_AE7_criteria_Spec_5_3_S2S_20230911_01nov2023_v0.txt` | TOG → CB6R3 물질 분배 비율 | 예제 (EPA SPECIATE 5.3) | Spcmat |
+| | `ge_dat/speciation/gspro_CB6R3_AE7_criteria_tracer_Spec_5_3_S2S_20230911_01nov2023_v1.txt` | TOG → `SOAALK`(장쇄 알케인 SOA 전구물질 추적자) 비율. 실행 스크립트의 `GSPROTMP_D1` | 예제 (EPA 예제 `nonpt`와 같은 사용, 2026-11-25 추가) | Spcmat |
 | | `ge_dat/speciation/gspro_PM2_5_AE6_Spec_5_3_S2S_20230911_01nov2023_v0.txt` | PM2.5 → AE 입자 성분 분배 비율 | 예제 (EPA SPECIATE 5.3) | Spcmat |
 | | `ge_dat/speciation/gspro_nox_hono_pf4_06aug2008_v0.txt` | NOX → NO 0.9 / NO2 0.092 / HONO 0.008 | 예제 | Spcmat |
 | | `ge_dat/speciation/gspro_static_cmaq_21feb2012_v13.txt` | CO·NH3·SO2를 그대로(`0000`), PMC를 그대로(`99999`) 넘김 | 예제 | Spcmat |
@@ -608,7 +611,7 @@ done
 | 05 §3~6 국외 HTAP_v3.2 원자료·생성·패치·설치 | 완료 (2026-11-10 사용자 실행 기록) |
 | 05 §7~8 국외 HTAP_v3.2 27KM | 8개 묶음 완료(오류 0, 남한 배출량 0, PEC·POC 포함) |
 | 국외 HTAP_v3.2 09·03KM | 8개 묶음씩 완료 (2026-11-11); 01KM 제외 (영역 내 국외배출량 0, 05 §8.4 재현 검증 조건 참고) |
-| 국내외 병합 | 미착수 ([03 개선 계획 §5](03_SMOKE_Emission_Improvement_Plan.md)) |
+| 국내외 병합 | 완료 (2026-11-24, [06 부문 병합 가이드](06_SMOKE_Busan_Sector_Merge_Guide.md)) |
 | 생물성 | CMAQ 인라인 MEGAN 3.2로 처리한다. 전처리는 [MEGAN 3.2 입력 전처리 가이드](../megan/01_MEGAN32_Input_Preprocessing_Guide.md)를 따르며, 운영 LDF 교체 후 CCTM에서 시험한다. |
 
 국내외 병합을 구성할 때 국내 4개 부문과 적용 대상 HTAP 부문만 입력 목록에 넣는다. 병합 파일을 CCTM에 연결하기 전에 [03 §9의 이중계상 확인 절차](03_SMOKE_Emission_Improvement_Plan.md#busan-inline-megan)를 따른다.
@@ -635,6 +638,7 @@ done
 | 10-26 | 6.2 생성기 `ModuleNotFoundError: No module named 'pandas'` | 6.1 파이썬 모듈 설치를 하지 않음 | 6.1 실행 (`pip3`가 없으면 `sudo dnf install -y python3-pip`) |
 | 10-29 | 바다 01KM Smkreport `Gridding matrix dimension is inconsistent with records count`, `NMATX`에 여유를 둔 패치에서는 바다 27KM Smkreport `Segmentation fault` | **근본 원인:** `genagmat.f`가 도메인 안에 대리자료가 없는 번호(5001·5002)에서 배출원 반복을 건너뛰지 않아, 앞 대리자료(902)의 격자 2,990칸에 `FRAC=1.0E-36` 항목을 기록 → `sizgmat.f`의 개수와 불일치. 행렬 길이에 여유를 두면 남는 칸(배출원 0번)을 읽다가 Smkreport가 죽음 | `sizgmat.f`는 원본으로 되돌리고 `genagmat.f`에 `CYCLE` 한 줄 추가(7.1). 10-24·10-25의 `sizgmat.f` 패치는 폐기. `1.0E-36` 항목의 질량 영향은 극히 작지만, 이전 합계 검증은 오류 없이 생성된 보고서에 한정하며 패치 후 재확인 |
 | 11-01 | 면 03KM 실행 후 `ERROR: 03KM 실행 실패`로 반복이 멈추고 01KM이 실행되지 않음 | 종료 코드로 중단하던 반복이 영역 밖 SCC 경고에 따른 로그 분석기 비영 종료도 실행 실패로 처리함 | 종료 코드만으로 반복을 중단하지 않고, 실행 기록의 `ERROR detected in` 또는 `Segmentation fault` 발견 시 중단하는 단순 방식으로 변경(4장, 8.1~8.4). 정상 여부는 각 절의 확인 명령, 8.5 및 10장 기준으로 판단. 01KM의 이전 결과 파일은 이번 실행 성공 근거로 사용하지 않음 |
+| 11-25 | 병합 파일을 CMAQ `cb6r5_ae7_aq` 배출 대응표와 대조하니 국내 부문의 `SOAALK`가 0(국외 HTAP에는 있음) | 국내 실행 스크립트에 EPA 예제가 쓰는 tracer 종분배(`gspro_CB6R3_AE7_criteria_tracer_…_v1.txt`)가 빠져 있었음 | 국내 5개 실행 스크립트에 `GSPROTMP_D1` 추가, 설치 스크립트 복사 목록에 추가(3.3) 후 국내 4개 부문 × 4개 도메인 재실행. `SOAALK` 외 모든 배출종은 이전과 같음(03 §7.3) |
 
 ## 10. 검토 근거 및 관련 문서
 
@@ -680,4 +684,4 @@ done
 - **별도 기록:** [91 Smkinven 오류 수정](91_SMOKE_smkinven_Fix.md). 기존 국내 [§7.1 Grdmat 패치](#busan-grdmat-patch)는 보존한다.
 - **남은 작업:** 국내외 병합, CMAQ 연계 검증(생물성은 CCTM 인라인 MEGAN 3.2, [03 §9](03_SMOKE_Emission_Improvement_Plan.md#busan-inline-megan)). 국외 실행 완료를 CMAQ-ready 입력 검증 완료로 표현하지 않는다.
 
-이전 04 §11의 국외 상세 절차는 중복과 유지보수 충돌을 막기 위해 05로 이관했다. **기존 04 §3.1의 GitHub 파일 43개 다운로드, 국내 입력 생성·설치, 4개 도메인 재현 절차 및 원래 소스 파일은 그대로 유지**한다.
+이전 04 §11의 국외 상세 절차는 중복과 유지보수 충돌을 막기 위해 05로 이관했다. **기존 04 §3.1의 GitHub 파일 다운로드(2026-11-25 병합 파일 포함 48개), 국내 입력 생성·설치, 4개 도메인 재현 절차 및 원래 소스 파일은 그대로 유지**한다.

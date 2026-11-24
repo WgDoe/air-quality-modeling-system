@@ -1,0 +1,14 @@
+--- a/smk_sectormerge_emf.csh
++++ b/smk_sectormerge_emf.csh
+@@ -629,6 +629,11 @@
+ 
+       set juldate = `$IOAPIDIR/juldate $mon $day $year | /bin/grep $year | cut -d, -f2`
+       setenv G_STDATE $juldate
++      # --- Busan patch (2026-11-24): limit merge dates to the MCIP period RUN_SDATE..RUN_EDATE (YYYYDDD)
++      #     same rule as the Busan patch in run/set_days_v5.csh; RUN_SDATE/RUN_EDATE come from directory_definitions.csh
++      if ( $?RUN_SDATE && $?RUN_EDATE ) then
++         if ( $juldate < $RUN_SDATE || $juldate > $RUN_EDATE ) continue
++      endif
+ 
+       ## Reset RUN_MRGGRID and RUN_M3STAT before calling runsettings.csh
+       setenv RUN_MRGGRID Y

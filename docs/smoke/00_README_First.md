@@ -9,12 +9,13 @@
 | **03 필수(배출량 기준)** | [CAPSS 2023 / HTAP 배출량 개선 계획 (국외 HTAP_v3.2 적용)](03_SMOKE_Emission_Improvement_Plan.md) | 자료 선정·단위·SCC·공간·시간·종분배 기준 |
 | **04 필수(현재 작업)** | [부산 실제사례 실행 가이드](04_SMOKE_Busan_Case_Run_Guide.md) | 국내 CAPSS 2023 4부문·4도메인 실행과 Grdmat 패치; 국외 절차는 05로 이관 |
 | **05 필수(국외 재현)** | [HTAP_v3.2 국외 배출량 처리 가이드](05_HTAP_v32_Reproduction_Checklist.md) | 국외 원자료·생성·패치·실행·검증(27·09·03KM), 01KM 제외 근거 |
+| **06 필수(병합)** | [부문 병합(Mrggrid) 가이드](06_SMOKE_Busan_Sector_Merge_Guide.md) | 국내·국외 지면 배출 병합 → CMAQ 입력, 예제 대비 수정 사항(§4), 합계 검증 |
 | **90 필요 시 참고** | [procar2pt.f 포인터 초기화 수정 기록](90_SMOKE_procar2pt_Fix.md) | 설치·컴파일 문제 발생 시 수정 이력 |
 | **91 필요 시 참고** | [smkinven.f 오류 수정](91_SMOKE_smkinven_Fix.md) | 국외 격자 인벤토리 NONPOINT 초기화 수정 |
 
 ## 현재 작업 재개 위치
 
-- **완료·다음:** 국내 CAPSS 2023 점·면·이동·바다 4부문 × 27·09·03·01KM 완료(기존 사용자 실행 기록). **2026-11-11 국외 HTAP_v3.2 2020년 0.1° 자료의 27·09·03KM 각 8개 묶음 완료, 01KM 제외**(사용자 제공 실행 기록 기준). 국외 재현은 05 처리 가이드를 따른다. 병합·CMAQ 연계는 별도. **생물성은 SMOKE에서 처리하지 않고 CMAQ 인라인 MEGAN 3.2로 결정(2026-11-11, [03 §9](03_SMOKE_Emission_Improvement_Plan.md#busan-inline-megan)).**
+- **완료·다음:** 국내 CAPSS 2023 점·면·이동·바다 4부문 × 27·09·03·01KM 완료(기존 사용자 실행 기록). **2026-11-11 국외 HTAP_v3.2 2020년 0.1° 자료의 27·09·03KM 각 8개 묶음 완료, 01KM 제외**(사용자 제공 실행 기록 기준). 국외 재현은 05 처리 가이드를 따른다. **2026-11-24 국내·국외 부문 병합 4개 도메인 완료(06, 부문 합계 일치). 2026-11-25 CCTM 메커니즘 `cb6r5_ae7_aq` 확정, 국내 `SOAALK` 종분배 추가 후 국내 4부문·병합 재실행([03 §7.3](03_SMOKE_Emission_Improvement_Plan.md#busan-mechanism)).** CMAQ 연계는 별도. **생물성은 SMOKE에서 처리하지 않고 CMAQ 인라인 MEGAN 3.2로 결정(2026-11-11, [03 §9](03_SMOKE_Emission_Improvement_Plan.md#busan-inline-megan)).**
 - **MEGAN:** [MEGAN 문서](../megan/00_README_First.md)에서 부산 4개 도메인의 입력 생성 및 수정 변환기 검증 절차를 확인한다. 운영 LDF 교체와 CCTM 실행은 남아 있다.
 - **재설치:** 04 §7.1의 genagmat.f CYCLE 패치와 05 [§6.1](05_HTAP_v32_Reproduction_Checklist.md#htap-install-once)의 smkinven.f 초기화 패치·재컴파일; 새 CASE마다 [§6.2](05_HTAP_v32_Reproduction_Checklist.md#htap-case-install)의 ASSIGNS.emf·실행 스크립트·HTAP 입력 설치을 적용한다. 이전 sizgmat.f 여유 배열 패치는 폐기했다. 전체 신규 설치 재현은 별도 검증 대상이다.
 - **설치·생성 파일:** [files/busan/2023capss/](files/busan/2023capss/)에 설치 스크립트·생성기·실행 스크립트를 보관. 대용량 FF10·대리자료는 저장소에 없으며 설치 ZIP 또는 생성기로 만든다.

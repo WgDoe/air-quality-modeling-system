@@ -15,7 +15,7 @@
 | 새 프로그램 | WRF 4.5.1·MCIP 5.5 사례 실행, SMOKE 5.3 설치·공식 예제 전 부문 검증 완료 | WRF/MCIP·SMOKE 설치 가이드 |
 | 기존 체계 분석 | SMOKE 2.7 운영체계(2020년 버전, CAPSS 2017)의 입력 구조를 기준선으로 확보 | 기존 운영체계 분석 문서 |
 | 새 체계 실행 틀 | 부산 사례 `CASES/BUSAN/TEST_20260901/EMIS/` 폴더·기상 링크·예제 스크립트 준비 완료. 기존 공통 입력은 2017 기준으로 작성된 내용의 2023 적용 여부 확인 필요 | [부산 사례 실행 가이드](04_SMOKE_Busan_Case_Run_Guide.md) §5~§9 |
-| 배출량 자료 교체 | 국내 4부문·4도메인 완료, 국외 HTAP_v3.2 27·09·03KM 완료·01KM 제외(사용자 실행기록 기준). 병합 미착수. 생물성은 CMAQ 인라인 MEGAN 3.2로 결정(§9), CCTM 단계에서 처리 | [04 국내](04_SMOKE_Busan_Case_Run_Guide.md) §9, [05 국외](05_HTAP_v32_Reproduction_Checklist.md) §9 |
+| 배출량 자료 교체 | 국내 4부문·4도메인 완료, 국외 HTAP_v3.2 27·09·03KM 완료·01KM 제외(사용자 실행기록 기준). [06 공식 병합](06_SMOKE_Busan_Sector_Merge_Guide.md) 4개 도메인 × 2일 완료(부문 합계 일치). CCTM 연결 미실행. 생물성은 CMAQ 인라인 MEGAN 3.2로 결정(§9), CCTM 단계에서 처리 | [04 국내](04_SMOKE_Busan_Case_Run_Guide.md) §9, [05 국외](05_HTAP_v32_Reproduction_Checklist.md) §9 |
 
 기존 2017 시나리오(`2017capss_cb6`)의 면 입력 준비와 미실행 절차는 **현행 실행 문서에서 제외**했다. 기존 체계의 분석·비교 결과는 [SMOKE 2.7 분석](02_Legacy_SMOKE27_Emission_Processing.md)과 이 계획서 §4에 유지하며, 예전 작업 문서 원문은 Git 커밋 이력에서 확인할 수 있다. 새 체계는 배출 시나리오 `2023capss_cb6` 하나로 진행한다. 다만 2017 작업에서 확인한 규칙(단위, 연료 번호, UTC 프로파일, 코드표 형식 등)은 그대로 이어서 쓴다(§4).
 
@@ -152,7 +152,7 @@ SMOKE는 인벤토리의 ton을 short ton(907.18474 kg)으로 처리한다. 2017
 | 프로파일 대응 | 기존 SCC→SPECIATE 번호 대응 유지. 기존 VOC 프로파일 57개, PM2.5 42개가 예제 파일에 모두 있음 |
 | VOC→TOG | 예제 `gscnv_SPECIATE_5_3`의 **프로파일별 계수** 사용. 기존 SCC별 계수 대비 국내 면 TOG 총량 97.7% |
 | 기타 물질 | CO·NH3·SO2 `0000`, PMC `99999`(예제 정적 프로파일), NOX `HONO`(NO 0.9 / NO2 0.092 / HONO 0.008, 기존과 같은 비율) |
-| 확인할 것 | CMAQ 5.5 기본 메커니즘(cb6r5 계열)과 CB6R3_AE7 배출 물질 이름 대응 — 병합 단계 |
+| 확인 결과 | CCTM `cb6r5_ae7_aq`와 CB6R3_AE7 배출 물질 대응 확인 완료(§7.3, 2026-11-25). `SOAALK`용 tracer 종분배 추가 |
 
 ### 4.8 공간배분 (계획)
 
@@ -277,6 +277,7 @@ SPECIATE 5.3을 현재 공개 최신판으로 간주하지 않는다. EPA는 [SP
 | 4 | 농업 NH3 시간배분 | 월 고정 프로파일 | 기상 연동 시간배분 검토. CMAQ 양방향 NH3는 별도 배출·침적 교환 설정으로 검토 | 중. PM2.5 질산·암모늄 |
 | 5 | 선박 시간배분 | 고정 프로파일 | 선박 AIS 운항 자료 | 중. 부산항 영향 |
 | 6 | PM2.5 종분배 연결 | 기존 연결 | 업종별 국내 PM 성분 측정 자료 | 중 |
+| 7 | 국내 1차 황산(`SULF`) | 국내 SO2에서 SULF를 나누지 않음(§7.3) | CAPSS 연소 SCC의 연료 번호(석탄 02·07, 중유 19~33, 경유·등유 36~45)를 EPA `gspro_sulf` 프로파일(석탄 95014·87514·75014, 유류 99010)에 대응시키는 `gsref` 추가 | 소~중. SO2의 약 1.5~2.9%가 1차 황산염으로 바로 배출 |
 
 효과 크기는 검증 전 예상이며 개선을 보장하지 않는다. CMAQ 양방향 NH3는 단순 시간 프로파일 교체가 아니다. 토양·비료 관련 입력과 배출·침적 설정, 기존 비료 NH3와의 중복 계상 방지를 별도로 확인한다([공식 예제](https://usepa.github.io/CMAQ/DOCS/Users_Guide/Tutorials/CMAQ_UG_tutorial_benchmark_cracmm2_stage.html)).
 
@@ -286,12 +287,26 @@ SPECIATE 5.3을 현재 공개 최신판으로 간주하지 않는다. EPA는 [SP
 
 종분배 비율(`gspro`, `gscnv`)은 CMAQ 화학 메커니즘에 맞춰야 한다. 현재는 `CB6R3_AE7`이며, CMAQ 5.5는 CB6R5·CRACMM 등 더 새로운 메커니즘도 지원한다. **병합·CMAQ 기준 실행 전에 기준 메커니즘을 확정**한다. 메커니즘 변경 시 해당 메커니즘용 종분배 자료뿐 아니라 CMAQ 빌드 설정, 배출종 이름·단위·변환계수, 제어 파일과 입력 대응을 함께 확인한다. CMAQ 5.5 지원 메커니즘은 [공식 FAQ](https://github.com/USEPA/CMAQ/blob/main/DOCS/Release_FAQ/CMAQv5.5-Series-FAQ.md)를 참고한다.
 
-**CMAQ 5.5 소스·메커니즘 재현 기준(사용자 제공 점검 기록):** 설치된 소스 `src/CMAQ_REPO` 커밋 `e10d0a0`(2025-07-11), 태그 `CMAQv5.5.0.3_11Jul2025`를 기준으로 한다. 새 시스템에서 `main`을 그대로 받지 말고 해당 버전 태그를 고정한다. **화학 메커니즘은 `cb6r5_ae7_aq` 잠정 후보**이며 병합 전에 확정해야 한다. 제공된 DESID 파일 비교에서는 `cb6r3_ae7_aq` 108행, `cb6r5_ae7_aq` 109행으로 `DMS` 항목이 추가된 차이가 보고되었으나, 실제 SMOKE 출력 배출종과의 대조는 아직 수행하지 않았다.
+**CMAQ 5.5 소스·메커니즘 재현 기준(사용자 제공 점검 기록):** 설치된 소스 `src/CMAQ_REPO` 커밋 `e10d0a0`(2025-07-11), 태그 `CMAQv5.5.0.3_11Jul2025`를 기준으로 한다. 새 시스템에서 `main`을 그대로 받지 말고 해당 버전 태그를 고정한다.
+
+<a id="busan-mechanism"></a>
+**확정(2026-11-25): CCTM 메커니즘 `cb6r5_ae7_aq`, SMOKE 종분배는 현재 CB6R3_AE7(`cmaq_cb6ae7`) 유지.** 근거(서버에서 직접 확인):
+
+| 확인 | 결과 |
+|---|---|
+| 설치된 CCTM | `CMAQv5.5/CCTM/scripts/BLD_CCTM_v55_gcc_cb6r5_ae7_aq_m3dry/CCTM_v55.exe` 1개 (공식 벤치마크 실행에 사용) |
+| DESID 규칙 `cb6r3_ae7_aq` ↔ `cb6r5_ae7_aq` | 차이는 `DMS` 1줄. DMS는 CCTM이 해양 파일로 계산하며 EPA 벤치마크 배출 파일에도 없음 |
+| EPA CB6R5 벤치마크(`run_cctm_Bench_2018_12NE3_CB6R5.csh`)의 배출 입력 | SMOKE `cmaq_cb6ae7` 종분배 파일(`emis_mole_all_…_nobeis_norwc_2018gc_cb6_18j.ncf`, `inln_mole_…_cmaq_cb6ae7_…`) — 부산과 같은 종분배 계열 |
+| 단위 | 기체 `moles/s`, 입자 `g/s`. PM 19종(`PAL`~`PMC`) 모두 있음, 대응 규칙과 일치 |
+| CMAQ가 쓰지 않는 배출종 | `GLY`·`GLYD`·`ISPD`·`MGLY`·`PACD`(CB6 VOC 몰수의 0.06% 이하), `IVOC`·`NMOG`·`NVOL`·`UNR`·`UNK`·`VOC_INV`(진단용), `NH3_FERT`(값 0) — 무시됨 |
+| 원자료가 없어 0인 배출종 | `CL2`·`HCL`·`ACROLEIN`·`BUTADIENE13`·`ALD2_PRIMARY`·`FORM_PRIMARY`(EPA는 HAP 인벤토리에서 생성, CAPSS·HTAP에는 없음). `SESQ`는 인라인 MEGAN이 공급 |
+| 종분배 누락 (수정) | 국내 `SOAALK`가 0이었음. EPA 예제처럼 `gspro_CB6R3_AE7_criteria_tracer_Spec_5_3_S2S_20230911_01nov2023_v1.txt`를 국내 5개 실행 스크립트에 추가(`GSPROTMP_D1`, [04 §3.3](04_SMOKE_Busan_Case_Run_Guide.md)) |
+| 종분배 누락 (개선 과제) | 국내 `SULF`(1차 황산) 0. EPA는 석탄·서유 보일러 SCC 119개만 SO2의 1.55~2.86%를 SULF로 분배(`gsref_sulf…` + `gspro_sulf_29jun2007_v1.txt`). CAPSS SCC는 체계가 달라 연료 번호 기준 대응표가 필요 → §7.2 |
 ### 7.4 진행 순서
 
 | 단계 | 할 일 |
 |---|---|
-| 1 | CMAQ 5.5 기준 메커니즘 확정, 현재 배출종·단위·종분배 자료와 CMAQ 입력 대응 확인 (§7.3) |
+| 1 | CMAQ 5.5 기준 메커니즘 확정, 현재 배출종·단위·종분배 자료와 CMAQ 입력 대응 확인 (§7.3) — **완료 2026-11-25 (`cb6r5_ae7_aq`)** |
 | 2 | 완료된 국외(HTAP_v3.2) 산출물을 사용해 확정한 메커니즘에 맞춰 병합·CMAQ 실행(생물성은 인라인 MEGAN 3.2, §9) → **기준 결과** 확보 |
 | 3 | 1~3순위를 하나씩 교체하고, 교체마다 기준 결과와 배출량·농도 차이를 비교해 효과를 기록 |
 | 4 | 4~6순위는 자료 확보 상황에 따라 검토 |
@@ -306,7 +321,7 @@ SPECIATE 5.3을 현재 공개 최신판으로 간주하지 않는다. EPA는 [SP
 - 남한 중복 제거는 CAPSS 1km 셀이 닿는 HTAP 0.1° 셀 전체를 0으로 만들기 때문에 해안·접경의 국외 배출량 일부도 손실될 수 있다.
 - BC·OC가 PM2.5를 초과한 셀의 성분 비례 축소는 PM2.5 질량을 보존하지만 BC·OC의 원자료 성분 질량을 변경한다.
 - 일부 하위 부문 프로파일은 기존 상위 부문을 대체 적용한 잠정 매핑이다.
-- 국내·국외 병합, CMAQ-ready 최종 입력, MEGAN 운영 LDF 교체 및 CCTM 실행은 미완료다.
+- 2026-11-10~11 당시에는 국내·국외 병합, MEGAN 운영 LDF 교체 및 CCTM 실행이 미완료였다. 최신 병합 상태는 §1을 따른다.
 
 <a id="busan-inline-megan"></a>
 
@@ -373,7 +388,7 @@ SPECIATE 5.3을 현재 공개 최신판으로 간주하지 않는다. EPA는 [SP
 
 | 항목 | 내용 | 시점 |
 |---|---|---|
-| 화학 메커니즘 확정 | `cb6r5_ae7_aq` 잠정 후보(§7.3). MEGAN 출력 물질도 이 메커니즘에 맞춰 대응됨 | 병합·CCTM 전 |
+| 화학 메커니즘 확정 | **`cb6r5_ae7_aq` 확정(2026-11-25, §7.3)**. MEGAN 출력 물질도 이 메커니즘에 맞춰 대응됨 | 완료 |
 | MEGAN 입력 자료 | 전처리기 버전과 식생·배출계수 원자료는 MEGAN 가이드 §3.2에 기록. LAI는 MCIP 사용 | 운영 LDF 교체 후 검증 |
 | LAI 자료 | 부산 기준은 MCIP LAI(`USE_MEGAN_LAI=N`) | 첫 CCTM 로그에서 확인 |
 | MCIP 토양 변수 | Noah 기준 `METCRO2D`의 토양수분·온도·유형 필드와 CCTM 읽기 확인. WRF의 `ISLTYP`는 MCIP에서 `SLTYP`로 출력 | CCTM 기준 설정 시 |

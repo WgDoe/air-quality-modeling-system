@@ -42,6 +42,7 @@ setenv GSREFTMP_A "${GE_DAT}/speciation/gsref_kor_nonpoint_2023capss_20261022.cs
 setenv GSPROTMP_A "${GE_DAT}/speciation/gspro_static_cmaq_21feb2012_v13.txt"
 setenv GSPROTMP_C "${GE_DAT}/speciation/gspro_PM2_5_AE6_Spec_5_3_S2S_20230911_01nov2023_v0.txt"
 setenv GSPROTMP_D "${GE_DAT}/speciation/gspro_CB6R3_AE7_criteria_Spec_5_3_S2S_20230911_01nov2023_v0.txt"
+setenv GSPROTMP_D1 "${GE_DAT}/speciation/gspro_CB6R3_AE7_criteria_tracer_Spec_5_3_S2S_20230911_01nov2023_v1.txt"   # SOAALK tracer, as in the example (2026-11-25)
 setenv GSPROTMP_G "${GE_DAT}/speciation/gspro_nox_hono_pf4_06aug2008_v0.txt"
 
 ## Reports (example)

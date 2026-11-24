@@ -1,6 +1,6 @@
 # SMOKE–CMAQ 공식 스크립트 기반 CASE 반복 실행 원칙 및 검증 기록
 
-> 작성: 2026-11-24 · 대상: BUSAN/TEST_20260901 · 상태: **운영 절차 설계 / 공식 병합·ICON·BCON 실행 미검증**
+> 작성: 2026-11-24 · 갱신: 2026-11-25 · 대상: BUSAN/TEST_20260901 · 상태: **공식 SMOKE 병합 검증 완료([06](../smoke/06_SMOKE_Busan_Sector_Merge_Guide.md)) / ICON·BCON 실행 미검증**
 >
 > 이 문서는 기존 [배출량 반복 실행](EMISSIONS_CASE_RUN.md), [CMAQ 실행 준비 상태](CMAQ_CASE_STATUS.md)를 보완한다. **공식 도구의 미실행 명령을 성공한 절차로 기록하지 않는다.** 신규 시스템에서의 설치·컴파일과 신규 CASE의 반복 실행은 분리한다.
 
@@ -22,16 +22,18 @@
 | SMOKE | CAPSS 2023: `kor_area`, `kor_mobile`, `kor_sea`, `kor_point` |
 | 국외 | HTAP v3.2 기반 8개 부문; 원자료의 대한민국 배출량 제거 확인 |
 | 지표면 통합 배출량 | 2026-08-31 및 09-01 × 4도메인, 8개 파일 생성 및 독립 수치 대조 **완료** |
-| 통합 생성 방식 | Python을 이용한 11개 부문 합산 **(공식 SMOKE 병합 프로그램으로 재현한 것은 아님)** |
-| 통합 화학종 | 61개: CAPSS 59 + `SOAALK`, `SULF`; `UNK`, `VOC_INV` 제외 |
-| 수치 QA | 8개 파일 모두 원본 부문 합산 결과와 float32 비교 불일치 0, 음수 0 |
+| 통합 생성 방식 | **SMOKE 5.3 공식 병합**(`smk_sectormerge_emf.csh` → `mrggrid`, [06](../smoke/06_SMOKE_Busan_Sector_Merge_Guide.md)). 이전 Python 합산본(`cmaq_ready/merged`)은 비교 참조용 |
+| 통합 화학종 | 27·09·03KM 63개(`UNK`·`VOC_INV` 포함, CMAQ 미사용), 01KM 60개(국외 제외). 국내 `SOAALK`는 2026-11-25 tracer 종분배 추가로 생성 |
+| 수치 QA | 공식 병합 8개 파일: 부문 합계와 상대차 5×10⁻⁸ 이하, 음수 0(`check_merge_totals.py`). 국내 SOAALK 반영 전 공식 병합은 Python 참조본과 공통 61종 상대차 5×10⁻⁸ 이하(06 부록 A) |
 | 국내 점오염원 | `inln_mole` + `stack_groups` 별도 입력; 지표면 파일과 직접 합치지 않음 |
 | 생물성 | SMOKE 병합에 추가하지 않고 CMAQ inline MEGAN 3.2 적용 계획 |
 | IC/BC | 부산 CASE용 ICON·BCON 산출물 및 실제 실행 **미확인·미검증** |
 
-**중요:** 위의 '완료'는 사용자 제공 `CMAQ_case_step11~14.txt` 수치·메타데이터 점검 보고서 기준이다. 공식 SMOKE 병합 결과와의 독립 비교, CCTM 적재 및 모의 성공을 뜻하지 않는다.
+**검증 범위:** 이전 Python 합산본은 사용자 제공 `CMAQ_case_step11~14.txt`에, 공식 SMOKE 병합과 부문 합계 검증은 06 §7에 기록했다. CCTM 입력 연결 및 모의는 미검증이다.
 
-## 3. SMOKE: 공식 병합 절차 수립 (다음 검증 대상)
+## 3. SMOKE: 공식 병합 절차 — **검증 완료(2026-11-24~25)**
+
+확정된 스크립트 사본·수정 사항·명령·정상 기준은 [06 부문 병합 가이드](../smoke/06_SMOKE_Busan_Sector_Merge_Guide.md)를 따른다(수정 사항 §4, 실행 §6, 확인 §7). 아래 3.1~3.3은 검증 전 계획 기록으로 남긴다.
 
 ### 3.1 기존 확인된 입력
 
@@ -50,7 +52,7 @@
 - `GDNAM` 표기 차이(`<GRID>` 대 `<GRID>_CROSS`)는 격자값이 같다는 사실과 구분해 공식 도구의 입출력 요구를 검사한다.
 - 기존 Python 통합파일은 덮어쓰지 않는다. 다른 출력 폴더에 생성한 후 원본 11부문 합계 및 Python 참조 결과와 대조한다.
 
-### 3.3 공식 명령 확정 기록 양식 — **아직 미검증**
+### 3.3 공식 명령 확정 기록 양식 — 06 문서로 대체
 
 ```text
 SMOKE version / installed executable path:

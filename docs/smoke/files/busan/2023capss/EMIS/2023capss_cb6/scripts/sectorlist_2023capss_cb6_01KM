@@ -1,0 +1,13 @@
+sector,sectorcase,sectbaseyr,mrgapproach,prevyrspinup,endzip,speciation,mergesector,projectroot
+"kor_area","2023capss_cb6","2026","all","SectBaseYr","N","","Y",""
+"kor_mobile","2023capss_cb6","2026","all","SectBaseYr","N","","Y",""
+"kor_sea","2023capss_cb6","2026","all","SectBaseYr","N","","Y",""
+"kor_point","2023capss_cb6","2026","all","SectBaseYr","N","","N",""
+"htap_energy","2023capss_cb6","2026","all","SectBaseYr","N","","N",""
+"htap_industry","2023capss_cb6","2026","all","SectBaseYr","N","","N",""
+"htap_transport","2023capss_cb6","2026","all","SectBaseYr","N","","N",""
+"htap_resident","2023capss_cb6","2026","all","SectBaseYr","N","","N",""
+"htap_waste","2023capss_cb6","2026","all","SectBaseYr","N","","N",""
+"htap_agriculture","2023capss_cb6","2026","all","SectBaseYr","N","","N",""
+"htap_aviation","2023capss_cb6","2026","all","SectBaseYr","N","","N",""
+"htap_intship","2023capss_cb6","2026","all","SectBaseYr","N","","N",""

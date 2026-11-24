@@ -3,7 +3,7 @@
 > **설치/소스 패치는 별도** [설치 목차](INSTALLATION_INDEX.md). 이 문서에서는 새 Case에서 다시 만들어야 하는 입력과 실행 단계를 안내한다. 전체 실제 명령은 연결된 검증 원문을 사용한다.
 
 ## 1. 국내 CAPSS 2023 — SMOKE 5.3
-**기존 상태:** 4부문(점·면·이동·바다) × 4도메인 27·09·03·01KM 완료(제공 실행기록). CMAQ-ready 병합·CCTM 연결 미검증.
+**기존 상태:** 4부문(점·면·이동·바다) × 4도메인 27·09·03·01KM 완료(제공 실행기록). 공식 병합은 §4 참조. CCTM 연결 미실행.
 
 | 반복 실행 단계 | 검토 항목 | 명령 원문 |
 |---|---|---|
@@ -45,5 +45,14 @@
 - 파일·격자 검증: [§7](../megan/01_MEGAN32_Input_Preprocessing_Guide.md).
 - **아직 검증되지 않음:** [§8 CCTM inline 연결 및 MEGAN_SOILOUT/MEGAN_SOILINP](../megan/01_MEGAN32_Input_Preprocessing_Guide.md).
 
-## 4. 병합 및 CMAQ 전달 — 미완료
-국내와 국외 각 부문 결과가 생성된 사실만으로 CCTM용 병합 파일이 유효하다는 뜻은 아니다. **부문별 단위·화학종·시간축·grid·수직층·중복 영역을 검증하고 병합을 수행한 다음 CCTM에 연결해야 한다.** 원문에서 미실행으로 기록한 작업을 임의의 성공 명령으로 채우지 않는다.
+## 4. 병합 및 CMAQ 전달 — 병합 완료, CCTM 연결 미완료
+**병합 상태(2026-11-24):** SMOKE 5.3 공식 병합(`smk_sectormerge_emf.csh` → `mrggrid`)으로 4도메인 × 2일 완료. 27·09·03KM은 국내 면·이동·바다 + HTAP 8묶음, 01KM은 국내 3부문. 점오염원은 inline, 생물성은 CCTM 인라인 MEGAN. 모든 화학종이 부문 합계와 일치.
+
+| 반복 실행 단계 | 검토 항목 | 명령 원문 |
+|---|---|---|
+| 수정 사항 | 예제 대비 변경 파일·이유·적용 시점 | [병합 가이드 §4](../smoke/06_SMOKE_Busan_Sector_Merge_Guide.md#merge-changes) |
+| 설치 | 국내 설치 스크립트([04 §7](../smoke/04_SMOKE_Busan_Case_Run_Guide.md))가 병합 파일 설치와 날짜 패치를 자동으로 함. 06 §5는 입력 확인과 기존 CASE용 수동 명령 | [§5](../smoke/06_SMOKE_Busan_Sector_Merge_Guide.md#merge-install) |
+| 실행 | 09KM 시험 → 27·03·01KM | [§6](../smoke/06_SMOKE_Busan_Sector_Merge_Guide.md#merge-run) |
+| QA | `check_merge_totals.py` 부문 합계·시간·층·음수 | [§7](../smoke/06_SMOKE_Busan_Sector_Merge_Guide.md#merge-verify) |
+
+새 CASE에서 바꾸는 값은 [§4.1](../smoke/06_SMOKE_Busan_Sector_Merge_Guide.md#merge-case-settings) (CASE 경로, 기상 연도가 2026이 아니면 부문 목록의 `sectbaseyr`). **화학 메커니즘은 `cb6r5_ae7_aq`로 확정했다(2026-11-25, [03 §7.3](../smoke/03_SMOKE_Emission_Improvement_Plan.md#busan-mechanism)). CCTM 연결 전에 생물성 이중계상 확인([03 §9.3](../smoke/03_SMOKE_Emission_Improvement_Plan.md#busan-inline-megan))을 먼저 한다.** 원문에서 미실행으로 기록한 작업을 임의의 성공 명령으로 채우지 않는다.

@@ -1,0 +1,5 @@
+2023capss/EMIS/2023capss_cb6/scripts/sectorlist_2023capss_cb6
+2023capss/EMIS/2023capss_cb6/scripts/sectorlist_2023capss_cb6_01KM
+2023capss/EMIS/2023capss_cb6/scripts/merge/Sector_merge_2023capss_cb6.csh
+2023capss/EMIS/2023capss_cb6/scripts/utils/check_merge_totals.py
+2023capss/EMIS/smoke5.2/scripts/emf/smk_sectormerge_emf_busan.patch
