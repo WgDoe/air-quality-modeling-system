@@ -231,7 +231,7 @@ MCIP/CMAQ가 처리 가능한 WRF/WPS 버전 결정
 | netCDF-C / netCDF-Fortran | 4.9.3 / 4.6.2 | 설치 완료. CMAQ 5.5는 C/Fortran 경로를 별도 변수로 지정 가능 |
 | HDF5 | 1.14.6 | 설치 완료 |
 | Compiler / MPI | GNU 11.5.0 / OpenMPI | 설치 완료 |
-| SMOKE | 5.3 (태그 `SMOKEv5.3_June2026`, 커밋 `f29374bbffe7425973376c3091da634d1a718a62`) | 설치·컴파일 및 공식 SMOKE-ExampleCase-v3 검증 완료(2026-10-19, 사용자 제공 문서 기준). 최종 병합 31개·굴뚝/inline 파일 1,032개 생성 기록. 부산 CAPSS 2023은 4개 도메인, HTAP_v3.2는 27·09·03KM 처리 완료(사용자 실행 기록 기준). 01KM 국외 제외. 국내외 병합·MEGAN 운영 LDF 교체·CCTM 실행은 미완료. [SMOKE 가이드](../smoke/01_SMOKE_Installation_Guide.md) |
+| SMOKE | 5.3 (태그 `SMOKEv5.3_June2026`, 커밋 `f29374bbffe7425973376c3091da634d1a718a62`) | 설치·컴파일 및 공식 SMOKE-ExampleCase-v3 검증 완료(2026-10-19, 사용자 제공 문서 기준). 최종 병합 31개·굴뚝/inline 파일 1,032개 생성 기록. 부산 CAPSS 2023은 4개 도메인, HTAP_v3.2는 27·09·03KM 처리 완료(사용자 실행 기록 기준). 01KM 국외 제외. [06 공식 병합](../smoke/06_SMOKE_Busan_Sector_Merge_Guide.md) 4개 도메인 × 2일 완료(부문 합계 일치). 운영 LDF와 사례 수정본의 일치 확인은 완료되었으며, CCTM 인라인 MEGAN 연결과 실행 검증이 남아 있다. [SMOKE 가이드](../smoke/01_SMOKE_Installation_Guide.md) |
 
 WRF 4.5.1을 선택한 이유:
 
@@ -340,7 +340,7 @@ df -h /home/woogon/CMAQ_MODEL
 | WRF/WPS 빌드와 전체 namelist·개별 실행 | [WRF/WPS 가이드](../wrf/WRF_WPS_Installation_Guide.md) §4~14 |
 | CMAQ 소스·설정·MCIP 빌드·격자·사례 실행 | [MCIP 가이드](../mcip/MCIP_Installation_Guide.md) §5~10 |
 
-이미 설치된 프로그램은 새 CASE에서 재사용한다. 기존 `txt2ioapi`로 만든 LDF는 가이드의 수정된 `setup_megan32.sh`로 변환기를 다시 빌드하고 교체한다. MCIP는 제공 기록 기준 완료이며 SMOKE는 설치·컴파일 및 공식 예제 검증을 완료했다(2026-10-19). 부산 CAPSS 2023은 4개 도메인, HTAP_v3.2는 27·09·03KM 처리 완료(사용자 실행 기록 기준). 01KM 국외 제외. 국내외 병합, MEGAN 운영 LDF 교체, CCTM·ISAM·자동화는 후속 단계이다. 실제로 성공한 명령이 확보되는 즉시 해당 기존 문서 체계에 기록한다. FNL 다운로드 스크립트 원문·파일 생성·시작/종료 UTC 인자·기간별 검사 명령은 [WRF/WPS §14.3.4](../wrf/WRF_WPS_Installation_Guide.md#fnl-download)에 통합했다.
+이미 설치된 프로그램은 새 CASE에서 재사용한다. 기존 `txt2ioapi`로 만든 LDF는 가이드의 수정된 `setup_megan32.sh`로 변환기를 다시 빌드하고 교체한다. MCIP는 제공 기록 기준 완료이며 SMOKE는 설치·컴파일 및 공식 예제 검증을 완료했다(2026-10-19). 부산 CAPSS 2023은 4개 도메인, HTAP_v3.2는 27·09·03KM 처리 완료(사용자 실행 기록 기준). 01KM 국외 제외. [06 공식 병합](../smoke/06_SMOKE_Busan_Sector_Merge_Guide.md)과 운영 LDF 일치 확인은 완료됐다. CCTM·ISAM 실행과 자동화는 후속 단계이다. 실제로 성공한 명령이 확보되는 즉시 해당 기존 문서 체계에 기록한다. FNL 다운로드 스크립트 원문·파일 생성·시작/종료 UTC 인자·기간별 검사 명령은 [WRF/WPS §14.3.4](../wrf/WRF_WPS_Installation_Guide.md#fnl-download)에 통합했다.
 
 # 5. Linux 기본 환경
 
@@ -711,7 +711,7 @@ REAS 원자료
 
 ## 13.1 식생배출
 
-**결정(2026-11-11):** 기존 운영방식(27·9km MEGAN v2.04, 3·1km BEIS 3.12)을 확인했고, 새 체계는 **CMAQ 5.5 CCTM 인라인 MEGAN 3.2를 4개 도메인에 공통 적용**한다. 토양 NO는 YL95를 쓰며(현재 WRF 지표모델 Noah), SMOKE에서는 생물성 부문을 처리하지 않는다. 근거·설정·후속 결정 사항은 [배출량 개선 계획 §9](../smoke/03_SMOKE_Emission_Improvement_Plan.md#busan-inline-megan)를 따른다. 부산 4개 도메인의 CT3·EFMAP·LDF를 생성했다. 수정한 변환기로 별도 시험에서 4개 도메인의 LDF가 원본 EFP CSV와 일치함을 확인했다. 운영 LDF 교체와 CCTM 실행은 남아 있다. 전처리 경로와 절차는 §4.2 및 [MEGAN 3.2 입력 전처리 가이드](../megan/01_MEGAN32_Input_Preprocessing_Guide.md)에서 확인한다.
+**결정(2026-11-11):** 기존 운영방식(27·9km MEGAN v2.04, 3·1km BEIS 3.12)을 확인했고, 새 체계는 **CMAQ 5.5 CCTM 인라인 MEGAN 3.2를 4개 도메인에 공통 적용**한다. 토양 NO는 YL95를 쓰며(현재 WRF 지표모델 Noah), SMOKE에서는 생물성 부문을 처리하지 않는다. 근거·설정·후속 결정 사항은 [배출량 개선 계획 §9](../smoke/03_SMOKE_Emission_Improvement_Plan.md#busan-inline-megan)를 따른다. 부산 4개 도메인의 CT3·EFMAP·LDF를 생성했다. 수정한 변환기로 별도 시험에서 4개 도메인의 LDF가 원본 EFP CSV와 일치함을 확인했다. 운영 LDF와 사례 수정본의 일치 확인은 완료되었으며, CCTM 인라인 MEGAN 연결과 실행 검증이 남아 있다. 전처리 경로와 절차는 §4.2 및 [MEGAN 3.2 입력 전처리 가이드](../megan/01_MEGAN32_Input_Preprocessing_Guide.md)에서 확인한다.
 
 후보(검토 당시):
 
@@ -930,7 +930,7 @@ case별 변경항목:
 ./run_case.sh   --start 2023-07-01   --end 2023-07-10   --domain BUSAN_D03   --met FNL   --emis CAPSS_HTAP   --cmaq 5.5   --isam yes
 ```
 
-단계별 성공 여부를 log로 기록하도록 한다. 아래 `OK`는 향후 성공 로그의 형식 예시이며 현재 실행 상태가 아니다. WRF 재현 검증·MCIP 정상 변환과 SMOKE 설치·컴파일·공식 예제 검증(2026-10-19)은 제공 기록 기준 완료이며, 부산 국내·국외 부문 처리 현황은 §22 Phase 5를 따른다. 병합, MEGAN 운영 LDF 교체 및 CMAQ·ISAM 실행은 미완료이다.
+단계별 성공 여부를 log로 기록하도록 한다. 아래 `OK`는 향후 성공 로그의 형식 예시이며 현재 실행 상태가 아니다. WRF 재현 검증·MCIP 정상 변환과 SMOKE 설치·컴파일·공식 예제 검증(2026-10-19)은 제공 기록 기준 완료이며, 부산 국내·국외 부문 처리 현황은 §22 Phase 5를 따른다. [06 공식 병합](../smoke/06_SMOKE_Busan_Sector_Merge_Guide.md)과 운영 LDF 일치 확인은 완료됐다. CMAQ·ISAM 실행은 미완료이다.
 
 ```text
 01_WPS      OK
@@ -985,7 +985,7 @@ find . -maxdepth 2 -type d
 3. MCIP script
 4. SMOKE script
 5. HTAP_v3.2 처리 스크립트
-6. 도메인별 MEGAN 입력 생성 절차는 [MEGAN 3.2 입력 전처리 가이드](../megan/01_MEGAN32_Input_Preprocessing_Guide.md)에 정리했다. 운영 LDF 교체와 CCTM 연결 검증이 남아 있다.
+6. 도메인별 MEGAN 입력 생성 절차는 [MEGAN 3.2 입력 전처리 가이드](../megan/01_MEGAN32_Input_Preprocessing_Guide.md)에 정리했다. 운영 LDF와 사례 수정본의 일치 확인은 완료되었으며, CCTM 인라인 MEGAN 연결과 실행 검증이 남아 있다.
 7. WRF/WPS namelist
 8. 후처리 script
 
@@ -1023,8 +1023,8 @@ ncdump -h filename.nc
 - **Phase 3 WRF/WPS 재현 검증 완료**: `TEST_20260901_REPEAT`에서 WPS·real.exe·WRF dmpar 4코어 정상 종료. `SUCCESS COMPLETE WRF` 및 d01~d04 종료시각 `2026-09-02_00:00:00` 확인. 원본 CASE `TEST_20260901`의 MCIP 변환 기록과 구분한다.
 - **Phase 4 MCIP 완료 (2026-10-09)**: CMAQ 5.5 저장소(`src/CMAQ_REPO`)와 프로젝트 폴더(`CMAQv5.5`) 생성, `config_cmaq.csh` gcc 경로 설정, MCIP gfortran 컴파일 완료. `TEST_20260901` d01~d04를 이전 운영체계 격자(EASTASIA 27KM/09KM/03KM/01KM)로 변환해 GRIDDESC 일치, 34층, 48시간 출력 확인. 상세는 [MCIP 구축 가이드](../mcip/MCIP_Installation_Guide.md).
 - **확인 필요**: CMAQ 저장소를 `main` 브랜치로 내려받았다. `PREP/mcip`는 확정 태그와 동일하나 CCTM은 다르므로 Phase 6 전에 별도 태그 소스·프로젝트를 준비한다(§3.5.3). 2026-10-08 UTC(한국시간 10-09) 공개된 `CMAQv5.5.0.4_08Oct2026`은 §3.5.4 재검토 대상이다.
-- **Phase 5 SMOKE 공식 예제 검증 완료 (2026-10-19)**: 설치·컴파일 및 공식 SMOKE-ExampleCase-v3 검증 완료(2026-10-19, 사용자 제공 문서 기준). 최종 병합 31개·굴뚝/inline 파일 1,032개 생성 기록. 부산 CAPSS 2023은 4개 도메인, HTAP_v3.2는 27·09·03KM 처리 완료(사용자 실행 기록 기준). 01KM 국외 제외. 국내외 병합·MEGAN 운영 LDF 교체·CCTM 실행은 미완료. `procar2pt.f` 지역 포인터 초기화 수정 후 전 부문·최종 병합 완료. EPA Intel 보조 실행파일 사용 예외와 수정본 4개(`docs/smoke/files/`)는 [SMOKE 가이드](../smoke/01_SMOKE_Installation_Guide.md)에 기록한다.
-- **다음 작업**: 부산 국내외 인위 배출 병합 및 SMOKE 결과 QA·CMAQ 연계 검증, 도메인별 MEGAN 운영 LDF 교체; ICON·BCON 준비와 CCTM benchmark(Phase 6). CMAQ 결과는 아직 완료로 기록하지 않는다.
+- **Phase 5 SMOKE 공식 예제 검증 완료 (2026-10-19)**: 설치·컴파일 및 공식 SMOKE-ExampleCase-v3 검증 완료(2026-10-19, 사용자 제공 문서 기준). 최종 병합 31개·굴뚝/inline 파일 1,032개 생성 기록. 부산 CAPSS 2023은 4개 도메인, HTAP_v3.2는 27·09·03KM 처리 완료(사용자 실행 기록 기준). 01KM 국외 제외. [06 공식 병합](../smoke/06_SMOKE_Busan_Sector_Merge_Guide.md) 4개 도메인 × 2일 완료(부문 합계 일치). 운영 LDF와 사례 수정본의 일치 확인은 완료되었으며, CCTM 인라인 MEGAN 연결과 실행 검증이 남아 있다. `procar2pt.f` 지역 포인터 초기화 수정 후 전 부문·최종 병합 완료. EPA Intel 보조 실행파일 사용 예외와 수정본 4개(`docs/smoke/files/`)는 [SMOKE 가이드](../smoke/01_SMOKE_Installation_Guide.md)에 기록한다.
+- **다음 작업**: 부산 병합 배출과 인라인 MEGAN 입력의 CCTM 연결 검증, ICON·BCON 준비 및 CCTM benchmark(Phase 6). CMAQ 결과는 아직 완료로 기록하지 않는다.
 
 완료 상태는 사용자 제공 실행 기록과 기존 문서에 기재된 종료 메시지·시간·격자 확인 결과를 근거로 한다. 이번 문서 검토에서는 Linux 서버의 원본 로그·netCDF 파일을 직접 열거나 모델을 재실행하지 않았다. CMAQ CCTM 실행, 입력 결측값·물리량 QA 및 기존 15층 배출량·IC/BC와 새 34층 기상의 정합성은 아직 검증되지 않았다.
 
@@ -1086,7 +1086,7 @@ ncdump -h filename.nc
 
 ## Phase 5. SMOKE
 
-**설치·컴파일 및 공식 예제 검증 완료(2026-10-19). 부산 국내 CAPSS 2023 4개 도메인 및 국외 HTAP_v3.2 27·09·03KM 처리 완료(사용자 실행 기록 기준), 01KM 국외 제외. 국내외 병합과 CMAQ 연계 검증은 미완료.** 상세는 [SMOKE 구축 가이드](../smoke/01_SMOKE_Installation_Guide.md)를 따른다.
+**설치·컴파일 및 공식 예제 검증 완료(2026-10-19). 부산 국내 CAPSS 2023 4개 도메인 및 국외 HTAP_v3.2 27·09·03KM 처리 완료(사용자 실행 기록 기준), 01KM 국외 제외. 부산 공식 병합(4개 도메인 × 2일)과 부문 합계 확인 완료. CMAQ 연계 미검증.** [06 공식 병합](../smoke/06_SMOKE_Busan_Sector_Merge_Guide.md) 참조. 상세는 [SMOKE 구축 가이드](../smoke/01_SMOKE_Installation_Guide.md)를 따른다.
 
 - [x] SMOKE 5.3 소스 태그 확정·설치, 실행파일 36개 및 내부 라이브러리 3개 컴파일, `ldd` 확인
 - [x] 공식 SMOKE-ExampleCase-v3 실행·결과 검증(2026-10-19, 사용자 제공 문서 기준)
@@ -1095,11 +1095,12 @@ ncdump -h filename.nc
 - [x] CAPSS 2023 국내 4부문·4개 도메인 처리 완료(사용자 실행 기록 기준)
 - [x] HTAP_v3.2 27·09·03KM 시험 완료(사용자 실행 기록 기준), 01KM 제외
 - [ ] 국내외 인위 배출 병합 및 CCTM 입력 검증
-- [ ] 부문별 최종 merge·QA 및 CMAQ 화학 메커니즘 종분배 확인
+- [x] [06 공식 병합](../smoke/06_SMOKE_Busan_Sector_Merge_Guide.md) 및 부문 합계 QA, CCTM 메커니즘 `cb6r5_ae7_aq` 확정과 배출종·단위 대응 확인([03 §7.3](../smoke/03_SMOKE_Emission_Improvement_Plan.md#busan-mechanism))
+- [ ] 실제 CCTM 입력 연결 및 실행 검증
 
 ## Phase 6. CMAQ
 
-부산 시험용 CCTM 실행 파일을 확인했다. ICON·BCON 준비, 벤치마크, 도메인별 MEGAN 운영 LDF 교체와 CCTM 연속 실행 검증이 남아 있다. 생물성 실행 설정은 §13.1을 따른다.
+부산 시험용 CCTM 실행 파일을 확인했다. CCTM 메커니즘은 `cb6r5_ae7_aq`로 확정했다. ICON·BCON 준비, 벤치마크, 인라인 MEGAN 연결과 CCTM 연속 실행 검증이 남아 있다. 생물성 실행 설정은 §13.1을 따른다.
 
 - 버전: CMAQ 5.5 (`CMAQv5.5.0.3_11Jul2025`)
 - compile

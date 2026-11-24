@@ -28,7 +28,8 @@
 7. [부산 배출량 개선 계획: CAPSS 2023·HTAP_v3.2·신규 시나리오](docs/smoke/03_SMOKE_Emission_Improvement_Plan.md)
 8. [부산 국내 CAPSS 2023 실행 가이드 — 4부문·4도메인 완료 기록](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md)
 9. [국외 HTAP_v3.2 처리·재현 가이드](docs/smoke/05_HTAP_v32_Reproduction_Checklist.md) — 2020년 0.1° 자료, 남한 제외·탄소 처리·8개 묶음, 27·09·03KM 완료 및 01KM 제외 기준
-10. [MEGAN 3.2 입력 전처리 가이드](docs/megan/01_MEGAN32_Input_Preprocessing_Guide.md) — 부산 4개 도메인의 CCTM 인라인 MEGAN 입력 생성·검증
+10. [부문 병합(Mrggrid) 가이드](docs/smoke/06_SMOKE_Busan_Sector_Merge_Guide.md) — 국내·국외 지면 배출 공식 SMOKE 병합, 4개 도메인 × 2일 완료, 예제 대비 수정 사항 정리
+11. [MEGAN 3.2 입력 전처리 가이드](docs/megan/01_MEGAN32_Input_Preprocessing_Guide.md) — 부산 4개 도메인의 CCTM 인라인 MEGAN 입력 생성·검증
 
 기존 CAPSS 2017 입력 준비 문서는 현행 목록에서 제외했다. 2023에도 필요한 공통 설정·검증 절차는 [부산 실행 가이드 §8](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md)에 통합했으며, 과거 원문은 Git 이력에서 확인할 수 있다.
 
@@ -69,6 +70,7 @@
 - [기존 SMOKE 2.7 배출량 산정체계 분석 (신규 5.3 전환 참고)](docs/smoke/02_Legacy_SMOKE27_Emission_Processing.md)
 - [SMOKE 부산 배출량 개선 계획: CAPSS 2023 / HTAP_v3.2 전환 기준](docs/smoke/03_SMOKE_Emission_Improvement_Plan.md)
 - [SMOKE 부산 실제사례 실행 가이드: 국내 CAPSS 2023 4부문·4도메인 완료 기록](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md)
+- [SMOKE 부산 부문 병합(Mrggrid) 가이드: 국내·국외 병합 → CMAQ 입력](docs/smoke/06_SMOKE_Busan_Sector_Merge_Guide.md)
 
 ### MEGAN
 
@@ -89,7 +91,7 @@ Master Plan §22의 구축 단계는 그대로 적용한다. §23의 산출물�
 | Phase 5. SMOKE | `07_SMOKE_Install.md` | [SMOKE 5.3 구축](docs/smoke/01_SMOKE_Installation_Guide.md) |
 | Phase 6. CMAQ CCTM 생물성 입력 | MEGAN 전처리 | [MEGAN 3.2 입력 전처리 가이드](docs/megan/01_MEGAN32_Input_Preprocessing_Guide.md) |
 
-### 구축 진행 현황 (2026-10-22 기준)
+### 구축 진행 현황 (2026-11-25 기준)
 
 | Phase | 구성요소 | 검증된 진행 상태 | 다음 확인 사항 |
 |---|---|---|---|
@@ -97,8 +99,8 @@ Master Plan §22의 구축 단계는 그대로 적용한다. §23의 산출물�
 | Phase 2 | GNU Compiler / OpenMPI / 공통 라이브러리 | GCC/GFortran 11.5.0, OpenMPI, HDF5, netCDF, I/O API 설치·테스트 완료 | 개별 모델과의 호환성 지속 확인 |
 | Phase 3 | WRF 4.5.1 / WPS 4.5 | 반복 사례 `TEST_20260901_REPEAT`에서 WPS, `real.exe`, WRF dmpar 4코어 실행 완료 | 실제 대기질 사례의 입력·출력 QA |
 | Phase 4 | MCIP 5.5 | `TEST_20260901` d01~d04 변환 및 격자 일치 확인 완료 | CCTM 기상 입력 및 수직층 정합성 검증 |
-| Phase 5 | SMOKE 5.3 | 공식 예제 및 국내 CAPSS 2023 4부문·4도메인 완료(사용자 기록 기준) | 국내·국외 병합 및 CMAQ 연계 검증 |
-| Phase 6 | CMAQ CCTM | 부산 시험용 CCTM 빌드 확인, benchmark 및 사례 실행 미완료 | 운영 LDF 검증 완료(2026-11-16); 인라인 MEGAN CCTM 연결·검증 필요 |
+| Phase 5 | SMOKE 5.3 | 공식 예제, 국내 CAPSS 2023 4부문·4도메인, 국외 HTAP_v3.2(27·09·03KM), [공식 병합](docs/smoke/06_SMOKE_Busan_Sector_Merge_Guide.md) 4도메인 × 2일 완료(부문 합계 일치) | CMAQ CCTM 입력 연결 |
+| Phase 6 | CMAQ CCTM | `cb6r5_ae7_aq` 빌드 확인, 메커니즘 확정([03 §7.3](docs/smoke/03_SMOKE_Emission_Improvement_Plan.md#busan-mechanism), 2026-11-25), benchmark 및 사례 실행 미완료 | 운영 LDF 검증 완료(2026-11-16); 인라인 MEGAN CCTM 연결·검증 필요 |
 | Phase 7 | CMAQ-ISAM | 미수행 | benchmark 및 배출원 기여도 분석 |
 
 WRF 반복 검증에서는 `rsl.error.0000`의 `SUCCESS COMPLETE WRF` 메시지와 d01~d04의 요청 종료시각(`2026-09-02_00:00:00`) 도달을 확인했다. MCIP는 네 영역 모두 `NORMAL TERMINATION`으로 종료되었고, GRIDDESC(27KM/09KM/03KM/01KM)가 기존 운영체계 격자와 일치했다.
@@ -114,7 +116,7 @@ WRF 반복 검증에서는 `rsl.error.0000`의 `SUCCESS COMPLETE WRF` 메시지�
 | 예제 실행 전 | `directory_definitions.csh` | 예제·SMOKE 실행파일·I/O API 경로 지정 |
 | 최종 병합 전 | `sectorlist_2022he_cb6_22m_withbeis_withrwc` | 교육 서버 경로를 실제 예제 경로로 변경 |
 
-적용 위치와 원본·수정본 md5는 [설치 가이드 §6·§10.3](docs/smoke/01_SMOKE_Installation_Guide.md)에 있다. 예제의 `afdust_adj` 보조 실행파일은 EPA 제공 Intel 빌드를 사용했으므로 전체 GNU 빌드 검증 완료를 의미하지 않는다. 다음 작업은 해당 보조 프로그램의 GNU 빌드·대체 방법 확인, 부산 국내·국외 병합과 CMAQ 입력 정합성 검증이다(생물성은 CMAQ 인라인 MEGAN 3.2).
+적용 위치와 원본·수정본 md5는 [설치 가이드 §6·§10.3](docs/smoke/01_SMOKE_Installation_Guide.md)에 있다. 예제의 `afdust_adj` 보조 실행파일은 EPA 제공 Intel 빌드를 사용했으므로 전체 GNU 빌드 검증 완료를 의미하지 않는다. 해당 보조 프로그램의 GNU 빌드·대체 방법 확인은 남아 있다. 부산 [06 공식 병합](docs/smoke/06_SMOKE_Busan_Sector_Merge_Guide.md)은 완료했고, 다음 단계는 CMAQ 입력 연결 및 정합성 검증이다.
 
 **검증 범위:** 완료 표시는 사용자 제공 실행 화면·로그와 기존 문서에 기록된 종료 메시지·시간·격자 확인 결과에 근거한다. 이번 GitHub 문서 수정 과정에서 Linux 서버의 원본 로그·netCDF 파일을 직접 열거나 모델을 재실행하지 않았다. CMAQ CCTM 실행, 입력 결측값·물리량 QA, 기존 15층 배출량·IC/BC와 새로운 34층 기상의 정합성은 아직 검증되지 않았다.
 
@@ -124,9 +126,9 @@ SMOKE 하위 문서는 재작업 시 읽는 순서를 드러내기 위해 `00_` 
 
 **2026-11-11 생물성 배출량 결정:** 기존 운영체계는 27·9km MEGAN v2.04, 3·1km BEIS 3.12로 처리했음을 확인했다. 새 체계는 SMOKE 생물성 부문 없이 **CMAQ 5.5 CCTM 인라인 MEGAN 3.2를 4개 도메인에 공통 적용**하고, 토양 NO는 YL95를 쓴다(현재 WRF 지표모델 Noah). 근거·CCTM 설정·후속 결정 사항은 [03 배출량 개선 계획 §9](docs/smoke/03_SMOKE_Emission_Improvement_Plan.md#busan-inline-megan)에 있다. 부산 4개 도메인의 CT3·EFMAP·LDF를 생성했다. 수정된 LDF는 2026-11-16 사용자 제공 서버 로그에서 4개 도메인 × 4변수의 EFP CSV/NetCDF 일치 및 0~1 범위를 확인했고, 운영 폴더 LDF와 사례 LDF의 MD5·`cmp` 일치도 확인했다. **운영 LDF 확인은 완료되었으며 CCTM 실행·실제 식생배출량 검증은 남아 있다.** 절차는 [MEGAN 3.2 입력 전처리 가이드](docs/megan/01_MEGAN32_Input_Preprocessing_Guide.md)에서 확인할 수 있다.
 
-**2026-11-11 국외배출량 최종 갱신:** [05 국외 HTAP_v3.2 처리 가이드](docs/smoke/05_HTAP_v32_Reproduction_Checklist.md)에 원자료 준비부터 입력 생성·SMOKE 소스 패치·재컴파일·8개 부문 실행·검증까지 통합했다. 27·09·03KM 각 8개 묶음 완료, 01KM은 시험상 배출 0으로 제외한다. 다른 시스템에서는 05 §8.4의 출력파일 존재 및 전체 배출종 0 여부를 재확인한다. 국내 처리는 [04 국내 가이드](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md), `smkinven.f` 패치는 [91 수정 이력](docs/smoke/91_SMOKE_smkinven_Fix.md)을 따른다. 병합·CMAQ 연계는 미실행.
+**2026-11-11 국외배출량 최종 갱신:** [05 국외 HTAP_v3.2 처리 가이드](docs/smoke/05_HTAP_v32_Reproduction_Checklist.md)에 원자료 준비부터 입력 생성·SMOKE 소스 패치·재컴파일·8개 부문 실행·검증까지 통합했다. 27·09·03KM 각 8개 묶음 완료, 01KM은 시험상 배출 0으로 제외한다. 다른 시스템에서는 05 §8.4의 출력파일 존재 및 전체 배출종 0 여부를 재확인한다. 국내 처리는 [04 국내 가이드](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md), `smkinven.f` 패치는 [91 수정 이력](docs/smoke/91_SMOKE_smkinven_Fix.md)을 따른다. 부산 [06 공식 병합](docs/smoke/06_SMOKE_Busan_Sector_Merge_Guide.md)은 2026-11-24~25에 4개 도메인 × 2일 완료했다. CCTM 연결과 모의는 미검증이다.
 
-**2026-10-30 CAPSS 2023 실행 갱신:** 국내 CAPSS 2023 점·면·이동·바다 4개 부문 × 27·09·03·01KM 완료(사용자 제공 2026-10-23~29 Linux 실행 기록 기준). 점 인벤토리 보고서 합계와 면·이동·바다 NOx 격자 합계 일치. 국외 HTAP_v3.2는 2026-11-11 현재 27·09·03KM에서 각 8개 묶음 완료, 01KM은 영역 내 국외 배출량 0으로 제외(사용자 시험 기록 기준). 다음은 병합 및 CMAQ 연계 검증. [04 부산 실행 가이드](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md) §7.1의 genagmat.f 패치를 적용하며 기존 sizgmat.f 패치는 폐기한다. 입력·설치 스크립트는 [2023capss/](docs/smoke/files/busan/2023capss/)에 보관한다. 신규 환경의 전체 재현 검증은 별도이다.
+**2026-10-30 CAPSS 2023 실행 갱신:** 국내 CAPSS 2023 점·면·이동·바다 4개 부문 × 27·09·03·01KM 완료(사용자 제공 2026-10-23~29 Linux 실행 기록 기준). 점 인벤토리 보고서 합계와 면·이동·바다 NOx 격자 합계 일치. 국외 HTAP_v3.2는 2026-11-11 현재 27·09·03KM에서 각 8개 묶음 완료, 01KM은 영역 내 국외 배출량 0으로 제외(사용자 시험 기록 기준). 최신 병합 상태는 [06 공식 병합](docs/smoke/06_SMOKE_Busan_Sector_Merge_Guide.md)을 따른다. [04 부산 실행 가이드](docs/smoke/04_SMOKE_Busan_Case_Run_Guide.md) §7.1의 genagmat.f 패치를 적용하며 기존 sizgmat.f 패치는 폐기한다. 입력·설치 스크립트는 [2023capss/](docs/smoke/files/busan/2023capss/)에 보관한다. 신규 환경의 전체 재현 검증은 별도이다.
 
 ### 모델 버전 기준
 
@@ -138,7 +140,7 @@ SMOKE 하위 문서는 재작업 시 읽는 순서를 드러내기 위해 `00_` 
 | MCIP | 5.5 (CMAQ 저장소 `PREP/mcip`) | **Phase 4 완료.** `TEST_20260901` d01~d04 정상 변환, 이전 운영체계 GRIDDESC와 격자 일치. 제공 기록의 설치 커밋은 `9bd3734`이며 `PREP/mcip` 소스는 5.5.0.3·5.5.0.4 태그와 동일함을 확인. CCTM 전 태그 전환 필요([MCIP 가이드 §3, §5.2](docs/mcip/MCIP_Installation_Guide.md)) |
 | WRF / WPS | 4.5.1 / 4.5 | **Phase 3 완료.** `TEST_20260901_REPEAT`에서 WPS, `real.exe`, WRF dmpar 4코어 정상 완료. `SUCCESS COMPLETE WRF` 및 d01~d04 종료시각 `2026-09-02_00:00:00` 확인 |
 | I/O API | 3.2-20200828 | 설치 완료 |
-| SMOKE | 5.3 (`SMOKEv5.3_June2026`) | 설치·컴파일 및 공식 SMOKE-ExampleCase-v3 검증 완료(2026-10-19, 사용자 제공 문서 기준). 최종 병합 31개·굴뚝/inline 파일 1,032개 생성 기록. 부산 국내 CAPSS 2023 4부문·4도메인 완료(사용자 기록 기준), 국외 HTAP_v3.2 27·09·03KM 완료; 병합 및 CMAQ 연계 미완료. 생물성은 SMOKE 대신 CMAQ 인라인 MEGAN 3.2 |
+| SMOKE | 5.3 (`SMOKEv5.3_June2026`) | 설치·컴파일 및 공식 SMOKE-ExampleCase-v3 검증 완료(2026-10-19, 사용자 제공 문서 기준). 최종 병합 31개·굴뚝/inline 파일 1,032개 생성 기록. 부산 국내 CAPSS 2023 4부문·4도메인 완료(사용자 기록 기준), 국외 HTAP_v3.2 27·09·03KM 완료. 부산 공식 병합 4개 도메인 × 2일 완료, CCTM 연계 미검증. 생물성은 SMOKE 대신 CMAQ 인라인 MEGAN 3.2 |
 
 ### 구축 디렉터리와 자료·사례 사용 경로 (2026-10-08 문서 정리)
 
