@@ -376,6 +376,8 @@ SPECIATE 5.3을 현재 공개 최신판으로 간주하지 않는다. EPA는 [SP
 
 **이중계상 확인.** 지면 배출 병합 대상은 국내 면·이동·바다와 27·09·03KM의 HTAP 8개 부문이다. 국내 점오염원은 병합 설정에서 제외(`mergesector=N`)하고, CCTM에 `stack_groups`와 `inln_mole`로 별도 입력한다. [06 공식 병합](06_SMOKE_Busan_Sector_Merge_Guide.md)의 §9를 따른다. 기존 `b3gts*BIO*`, 오프라인 MEGAN 산출물, 생물성이 포함된 예제 또는 과거 병합 파일이 병합 목록과 CCTM 입력 스트림에 없는지 파일의 생성 이력까지 확인한다. CCTM 시작 로그와 DESID 스트림 진단에서 인라인 MEGAN만 생물성 배출을 공급하는지 확인한다.
 
+**확인 결과(2026-11-25, 병합 단계까지):** 부문 목록(`sectorlist_2023capss_cb6`, `…_01KM`)의 병합 대상과 4개 도메인 병합 결과 README에 생물성 부문이 없다(국내 3 + HTAP 8, 01KM은 국내 3). 병합 파일의 `FILEDESC`에도 생물성 표시가 없고, 생물성 전용 물질 `SESQ`가 없다. `ISOP`는 `OLE`의 0.3~1.4%로 기록됐다. 병합 부문의 포함 여부는 부문 목록과 산출 README로 확인했다. 생물성 관련 파일은 예전 시나리오 `EMIS/2017capss_cb6`(`inputs/beis4`, `scripts/biogenics`)와 MEGAN 입력(`EMIS/MEGAN/*/CT3·EFMAP·LDF`)뿐이며, 앞의 것은 병합·CCTM 입력에 쓰지 않는다. 남은 확인은 CCTM 실행 시 시작 로그·DESID 진단이다.
+
 ### 9.4 입력 준비 및 전처리 현황
 
 2026-11-15 서버 확인 기준으로 MEGAN 3.2 전처리기는 프로젝트 루트의 `MEGAN/`, 공용 식생·배출계수 원자료는 `DATA/EMIS/MEGAN/`에 있다. 부산 사례에서는 `CASES/BUSAN/TEST_20260901/EMIS/MEGAN/`에 실행 스크립트, 도메인별 설정과 전처리 결과를 두고, 로그는 사례의 `LOG/`에 저장한다. 상세 경로와 기존 경로의 호환 링크는 [Master Plan §4.2](../planning/00_CMAQ_Project_Master_Plan.md#42-현재-구축-디렉터리와-자료-분리-원칙)를 따른다.

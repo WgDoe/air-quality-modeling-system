@@ -25,7 +25,7 @@
 | SMOKE 5.3 | 공식 예제 성공; CAPSS 2023 점·면·이동·바다 × 4도메인 완료(기존 사용자 실행 기록) | [SMOKE 04 §9](../smoke/04_SMOKE_Busan_Case_Run_Guide.md) |
 | 국외 HTAP_v3.2 | 2020 연간 flux, 27·09·03KM에서 각 8묶음 실행 완료(기존 사용자 기록); 01KM 제외 | [SMOKE 05](../smoke/05_HTAP_v32_Reproduction_Checklist.md) |
 | MEGAN 3.2 | 부산 4도메인 CT3·EFMAP·LDF 입력 생성 및 재현 확인 기록; CCTM 연결 미완료 | [MEGAN §7–9](../megan/01_MEGAN32_Input_Preprocessing_Guide.md) |
-| CMAQ 5.5 CCTM | 시험용 빌드 확인; 실제 Case·benchmark 미완료 | [저장소 README](../../README.md) |
+| CMAQ 5.5 CCTM | `cb6r5_ae7_aq` 빌드·EPA 벤치마크 비교 완료; ICON·BCON 미빌드, 부산 Case 미실행 | [CCTM 구축 가이드](../cmaq/01_CCTM_Installation_Guide.md) |
 | 국내외 배출량 병합 | SMOKE 5.3 공식 병합(`mrggrid`) 4도메인 × 2일 완료, 부문 합계 일치(2026-11-24~25). CCTM 메커니즘 `cb6r5_ae7_aq` 확정 | [SMOKE 06](../smoke/06_SMOKE_Busan_Sector_Merge_Guide.md), [03 §7.3](../smoke/03_SMOKE_Emission_Improvement_Plan.md#busan-mechanism) |
 | ISAM | 미완료/미검증 | [저장소 README](../../README.md) |
 

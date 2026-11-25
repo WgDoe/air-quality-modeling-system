@@ -83,7 +83,7 @@ Rocky Linux 기반 CMAQ 통합 대기질 모델링 시스템의 Phase 4(MCIP) �
 
 > **실제 설치 기록과 공식 소스 비교를 구분한다.** 제공 문서의 설치 소스는 `main` 커밋 `9bd3734176479c2e49139fea98e1d5e8a16170e3`(2025-08-25)이다. 2026-10-09 공식 Git tree 확인에서 이 커밋과 `CMAQv5.5.0.3_11Jul2025`, `CMAQv5.5.0.4_08Oct2026`의 `PREP` tree SHA는 모두 `1226fc47136a66187b1b1a8b23ba0a9ff4c37d12`로 동일했다. 따라서 `PREP/mcip` 소스도 동일하다. 서버의 로컬 수정·컴파일 옵션·라이브러리·입력파일까지 확인한 것은 아니므로 실행파일·결과의 동일성을 단정하지 않는다. 세 버전의 `CCTM` tree는 서로 다르므로 Phase 6 전에 기준 태그와 빌드 프로젝트를 일치시킨다(§5.2).
 
-> **태그 재검토(채택 미정).** [5.5.0.4 릴리스](https://github.com/USEPA/CMAQ/releases/tag/CMAQv5.5.0.4_08Oct2026)는 2026-10-08 21:09 UTC(한국시간 10-09 06:09)에 공개되었고 `pre-release`로 표시된다. HONIT AERO_DATA 오타, STAGE 수은 양방향 flux 및 CASTNET QA 처리 수정이 포함된다. 기존 5.5.0.3 기준은 유지하며, Phase 6 전 화학기작·침적 설정과 benchmark 영향을 검토한 뒤 채택 태그를 확정한다(기본계획 §3.5.4).
+> **태그 재검토(채택 미정).** [5.5.0.4 릴리스](https://github.com/USEPA/CMAQ/releases/tag/CMAQv5.5.0.4_08Oct2026)는 2026-10-08 21:09 UTC(한국시간 10-09 06:09)에 공개되었고 `pre-release`로 표시된다. HONIT AERO_DATA 오타, STAGE 수은 양방향 flux 및 CASTNET QA 처리 수정이 포함된다. CCTM은 5.5.0.3 기준으로 빌드하고 벤치마크를 완료했다. 5.5.0.4는 채택하지 않은 검토 후보로 남아 있다.
 
 ---
 
@@ -379,11 +379,11 @@ ldd mcip.exe | grep "not found"
 
 | 구성요소 | 버전 | 위치 | 실행파일 | 상태 |
 |---|---|---|---|---|
-| CMAQ 저장소 | 5.5 (`main`, 커밋 `9bd3734`) | `src/CMAQ_REPO` | - | 내려받기 완료. Phase 6 전 확정 태그 전환 필요(5.2) |
+| CMAQ 저장소 | 5.5 (`main`, 커밋 `9bd3734`) | `src/CMAQ_REPO` | - | MCIP 설치 당시 소스. CCTM 구축 및 벤치마크에 사용한 태그는 5.5.0.3 |
 | CMAQ 프로젝트 폴더 | 5.5 | `CMAQv5.5` | - | 생성·`config_cmaq.csh` gcc 설정 완료 |
 | MCIP | 5.5 | `CMAQv5.5/PREP/mcip/src` | `mcip.exe` | 컴파일 완료, TEST_20260901 d01~d04 정상 실행·격자 검증 완료 |
 
-Phase 4 MCIP의 설치·실행과 CMAQ 격자 검증은 완료로 기록한다(2026-10-09). 이후 Phase 5 SMOKE 5.3은 **설치·컴파일 및 공식 ExampleCase-v3 검증 완료(2026-10-19, 사용자 제공 문서 기준)**이며, 부산 CAPSS·REAS·자연배출량 처리와 CMAQ 연계 검증은 미완료다([SMOKE 가이드](../smoke/01_SMOKE_Installation_Guide.md)). Phase 6 CMAQ CCTM·ICON·BCON 컴파일 및 benchmark도 미완료다.
+Phase 4 MCIP의 설치·실행과 CMAQ 격자 검증은 완료로 기록한다(2026-10-09). 이후 Phase 5 SMOKE 5.3은 **설치·컴파일 및 공식 ExampleCase-v3 검증 완료(2026-10-19, 사용자 제공 문서 기준)**이며, 부산 CAPSS 2023과 HTAP_v3.2 처리 및 [공식 부문 병합](../smoke/06_SMOKE_Busan_Sector_Merge_Guide.md)을 완료했다. 부산 CCTM 입력 연계는 미검증이다. Phase 6 CCTM 컴파일·벤치마크는 [CCTM 구축 가이드](../cmaq/01_CCTM_Installation_Guide.md)에 기록했다(2026-11-25 갱신). ICON·BCON 컴파일은 미완료다.
 
 부산 사례에서 SMOKE에 연결할 때는 예제의 `12LISTOS` 기상자료를 재사용하지 않고 해당 CASE의 MCIP 결과·GRIDDESC를 사용한다. 격자명·투영·원점·셀 크기·셀 수, 기상 기간·시간 간격 및 점오염원 처리에 필요한 연직층을 함께 대조한다. 미국 공식 예제 검증 완료가 부산 MCIP–SMOKE–CMAQ 연결 검증 완료를 뜻하지 않는다. 설치 수정본 4개는 [SMOKE 수정 파일](../smoke/files/)에 보관했으며, 예제 보조 실행파일의 GNU 빌드·대체 확인 사항은 [기본계획 §10.2](../planning/00_CMAQ_Project_Master_Plan.md#102-초기-구축)를 따른다.
 

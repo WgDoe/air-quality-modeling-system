@@ -222,7 +222,7 @@ MCIP/CMAQ가 처리 가능한 WRF/WPS 버전 결정
 
 | 구성요소 | 확정 버전 | 비고 |
 |---|---|---|
-| CMAQ | 5.5 (태그 `CMAQv5.5.0.3_11Jul2025`) | 기존 기준 태그 유지. 5.5.0.4 공개로 Phase 6 전 재검토 필요(§3.5.4). CCTM·benchmark 미완료. 문서·benchmark 자료는 v5.5 기준 |
+| CMAQ | 5.5 (태그 `CMAQv5.5.0.3_11Jul2025`) | 5.5.0.3으로 CCTM 빌드·EPA 벤치마크 참조 비교 완료. 부산 사례 미실행. [CCTM 구축 가이드](../cmaq/01_CCTM_Installation_Guide.md) |
 | MCIP | 5.5 (`MCIP V5.5 FROZEN 09/19/2024`) | **Phase 4 완료.** 설치 기록은 `main` 커밋 `9bd3734`; 해당 `PREP/mcip` 소스는 5.5.0.3·5.5.0.4 태그와 동일. 실행파일·결과의 동일성을 뜻하지 않음 |
 | ICON/BCON 등 전처리 | CMAQ 5.5.0.3 포함 버전 | `PREP/` |
 | WRF | 4.5.1 (태그 `v4.5.1`) | WRF-CMAQv5.5 결합 호환범위(4.4~4.5.1)의 상한. **설치·컴파일·반복 사례 실행 검증 완료.** `TEST_20260901_REPEAT`에서 WRF dmpar 4코어가 `SUCCESS COMPLETE WRF`로 종료되고 d01~d04가 `2026-09-02_00:00:00`까지 도달함 |
@@ -267,7 +267,7 @@ git clone -b CMAQv5.5.0.3_11Jul2025 https://github.com/USEPA/CMAQ.git CMAQ_REPO
 
 ---
 
-2026-10-09 검토: [5.5.0.4 릴리스](https://github.com/USEPA/CMAQ/releases/tag/CMAQv5.5.0.4_08Oct2026)는 2026-10-08 21:09 UTC(한국시간 10-09 06:09)에 공개되었으며 `pre-release`이다. HONIT AERO_DATA 오타, STAGE 수은 양방향 flux, CASTNET QA 처리 수정이 포함된다. 기존 5.5.0.3 기준은 유지하되 Phase 6 전 화학기작·침적 설정 및 benchmark 영향을 검토해 채택 여부를 기록한다. 최신 태그라는 이유만으로 검증 완료나 채택으로 처리하지 않는다.
+2026-10-09 검토: [5.5.0.4 릴리스](https://github.com/USEPA/CMAQ/releases/tag/CMAQv5.5.0.4_08Oct2026)는 2026-10-08 21:09 UTC(한국시간 10-09 06:09)에 공개되었으며 `pre-release`이다. HONIT AERO_DATA 오타, STAGE 수은 양방향 flux, CASTNET QA 처리 수정이 포함된다. CCTM 빌드와 EPA 벤치마크에 5.5.0.3을 사용했다. 5.5.0.4는 검토 후보로 남아 있다. [CCTM 구축 가이드](../cmaq/01_CCTM_Installation_Guide.md)
 
 # 4. 하드웨어 및 운영체제 요구사항
 
@@ -1022,9 +1022,9 @@ ncdump -h filename.nc
 - **모델 버전 확정 (2026-10-03)**: CMAQ 5.5(`CMAQv5.5.0.3_11Jul2025`)를 기준으로 MCIP(CMAQ 포함), WRF 4.5.1, WPS 4.5로 결정. 상세 기준은 §3.5.
 - **Phase 3 WRF/WPS 재현 검증 완료**: `TEST_20260901_REPEAT`에서 WPS·real.exe·WRF dmpar 4코어 정상 종료. `SUCCESS COMPLETE WRF` 및 d01~d04 종료시각 `2026-09-02_00:00:00` 확인. 원본 CASE `TEST_20260901`의 MCIP 변환 기록과 구분한다.
 - **Phase 4 MCIP 완료 (2026-10-09)**: CMAQ 5.5 저장소(`src/CMAQ_REPO`)와 프로젝트 폴더(`CMAQv5.5`) 생성, `config_cmaq.csh` gcc 경로 설정, MCIP gfortran 컴파일 완료. `TEST_20260901` d01~d04를 이전 운영체계 격자(EASTASIA 27KM/09KM/03KM/01KM)로 변환해 GRIDDESC 일치, 34층, 48시간 출력 확인. 상세는 [MCIP 구축 가이드](../mcip/MCIP_Installation_Guide.md).
-- **확인 필요**: CMAQ 저장소를 `main` 브랜치로 내려받았다. `PREP/mcip`는 확정 태그와 동일하나 CCTM은 다르므로 Phase 6 전에 별도 태그 소스·프로젝트를 준비한다(§3.5.3). 2026-10-08 UTC(한국시간 10-09) 공개된 `CMAQv5.5.0.4_08Oct2026`은 §3.5.4 재검토 대상이다.
+- **소스 기준**: MCIP 설치에는 당시 `main`을 사용했다. CCTM은 `CMAQv5.5.0.3_11Jul2025` 태그로 빌드·벤치마크를 마쳤다. 2026-10-08 UTC(한국시간 10-09) 공개된 `CMAQv5.5.0.4_08Oct2026`은 §3.5.4 재검토 대상이다.
 - **Phase 5 SMOKE 공식 예제 검증 완료 (2026-10-19)**: 설치·컴파일 및 공식 SMOKE-ExampleCase-v3 검증 완료(2026-10-19, 사용자 제공 문서 기준). 최종 병합 31개·굴뚝/inline 파일 1,032개 생성 기록. 부산 CAPSS 2023은 4개 도메인, HTAP_v3.2는 27·09·03KM 처리 완료(사용자 실행 기록 기준). 01KM 국외 제외. [06 공식 병합](../smoke/06_SMOKE_Busan_Sector_Merge_Guide.md) 4개 도메인 × 2일 완료(부문 합계 일치). 운영 LDF와 사례 수정본의 일치 확인은 완료되었으며, CCTM 인라인 MEGAN 연결과 실행 검증이 남아 있다. `procar2pt.f` 지역 포인터 초기화 수정 후 전 부문·최종 병합 완료. EPA Intel 보조 실행파일 사용 예외와 수정본 4개(`docs/smoke/files/`)는 [SMOKE 가이드](../smoke/01_SMOKE_Installation_Guide.md)에 기록한다.
-- **다음 작업**: 부산 병합 배출과 인라인 MEGAN 입력의 CCTM 연결 검증, ICON·BCON 준비 및 CCTM benchmark(Phase 6). CMAQ 결과는 아직 완료로 기록하지 않는다.
+- **다음 작업**: 부산 병합 배출과 인라인 MEGAN 입력의 CCTM 연결 검증, ICON·BCON 빌드 및 부산 사례 입력 생성·실행(Phase 6). EPA 벤치마크 결과는 [CCTM 구축 가이드](../cmaq/01_CCTM_Installation_Guide.md)에 기록했다.
 
 완료 상태는 사용자 제공 실행 기록과 기존 문서에 기재된 종료 메시지·시간·격자 확인 결과를 근거로 한다. 이번 문서 검토에서는 Linux 서버의 원본 로그·netCDF 파일을 직접 열거나 모델을 재실행하지 않았다. CMAQ CCTM 실행, 입력 결측값·물리량 QA 및 기존 15층 배출량·IC/BC와 새 34층 기상의 정합성은 아직 검증되지 않았다.
 
@@ -1100,7 +1100,7 @@ ncdump -h filename.nc
 
 ## Phase 6. CMAQ
 
-부산 시험용 CCTM 실행 파일을 확인했다. CCTM 메커니즘은 `cb6r5_ae7_aq`로 확정했다. ICON·BCON 준비, 벤치마크, 인라인 MEGAN 연결과 CCTM 연속 실행 검증이 남아 있다. 생물성 실행 설정은 §13.1을 따른다.
+CCTM `cb6r5_ae7_aq`·`m3dry` 빌드와 EPA 2일 벤치마크 참조 비교를 완료했다([CCTM 구축 가이드](../cmaq/01_CCTM_Installation_Guide.md)). ICON·BCON 빌드와 부산 입력 생성, 인라인 MEGAN 연결 및 CCTM 연속 실행 검증이 남아 있다. 생물성 실행 설정은 §13.1을 따른다.
 
 - 버전: CMAQ 5.5 (`CMAQv5.5.0.3_11Jul2025`)
 - compile

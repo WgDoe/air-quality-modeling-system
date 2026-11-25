@@ -1,0 +1,114 @@
+--- a/run_cctm_benchmark.csh
++++ b/run_cctm_benchmark.csh
+@@ -22,16 +22,22 @@ echo 'Start Model Run At ' `date`
+ #> Choose compiler and set up CMAQ environment with correct 
+ #> libraries using config.cmaq. Options: intel | gcc | pgi
+  if ( ! $?compiler ) then
+-   setenv compiler intel
++   setenv compiler gcc
+  endif
+  if ( ! $?compilerVrsn ) then
+    setenv compilerVrsn Empty
+  endif
+ 
+ #> Source the config.cmaq file to set the build environment
+- cd ../..
++ cd /home/woogon/CMAQ_MODEL/CMAQv5.5
++ if ( $status != 0 ) exit 1
++ if ( ! -r ./config_cmaq.csh ) then
++   echo "Cannot read config_cmaq.csh"
++   exit 1
++ endif
+  source ./config_cmaq.csh $compiler $compilerVrsn
+- cd CCTM/scripts
++ cd /home/woogon/CMAQ_MODEL/CASES/CMAQTEST/CMAQ_benchmark/config
++ if ( $status != 0 ) exit 1
+ 
+ #> Set General Parameters for Configuring the Simulation
+  set VRSN      = v55              #> Code Version
+@@ -54,10 +60,10 @@ echo 'Start Model Run At ' `date`
+  if ( $CTM_DIAG_LVL != 0 ) set echo 
+ 
+ #> Set Working, Input, and Output Directories
+- setenv WORKDIR ${CMAQ_HOME}/CCTM/scripts          #> Working Directory. Where the runscript is.
+- setenv OUTDIR  ${CMAQ_DATA}/output_CCTM_${RUNID}  #> Output Directory
+- setenv INPDIR  ${CMAQ_DATA}/CMAQv5.4_2018_12NE3_Benchmark_2Day_Input/2018_12NE3            #> Input Directory
+- setenv LOGDIR  ${OUTDIR}/LOGS     #> Log Directory Location
++ setenv WORKDIR /home/woogon/CMAQ_MODEL/CASES/CMAQTEST/CMAQ_benchmark/config          #> Working Directory. Where the runscript is.
++ setenv OUTDIR /home/woogon/CMAQ_MODEL/CASES/CMAQTEST/CMAQ_benchmark/CMAQ/output #> Output Directory
++ setenv INPDIR /home/woogon/CMAQ_MODEL/DATA/CMAQ_BENCHMARK/CMAQv5.4_2018_12NE3_Benchmark_2Day_Input/2018_12NE3 #> Input Directory
++ setenv LOGDIR /home/woogon/CMAQ_MODEL/CASES/CMAQTEST/CMAQ_benchmark/LOG #> Log Directory Location
+  setenv NMLpath ${BLD}             #> Location of Namelists. Common places are: 
+                                    #>   ${WORKDIR} | ${CCTM_SRC}/MECHS/${MECH} | ${BLD}
+ 
+@@ -86,7 +92,7 @@ set TSTEP      = 010000            #> output time step interval (HHMMSS)
+ if ( $PROC == serial ) then
+    setenv NPCOL_NPROW "1 1"; set NPROCS   = 1 # single processor setting
+ else
+-   @ NPCOL  =  8; @ NPROW =  4
++   @ NPCOL = 1; @ NPROW = 1
+    @ NPROCS = $NPCOL * $NPROW
+    setenv NPCOL_NPROW "$NPCOL $NPROW"; 
+ endif
+@@ -107,7 +113,7 @@ echo ""
+ echo "---CMAQ EXECUTION ID: $EXECUTION_ID ---"
+ 
+ #> Keep or Delete Existing Output Files
+-set CLOBBER_DATA = TRUE 
++set CLOBBER_DATA = FALSE
+ 
+ #> Logfile Options
+ #> Master Log File Name; uncomment to write standard output to a log, otherwise write to screen
+@@ -121,7 +127,7 @@ setenv STDOUT T                    #> Override I/O-API trying to write informati
+                                    #>   logs and STDOUT [ options: T | F ]
+ 
+ setenv GRID_NAME 2018_12NE3         #> check GRIDDESC file for GRID_NAME options
+-setenv GRIDDESC $INPDIR/GRIDDESC    #> grid description file
++setenv GRIDDESC /home/woogon/CMAQ_MODEL/CASES/CMAQTEST/CMAQ_benchmark/MCIP/mcipv5.4/GRIDDESC #> grid description file
+ 
+ #> Retrieve the number of columns, rows, and layers in this simulation
+ set NZ = 35
+@@ -238,16 +244,16 @@ setenv CTM_WVEL Y            #> save derived vertical velocity component to conc
+ #> Input Directories and Filenames
+ # =====================================================================
+ 
+-set ICpath    = $INPDIR/icbc                        #> initial conditions input directory 
+-set BCpath    = $INPDIR/icbc                        #> boundary conditions input directory
+-set EMISpath  = $INPDIR/emis                        #> gridded emissions input directory
+-set IN_PTpath = $INPDIR/emis                        #> point source emissions input directory
++set ICpath    = /home/woogon/CMAQ_MODEL/CASES/CMAQTEST/CMAQ_benchmark/CMAQ/input/icbc                        #> initial conditions input directory
++set BCpath    = /home/woogon/CMAQ_MODEL/CASES/CMAQTEST/CMAQ_benchmark/CMAQ/input/icbc                        #> boundary conditions input directory
++set EMISpath  = /home/woogon/CMAQ_MODEL/CASES/CMAQTEST/CMAQ_benchmark/EMIS/emis                        #> gridded emissions input directory
++set IN_PTpath = /home/woogon/CMAQ_MODEL/CASES/CMAQTEST/CMAQ_benchmark/EMIS/emis                        #> point source emissions input directory
+ set IN_LTpath = $INPDIR/lightning                   #> lightning NOx input directory
+-set METpath   = $INPDIR/met/mcipv5.4                #> meteorology input directory 
++set METpath   = /home/woogon/CMAQ_MODEL/CASES/CMAQTEST/CMAQ_benchmark/MCIP/mcipv5.4                #> meteorology input directory
+ #set JVALpath  = $INPDIR/jproc                      #> offline photolysis rate table directory
+ set OMIpath   = $BLD                                #> ozone column data for the photolysis model
+-set EPICpath  = $INPDIR/epic                        #> EPIC putput for bidirectional NH3
+-set SZpath    = $INPDIR/surface                     #> surf zone file for in-line seaspray emissions
++set EPICpath  = /home/woogon/CMAQ_MODEL/CASES/CMAQTEST/CMAQ_benchmark/CMAQ/input/epic                        #> EPIC putput for bidirectional NH3
++set SZpath    = /home/woogon/CMAQ_MODEL/CASES/CMAQTEST/CMAQ_benchmark/CMAQ/input/surface                     #> surf zone file for in-line seaspray emissions
+ 
+ # =====================================================================
+ #> Begin Loop Through Simulation Days
+@@ -658,8 +664,7 @@ while ($TODAYJ <= $STOP_DAY )  #>Compare dates in terms of YYYYJJJ
+      #> error if previous log files exist
+      if ( "$log_test" != "" ) then
+        echo "*** Logs exist - run ABORTED ***"
+-       echo "*** To overide, set CLOBBER_DATA = TRUE in run_cctm.csh ***"
+-       echo "*** and these files will be automatically deleted. ***"
++       echo "*** Archive the existing logs and outputs before retrying. ***"
+        exit 1
+      endif
+      
+@@ -669,8 +674,7 @@ while ($TODAYJ <= $STOP_DAY )  #>Compare dates in terms of YYYYJJJ
+        foreach file ( $out_test )
+           echo " cannot delete $file"
+        end
+-       echo "*** To overide, set CLOBBER_DATA = TRUE in run_cctm.csh ***"
+-       echo "*** and these files will be automatically deleted. ***"
++       echo "*** Archive the existing logs and outputs before retrying. ***"
+        exit 1
+      endif
+   endif

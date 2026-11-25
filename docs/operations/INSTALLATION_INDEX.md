@@ -13,7 +13,7 @@
 | 7 | [SMOKE Grdmat 최초 패치 §7.1](../smoke/04_SMOKE_Busan_Case_Run_Guide.md#busan-grdmat-patch) | 국내 입력 실행 전에 적용한 genagmat.f 수정 |
 | 8 | [HTAP용 smkinven 패치 §6.1](../smoke/05_HTAP_v32_Reproduction_Checklist.md#htap-install-once) | **§6.1만** 최초 설치/소스 교체 시 패치·재컴파일; [§6.2](../smoke/05_HTAP_v32_Reproduction_Checklist.md#htap-case-install)는 새 CASE마다 필수 |
 | 9 | [MEGAN §5](../megan/01_MEGAN32_Input_Preprocessing_Guide.md) | 전처리 도구 설치·컴파일과 공용 자료 준비 |
-| 10 | CMAQ 5.5 CCTM 빌드 (`cb6r5_ae7_aq`, `m3dry`) | 메커니즘 확정(2026-11-25, [03 §7.3](../smoke/03_SMOKE_Emission_Improvement_Plan.md#busan-mechanism)). 현재 빌드 `CMAQv5.5/CCTM/scripts/BLD_CCTM_v55_gcc_cb6r5_ae7_aq_m3dry/CCTM_v55.exe`. 메커니즘을 바꿀 때만 재빌드. 빌드 절차 문서는 아직 없음 |
+| 10 | [CMAQ 5.5 CCTM 빌드·벤치마크](../cmaq/01_CCTM_Installation_Guide.md) | `cb6r5_ae7_aq` + `m3dry` 빌드, EPA 벤치마크 2일 실행·참조 비교 완료. 메커니즘·소스·라이브러리가 바뀌면 재빌드. ICON·BCON 빌드는 이 문서 §8에 미빌드로 기록 |
 
 **설치·컴파일이 아닌 것(CASE마다):** SMOKE 부문 병합의 날짜 패치(`smk_sectormerge_emf.csh`)와 병합 설정 파일은 CASE의 `smoke5.2` 사본에 들어가므로 [04 §7 설치 스크립트](../smoke/04_SMOKE_Busan_Case_Run_Guide.md)가 CASE마다 자동 적용한다(재컴파일 없음, [06](../smoke/06_SMOKE_Busan_Sector_Merge_Guide.md)). 국내 `SOAALK` tracer 종분배 추가(2026-11-25)도 입력 파일 변경이라 재컴파일이 필요 없다.
 
